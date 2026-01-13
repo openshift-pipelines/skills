@@ -55,10 +55,21 @@ Run `/osp:configure` to set this up, or set the `JIRA_TOKEN` environment variabl
 
 ## Updating Skills
 
-To update to the latest version:
+To update to the latest version (clone method is most reliable):
+
 ```bash
-npx github:openshift-pipelines/skills
+# Clone, install, and clean up
+git clone https://github.com/openshift-pipelines/skills.git /tmp/osp-skills
+cd /tmp/osp-skills && node bin/install.js -g
+cd - && rm -rf /tmp/osp-skills
 ```
+
+Or if using npx (must clear cache first):
+```bash
+npm cache clean --force && npx github:openshift-pipelines/skills
+```
+
+**Important**: Restart Claude Code after updating to reload commands.
 
 ## Resources
 

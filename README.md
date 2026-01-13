@@ -54,19 +54,62 @@ CLAUDE_CONFIG_DIR=/home/user/.claude npx github:openshift-pipelines/skills -- --
 
 ## Updating
 
-Re-run the installer to update to the latest version:
+When the repository is updated with new skills or improvements, update your local installation using one of these methods:
+
+### Method 1: Clone and Install (Recommended)
+
+The most reliable way to get the latest version:
 
 ```bash
-# From GitHub (always gets latest)
-npx github:openshift-pipelines/skills
+# Clone fresh (or pull if you already have it)
+git clone https://github.com/openshift-pipelines/skills.git /tmp/osp-skills
+cd /tmp/osp-skills
 
-# Clear npx cache first if needed
-npx clear-npx-cache && npx github:openshift-pipelines/skills
+# Install globally
+node bin/install.js -g
+
+# Clean up
+cd - && rm -rf /tmp/osp-skills
 ```
 
-The installer will overwrite existing command files with the latest versions.
+Or if you keep a local clone:
 
-**Note**: If commands don't appear after updating, restart Claude Code to reload slash commands.
+```bash
+cd /path/to/skills
+git pull origin main
+node bin/install.js -g
+```
+
+### Method 2: npx with Cache Clear
+
+npx caches packages, so you must clear the cache to get updates:
+
+```bash
+# Clear npx cache and reinstall
+npx cache clean --force && npx github:openshift-pipelines/skills
+
+# Or use npm cache
+npm cache clean --force && npx github:openshift-pipelines/skills
+```
+
+### Method 3: Direct File Copy
+
+If you have the repo cloned:
+
+```bash
+cd /path/to/skills
+git pull origin main
+cp -r commands/osp ~/.claude/commands/
+```
+
+### After Updating
+
+**Important**: Restart Claude Code after updating to reload the slash commands. The new commands won't be available until you restart.
+
+To verify the update:
+```bash
+ls -la ~/.claude/commands/osp/
+```
 
 ## Available Commands
 

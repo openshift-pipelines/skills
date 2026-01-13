@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test output
+coverage/
+.nyc_output/
+
+# Package manager locks (optional - uncomment if you want to track)
+# package-lock.json
+
+# Environment
+.env
+.env.local
+.env.*.local

@@ -1,0 +1,39 @@
+{
+  "name": "openshift-pipelines-skills",
+  "version": "0.1.0",
+  "description": "Claude Code skills for OpenShift Pipelines development workflows",
+  "main": "bin/install.js",
+  "bin": {
+    "openshift-pipelines-skills": "bin/install.js"
+  },
+  "files": [
+    "bin",
+    "commands"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openshift-pipelines/skills.git"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "openshift",
+    "pipelines",
+    "tekton",
+    "kubernetes",
+    "ai",
+    "skills"
+  ],
+  "author": "OpenShift Pipelines Team",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/openshift-pipelines/skills/issues"
+  },
+  "homepage": "https://github.com/openshift-pipelines/skills#readme",
+  "engines": {
+    "node": ">=16.7.0"
+  }
+}

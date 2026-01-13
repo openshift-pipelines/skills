@@ -123,6 +123,7 @@ After installation, the following commands are available in Claude Code:
 | `/osp:task` | Create or modify Tekton Task resources |
 | `/osp:debug` | Debug failed PipelineRuns or TaskRuns |
 | `/osp:map-jira-to-upstream` | Find upstream Tekton GitHub issues related to a Red Hat Jira issue |
+| `/osp:release-status` | Track release status from Jira version and generate todo list |
 
 ## Configuration
 
@@ -191,6 +192,21 @@ This will:
 3. Search tektoncd GitHub repositories
 4. Report related upstream issues with recommendations
 
+### Track Release Status
+
+```
+/osp:release-status
+
+> Enter Jira version: https://issues.redhat.com/projects/SRVKP/versions/12453355
+```
+
+This will:
+1. Fetch version details and all associated issues
+2. Categorize issues by status (Done, In Progress, To Do)
+3. Search GitHub for related PRs on pending issues
+4. Generate a summary report with status breakdown
+5. Create a todo list for remaining work
+
 ### Create a Tekton Task
 
 ```
@@ -220,7 +236,8 @@ Systematic analysis of PipelineRun/TaskRun failures with remediation suggestions
 │       ├── pipeline.md         # /osp:pipeline
 │       ├── task.md             # /osp:task
 │       ├── debug.md            # /osp:debug
-│       └── map-jira-to-upstream.md  # /osp:map-jira-to-upstream
+│       ├── map-jira-to-upstream.md  # /osp:map-jira-to-upstream
+│       └── release-status.md   # /osp:release-status
 ├── package.json
 ├── .gitignore
 └── README.md

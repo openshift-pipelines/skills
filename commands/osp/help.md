@@ -40,6 +40,11 @@ Present the following command reference to the user in a clear, formatted manner
 |---------|-------------|
 | `/osp:map-jira-to-upstream` | Find upstream Tekton GitHub issues related to a Red Hat Jira issue |
 
+### Release Management
+| Command | Description |
+|---------|-------------|
+| `/osp:release-status` | Track release status from Jira version and generate todo list |
+
 ## Quick Start
 
 1. **First time setup**: `/osp:configure` - Set up Jira authentication
@@ -47,6 +52,7 @@ Present the following command reference to the user in a clear, formatted manner
 3. **Create a Pipeline**: `/osp:pipeline` - Build pipelines from tasks
 4. **Debug issues**: `/osp:debug` - Analyze failed runs
 5. **Map Jira to upstream**: `/osp:map-jira-to-upstream` - Cross-reference with tektoncd
+6. **Track release**: `/osp:release-status` - Check Jira version status and generate todos
 
 ## Configuration
 

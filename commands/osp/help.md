@@ -47,6 +47,8 @@ Present the following command reference to the user in a clear, formatted manner
 | `/osp:release-status` | Track release status from Jira version and generate todo list |
 | `/osp:release-checklist` | Generate component release checklist from Jira version |
 | `/osp:component-status` | Check release readiness of a single component |
+| `/osp:component-builds` | Check Konflux build status, monitor pipelines, verify image freshness |
+| `/osp:konflux-image` | Extract image references (URL, digest) from Konflux pipeline results |
 | `/osp:operator-release` | Run operator update workflows and generate index images |
 
 ### Minor Release Configuration (New)

@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-19)
 
 **Core value:** Ship 1.15.4 with all blocking CVEs and issues resolved.
-**Current focus:** Phase 3 — Dev Release (BLOCKED)
+**Current focus:** Phase 3 — Dev Release (IN PROGRESS - Task 3 skopeo copy)
 
 ## Current Position
 
 Phase: 3 of 5 (Dev Release)
 Plan: 1 of 1 in current phase
-Status: **BLOCKED** — ISS-005 (index PR pipelines failing)
-Last activity: 2026-01-19 — Phase 3 execution started, hit blocker at Task 2
+Status: **IN PROGRESS** — Task 3 skopeo copy
+Last activity: 2026-01-19 — ISS-005 resolved, catalog PRs merged, copying images
 
-Progress: ██████░░░░ 60%
+Progress: ████████░░ 80%
 
 ## Performance Metrics
 
@@ -95,28 +95,31 @@ See .planning/ISSUES.md:
 ## Session Continuity
 
 Last session: 2026-01-19
-Stopped at: ISS-005 fix in progress — PR #14224 created, awaiting merge
+Stopped at: Task 3 skopeo copy in progress
 Resume file: `.planning/phases/03-dev-release/.continue-here.md`
 
 **Phase 3 Execution Progress:**
-- [x] Task 1: Run index-render-template workflow ✅ (run #21140605709)
-- [ ] Task 2: Merge index PRs — **FIX PENDING** (PR #14224 adds serviceAccountName)
-- [ ] Task 3: Copy images to devel registry (skopeo copy)
+- [x] Task 1: Run index-render-template workflow ✅ (run #21143589277)
+- [x] Task 2: Merge catalog PRs ✅
+  - ISS-005 FIXED: PR #14224 merged (removed 4-12, kept 4-14 to 4-18)
+  - All 5 catalog PRs merged: #14227, #14228, #14229, #14231, #14232
+  - All on-push pipelines completed successfully
+- [ ] Task 3: Copy images to devel registry — **IN PROGRESS**
 - [ ] Task 4: Verify and generate QE handoff
 
-**ISS-005 Fix Status:**
-- Attempted hack repo fix (Option 2) — failed due to filename pattern mismatch
-- Reverted hack repo changes, created revert PR #437
-- Created direct fix PR #14224 to operator repo (Option B)
-- PR adds `serviceAccountName` to all 12 index pipeline files
+**ISS-005 Status: RESOLVED**
+- PR #14224 merged (serviceAccountName fix for OCP 4.14-4.18)
+- PR #437 merged (hack revert cleanup)
 
-**Open PRs to merge:**
-1. https://github.com/openshift-pipelines/operator/pull/14224 (THE FIX)
-2. https://github.com/openshift-pipelines/hack/pull/437 (revert - cleanup)
+**Image Copy Status:**
+Source: `quay.io/redhat-user-workloads/tekton-ecosystem-tenant/operator-1-15-index-{OCP}-application/index-{OCP}:{SHA}`
+Dest: `quay.io/openshift-pipeline/pipelines-index-{OCP}:1.15`
 
-**After fix merged:**
-- Retrigger catalog PRs #14207-#14210 (4.15-4.18)
-- Once passing, merge them
-- Resume Task 3 (skopeo copy)
+Commits for each OCP version:
+- v4.14: 86862110445eaeb7f0e85c69d81388f4802795e5
+- v4.15: 7652d9f419bed7ee355f6500abfde4f8d13b616a
+- v4.16: 1fdf34ca2ddf602479303ab46ece8799bf3c8398
+- v4.17: 71e5039e39f045013c4e3dd8d71273d0625e3beb
+- v4.18: efb8305e0f8f94e4084a441537d12dfe294e6379
 
 **To resume:** `/gsd:resume-work`

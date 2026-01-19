@@ -4,7 +4,30 @@ Enhancements discovered during execution. Not critical - address in future phase
 
 ## Open Enhancements
 
-_None currently open._
+### ISS-004: Document registry usage for different release stages in skills
+
+- **Discovered:** Phase 2 Plan 3 (2026-01-19) — during PR #903 pipeline failure diagnosis
+- **Context:** The PAC_BUILDER in tektoncd-cli Dockerfile was pointing to `registry.redhat.io` (prod) but that image was purged. Investigation revealed the registry flow:
+  - `quay.io/openshift-pipeline/` — Dev/CI builds (publicly accessible, use for on-push)
+  - `registry.stage.redhat.io/` — Stage releases
+  - `registry.redhat.io/` — Production releases
+- **Enhancement:** Add registry documentation to relevant skills:
+  - `/osp:stage-release` — document registry.stage.redhat.io usage
+  - `/osp:prod-release` — document registry.redhat.io usage
+  - `/osp:component-builds` or new skill — document quay.io/openshift-pipeline for dev builds
+  - Consider creating `/osp:registry-info` skill with registry lookup/verification
+- **CLI PAC_BUILDER workflow:** The tkn CLI Dockerfile has a `PAC_BUILDER` ARG that references the PAC CLI image. This must be updated:
+  - After prod release expires/before new release: revert to `quay.io/openshift-pipeline/pipelines-pipelines-as-code-cli-rhel8:1.15`
+  - During stage release: update to `registry.stage.redhat.io/openshift-pipelines/pipelines-pipelines-as-code-cli-rhel8@sha256:...`
+  - During prod release: update to `registry.redhat.io/openshift-pipelines/pipelines-pipelines-as-code-cli-rhel8@sha256:...`
+  - Skills should guide this update as part of release workflows
+- **Dockerfile version updates on upstream sync:** When syncing upstream (e.g., tektoncd/cli), Dockerfiles need manual updates:
+  - `TKN_VERSION` ARG must match the upstream VERSION file
+  - Other version-related ARGs may need updating
+  - The bot sync PRs don't automatically update Dockerfiles
+  - Skills should remind/guide this as part of upstream sync workflow
+  - Example: PR #903 synced upstream 0.37.2 but Dockerfile had TKN_VERSION=0.37.1 → needed PR #907 to fix
+- **Priority:** Medium — prevents future confusion about which registry to use
 
 ## Closed Enhancements
 

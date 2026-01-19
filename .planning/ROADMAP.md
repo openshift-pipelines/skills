@@ -16,7 +16,7 @@ None
 
 - [x] **Phase 1: Assessment** - Analyze Jira version, identify all blocking issues, check Konflux pipeline freshness
 - [x] **Phase 2: Fix Blockers** - Resolve CVEs, upstream deps, build/CI issues, re-trigger stale Konflux builds
-- [ ] **Phase 3: Dev Release** - Execute development release for internal testing
+- [ ] **Phase 3: Dev Release** - Execute development release for internal testing ⚠️ **BLOCKED** (ISS-005)
 - [ ] **Phase 4: Stage Release** - Execute stage release (CORE → CLI → OPERATOR → INDEX)
 - [ ] **Phase 5: Production Release** - Execute production release after QE validation
 
@@ -58,9 +58,16 @@ Plans:
 **Depends on**: Phase 2
 **Research**: Unlikely (following established workflow)
 **Plans**: 1 plan
+**Status**: ⚠️ **BLOCKED** by ISS-005 (index PR Konflux pipelines failing)
 
 Plans:
-- [ ] 03-01: Execute dev release workflow
+- [ ] 03-01: Execute dev release workflow — Task 1 complete, Task 2 blocked
+
+**Blocker Details (ISS-005):**
+- All 6 index PRs fail Konflux PR pipelines (clone-repository task)
+- Root cause: Missing `serviceAccountName` in `.tekton/operator-1-15-index-*-pull-request.yaml`
+- Fix needed in hack repo or operator .tekton files
+- See `.planning/ISSUES.md` for full investigation details
 
 ### Phase 4: Stage Release
 **Goal**: Execute stage release — CORE → CLI → OPERATOR → INDEX to registry.stage.redhat.io
@@ -89,6 +96,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Assessment | 2/2 | Complete | 2026-01-19 |
 | 2. Fix Blockers | 4/4 | Complete | 2026-01-19 |
-| 3. Dev Release | 0/1 | Not started | - |
+| 3. Dev Release | 0/1 | ⚠️ **BLOCKED** (ISS-005) | - |
 | 4. Stage Release | 0/1 | Not started | - |
 | 5. Production Release | 0/1 | Not started | - |

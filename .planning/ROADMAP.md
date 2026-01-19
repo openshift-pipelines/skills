@@ -49,7 +49,7 @@ Plans:
 
 Plans:
 - [x] 02-01: Re-trigger stale Konflux on-push pipelines (8 components need rebuild)
-- [ ] 02-02: Create /osp:component-builds skill (ISS-003 - status/watch/freshness modes)
+- [x] 02-02: Create /osp:component-builds skill (ISS-003 - status/watch/freshness modes)
 - [ ] 02-03: Diagnose and fix PR #903 Konflux pipeline failure
 - [ ] 02-04: Verify all images built successfully before dev release
 
@@ -88,7 +88,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Assessment | 2/2 | Complete | 2026-01-19 |
-| 2. Fix Blockers | 1/4 | In progress | - |
+| 2. Fix Blockers | 2/4 | In progress | - |
 | 3. Dev Release | 0/1 | Not started | - |
 | 4. Stage Release | 0/1 | Not started | - |
 | 5. Production Release | 0/1 | Not started | - |

@@ -4,23 +4,20 @@ Enhancements discovered during execution. Not critical - address in future phase
 
 ## Open Enhancements
 
+_None currently open._
+
+## Closed Enhancements
+
 ### ISS-003: Create /osp:wait-for-builds skill for Konflux pipeline monitoring
 
 - **Discovered:** Phase 2 Task 1 (2026-01-19) — during Konflux rebuild trigger execution
-- **Priority:** Medium (needed for 02-03 verification plan)
-- **Description:**
-  - Wait-and-check skill that monitors Konflux on-push pipelines after triggering rebuilds
-  - Polls every 15 minutes to check pipeline status
-  - Continues until all pipelines complete (pass or fail) or 3-hour timeout
-  - Reports final status of all monitored components
-- **Use case:** After triggering rebuilds on multiple components, need automated way to wait for all builds to complete before proceeding to release
-- **Suggested implementation:**
-  - Accept list of repo/branch pairs to monitor
-  - Use `gh api` to check pipeline runs on each repo
-  - Track pending, running, success, failure states
-  - Exit with summary when all complete or timeout reached
-
-## Closed Enhancements
+- **Resolved:** Phase 2 Plan 2 (2026-01-19)
+- **Resolution:** Implemented as `/osp:component-builds` skill with three modes:
+  - `status`: One-shot pipeline status check for all 11 components
+  - `watch`: Poll every 15 minutes until complete (3hr timeout)
+  - `freshness`: Verify images are fresh (<72h since last commit)
+- Skill file: `commands/osp/component-builds.md`
+- Covers all ISS-003 requirements plus freshness checking
 
 ### ISS-001: Create /osp:pr-pipeline-status skill to diagnose Konflux pipeline failures
 

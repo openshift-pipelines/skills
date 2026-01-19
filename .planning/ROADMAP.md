@@ -49,7 +49,7 @@ Plans:
 
 Plans:
 - [x] 02-01: Re-trigger stale Konflux on-push pipelines (8 components need rebuild)
-- [ ] 02-02: Create /osp:wait-for-builds skill (ISS-003 - poll every 15min, 3hr timeout)
+- [ ] 02-02: Create /osp:component-builds skill (ISS-003 - status/watch/freshness modes)
 - [ ] 02-03: Diagnose and fix PR #903 Konflux pipeline failure
 - [ ] 02-04: Verify all images built successfully before dev release
 

@@ -34,6 +34,7 @@ Present the following command reference to the user in a clear, formatted manner
 | Command | Description |
 |---------|-------------|
 | `/osp:debug` | Debug failed PipelineRuns or TaskRuns |
+| `/osp:pr-pipeline-status` | Check PR pipeline status and diagnose Konflux failures |
 
 ### Issue Tracking & Upstream
 | Command | Description |
@@ -44,6 +45,19 @@ Present the following command reference to the user in a clear, formatted manner
 | Command | Description |
 |---------|-------------|
 | `/osp:release-status` | Track release status from Jira version and generate todo list |
+| `/osp:release-checklist` | Generate component release checklist from Jira version |
+| `/osp:component-status` | Check release readiness of a single component |
+| `/osp:operator-release` | Run operator update workflows and generate index images |
+
+### Minor Release Configuration (New)
+| Command | Description |
+|---------|-------------|
+| `/osp:hack-config` | Configure hack repository for a new minor release |
+| `/osp:component-config` | Configure a single component for a minor release |
+| `/osp:operator-config` | Configure the operator for a minor release |
+| `/osp:release-config` | Create Konflux release resources (RPA, RP, Release YAML) |
+| `/osp:stage-release` | Execute stage release for OpenShift Pipelines |
+| `/osp:prod-release` | Execute production release for OpenShift Pipelines |
 
 ## Quick Start
 
@@ -53,6 +67,84 @@ Present the following command reference to the user in a clear, formatted manner
 4. **Debug issues**: `/osp:debug` - Analyze failed runs
 5. **Map Jira to upstream**: `/osp:map-jira-to-upstream` - Cross-reference with tektoncd
 6. **Track release**: `/osp:release-status` - Check Jira version status and generate todos
+
+## Release Workflow
+
+For release captains managing OpenShift Pipelines releases:
+
+### Minor Release Workflow (Full)
+
+For new minor releases (e.g., 1.20.0):
+
+```
+/osp:hack-config → /osp:component-config (all) → /osp:operator-config
+    → /osp:operator-release (devel) → QE testing
+    → /osp:release-config → /osp:stage-release → /osp:prod-release
+```
+
+**Phase 1: Configuration**
+1. `/osp:hack-config` - Configure hack repo for new version
+2. `/osp:component-config` - Configure each component (run for each)
+3. `/osp:operator-config` - Configure operator after all components
+
+**Phase 2: Devel Build & Testing**
+4. `/osp:operator-release` (devel) - Generate devel images
+5. QE testing on devel build
+
+**Phase 3: Release Configuration**
+6. `/osp:release-config` - Create Konflux CRD (RPA, RP, Release YAML)
+
+**Phase 4: Stage & Production**
+7. `/osp:stage-release` - Execute stage release
+8. QE validation on stage
+9. `/osp:prod-release` - Execute production release
+
+### Patch Release Workflow
+
+For patch releases (e.g., 1.19.2):
+
+### Phase 1: Analysis & Planning
+1. **Start release**: `/osp:release-checklist` with Jira version URL
+   - Analyzes all issues in the release
+   - Identifies CVEs and checks fix status
+   - Creates PRs for upstream tracking updates
+   - Generates per-component checklist
+
+2. **Check component**: `/osp:component-status <component> <version>`
+   - Verify branch exists
+   - Check Dockerfile updates
+   - View CI/workflow status
+
+### Phase 2: Component Updates
+3. **Fix CVEs/Issues**: Follow the release-checklist guidance
+   - Merge hack config PRs (upstream tracking)
+   - Merge Konflux config PRs
+   - Run update-sources workflows
+   - Merge bot PRs with upstream changes
+   - **Monitor on-push pipelines (including Enterprise Contract)**
+
+4. **Diagnose pipeline failures**: `/osp:pr-pipeline-status <repo> <pr>`
+   - Check PR pipeline status
+   - Diagnose Konflux failures (requires SSO auth via `/osp:configure`)
+   - Get actionable fix recommendations
+
+### Phase 3: Operator & Index
+4. **Operator release**: `/osp:operator-release`
+   - Run operator-update-images workflow (devel/staging/production)
+   - Run index-render-template workflow
+   - Verify images in target registry
+
+### Phase 4: Release Execution
+5. **Track progress**: `/osp:release-status` with Jira version
+   - Shows completion percentage
+   - Lists blocking issues
+   - Generates actionable todo list
+
+**Release Flow (Patch):**
+```
+Component PRs → Konflux builds → operator-update-images (devel)
+    → index-render-template → QE testing → staging → production
+```
 
 ## Configuration
 

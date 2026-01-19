@@ -11,7 +11,7 @@ allowed-tools:
 # Configure OpenShift Pipelines Skills
 
 <objective>
-Set up authentication and configuration for OpenShift Pipelines skills, including Jira API access.
+Set up authentication and configuration for OpenShift Pipelines skills, including Jira API access, GitHub, and Konflux console.
 </objective>
 
 <process>
@@ -28,6 +28,11 @@ cat ~/.config/osp/config.json 2>/dev/null || echo "No config file"
 # Check environment variables
 echo "JIRA_TOKEN: ${JIRA_TOKEN:+[SET]}"
 echo "GITHUB_TOKEN: ${GITHUB_TOKEN:+[SET]}"
+
+# Check Konflux cookie
+if [ -f ~/.config/osp/config.json ]; then
+  jq -r 'if .konflux.cookie then "KONFLUX_COOKIE: [SET]" else "KONFLUX_COOKIE: [NOT SET]" end' ~/.config/osp/config.json 2>/dev/null
+fi
 ```
 
 Report what's already configured.
@@ -37,8 +42,9 @@ Report what's already configured.
 Use AskUserQuestion to determine what the user wants to configure:
 
 **Question**: What would you like to configure?
-- Jira authentication (required for `/osp:map-jira-to-upstream`)
+- Jira authentication (required for `/osp:release-status`, `/osp:map-jira-to-upstream`)
 - GitHub authentication (optional, increases API rate limits)
+- Konflux authentication (required for `/osp:pr-pipeline-status` pipeline diagnostics)
 - View current configuration
 - Reset all configuration
 </step>
@@ -50,6 +56,9 @@ If configuring Jira:
 ```
 ## Getting a Jira Personal Access Token
 
+**Direct link**: https://issues.redhat.com/secure/ViewProfile.jspa?selectedTab=com.atlassian.pats.pats-plugin:jira-user-personal-access-tokens
+
+Or navigate manually:
 1. Log in to https://issues.redhat.com
 2. Click your profile icon in the top right
 3. Select "Personal Access Tokens"
@@ -97,6 +106,85 @@ chmod 600 ~/.config/osp/config.json
 ```
 
 Replace TOKEN_PLACEHOLDER with the actual token using the Edit tool.
+</step>
+
+<step name="configure_konflux">
+If configuring Konflux:
+
+1. Explain the SSO authentication flow:
+```
+## Konflux Authentication (SSO Session Cookie)
+
+Konflux uses Red Hat SSO. To access pipeline logs and details, you need to:
+1. Log in via browser
+2. Extract the session cookie
+3. Save it for API access
+
+**Why a cookie?** Konflux doesn't have a public API with token auth.
+The cookie is stored in ~/.config/osp/config.json (outside any git repo).
+```
+
+2. Guide user through SSO login:
+```
+## Step 1: Log in to Konflux
+
+Open this URL in your browser:
+https://konflux-ui.apps.kflux-prd-rh02.0fk9.p1.openshiftapps.com
+
+Log in with your Red Hat SSO credentials.
+```
+
+3. Guide user to extract session cookie:
+```
+## Step 2: Extract Session Cookie
+
+After logging in:
+
+**Chrome/Edge:**
+1. Open DevTools (F12)
+2. Go to Application → Cookies → konflux-ui.apps.kflux-prd-rh02...
+3. Find the cookie named `_oauth_proxy` or `_oauth2_proxy`
+4. Copy its value
+
+**Firefox:**
+1. Open DevTools (F12)
+2. Go to Storage → Cookies
+3. Find the session cookie
+4. Copy its value
+
+**Alternative - Using browser extension:**
+Install "Cookie Editor" extension and export the session cookie.
+```
+
+4. Save the cookie to config:
+```bash
+mkdir -p ~/.config/osp
+chmod 700 ~/.config/osp
+
+# Read existing config or create new
+if [ -f ~/.config/osp/config.json ]; then
+  CONFIG=$(cat ~/.config/osp/config.json)
+else
+  CONFIG='{}'
+fi
+
+# Add konflux section (user provides cookie value)
+echo "$CONFIG" | jq --arg cookie "USER_PROVIDED_COOKIE" \
+  '. + {konflux: {base_url: "https://konflux-ui.apps.kflux-prd-rh02.0fk9.p1.openshiftapps.com", cookie: $cookie}}' \
+  > ~/.config/osp/config.json
+
+chmod 600 ~/.config/osp/config.json
+```
+
+5. Note about cookie expiration:
+```
+## Important Notes
+
+- **Cookie expires**: SSO cookies typically expire after 8-24 hours
+- **Re-authenticate when needed**: Run `/osp:configure` again if you get auth errors
+- **Secure storage**: Cookie is stored in ~/.config/osp/ with 600 permissions
+- **Not in git**: This directory is in your home folder, outside any git repository
+```
 </step>
 
 <step name="configure_github">
@@ -151,14 +239,40 @@ Expected: `200` for success, `401` for invalid token, `403` for insufficient per
 gh api user --jq '.login' 2>/dev/null || echo "Not authenticated"
 ```
 
-3. Report results:
+3. **Test Konflux access:**
+```bash
+if [ -f ~/.config/osp/config.json ]; then
+  KONFLUX_COOKIE=$(jq -r '.konflux.cookie // empty' ~/.config/osp/config.json)
+  KONFLUX_URL=$(jq -r '.konflux.base_url // empty' ~/.config/osp/config.json)
+
+  if [ -n "$KONFLUX_COOKIE" ] && [ -n "$KONFLUX_URL" ]; then
+    # Try to access API with cookie
+    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+      -H "Cookie: _oauth2_proxy=${KONFLUX_COOKIE}" \
+      "${KONFLUX_URL}/api/v1/namespaces")
+
+    if [ "$HTTP_CODE" = "200" ]; then
+      echo "Konflux: Connected"
+    elif [ "$HTTP_CODE" = "401" ] || [ "$HTTP_CODE" = "403" ]; then
+      echo "Konflux: Cookie expired - re-run /osp:configure"
+    else
+      echo "Konflux: Error (HTTP $HTTP_CODE)"
+    fi
+  else
+    echo "Konflux: Not configured"
+  fi
+fi
+```
+
+4. Report results:
 ```
 ## Configuration Status
 
-| Service | Status | Method |
-|---------|--------|--------|
-| Jira    | ✓ Connected | Environment variable |
-| GitHub  | ✓ Connected | gh CLI |
+| Service  | Status | Method |
+|----------|--------|--------|
+| Jira     | ✓ Connected | Environment variable |
+| GitHub   | ✓ Connected | gh CLI |
+| Konflux  | ✓ Connected | SSO Cookie |
 ```
 </step>
 

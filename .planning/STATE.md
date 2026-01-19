@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-19)
 
 **Core value:** Ship 1.15.4 with all blocking CVEs and issues resolved.
-**Current focus:** Phase 3 — Dev Release (IN PROGRESS - Task 3 skopeo copy)
+**Current focus:** Phase 3 — Dev Release (testing deployment on cluster)
 
 ## Current Position
 
 Phase: 3 of 5 (Dev Release)
-Plan: 1 of 1 in current phase
-Status: **IN PROGRESS** — Task 3 skopeo copy
-Last activity: 2026-01-19 — ISS-005 resolved, catalog PRs merged, copying images
+Plan: 2 of 2 in current phase
+Status: **READY** — Plan 03-02 created
+Last activity: 2026-01-19 — Deployment test revealed missing component images
 
-Progress: ████████░░ 80%
+Progress: █████████░ 85%
 
 ## Performance Metrics
 
@@ -76,50 +76,43 @@ See .planning/ISSUES.md:
 - ~~8 stale components need rebuild~~ → **COMPLETE: All 11 passed**
 - ~~Operator needs fresh images~~ → **COMPLETE** (PR #14206 merged, on-push build passed)
 
-**Phase 3 BLOCKED — ISS-005: Index PR Konflux pipelines failing**
+**Phase 3 COMPLETE — All blockers resolved**
 
-- **Issue:** All 6 index PRs (#14207-#14212) fail Konflux PR pipelines immediately (~25s)
-- **Root cause:** `.tekton/operator-1-15-index-*-pull-request.yaml` files missing `serviceAccountName` in `taskRunTemplate`
-- **Error:** `clone-repository` task fails with "Unauthorized error, wrong registry credentials"
-- **Why:** Without service account, no registry push credentials for OCI artifact storage
-- **Comparison:** Bundle pipeline has `serviceAccountName: build-pipeline-operator-1-15-bundle` and PASSES
+- ~~ISS-005: Index PR Konflux pipelines failing~~ → **FIXED** (PR #14224 merged)
+- All 5 catalog PRs merged and on-push pipelines passed
+- All 5 index images copied to quay.io/openshift-pipeline
+- Dev release ready for QE testing
 
-**Fix options:**
-1. Update hack repo template to include service account for index pipelines
-2. Manually add service account to operator repo .tekton files (temporary)
-3. Configure Konflux index applications with proper image repository secrets
-4. Force merge with `/override` (workaround, not recommended)
-
-**Full details:** See ISS-005 in .planning/ISSUES.md
+**No current blockers.**
 
 ## Session Continuity
 
-Last session: 2026-01-19
-Stopped at: Task 3 skopeo copy in progress
-Resume file: `.planning/phases/03-dev-release/.continue-here.md`
+Last session: 2026-01-19T18:25:00Z
+Stopped at: Plan 03-02 rewritten, ready for execution
+Resume file: .planning/phases/03-dev-release/.continue-here.md
 
-**Phase 3 Execution Progress:**
-- [x] Task 1: Run index-render-template workflow ✅ (run #21143589277)
+**Phase 3: Dev Release**
+
+### Plan 03-01: Index Images (COMPLETE with issues)
+- [x] Task 1: Run index-render-template workflow ✅
 - [x] Task 2: Merge catalog PRs ✅
-  - ISS-005 FIXED: PR #14224 merged (removed 4-12, kept 4-14 to 4-18)
-  - All 5 catalog PRs merged: #14227, #14228, #14229, #14231, #14232
-  - All on-push pipelines completed successfully
-- [ ] Task 3: Copy images to devel registry — **IN PROGRESS**
-- [ ] Task 4: Verify and generate QE handoff
+- [x] Task 3: Copy INDEX images to devel registry ✅
+- [x] Task 4: Verify index images ✅
+- [x] Task 5: Test deployment ❌ **FAILED** — ImagePullBackOff
 
-**ISS-005 Status: RESOLVED**
-- PR #14224 merged (serviceAccountName fix for OCP 4.14-4.18)
-- PR #437 merged (hack revert cleanup)
+**Root Cause:** Only copied INDEX images, not COMPONENT images.
+Bundle references `quay.io/openshift-pipeline/` but component images don't exist there.
 
-**Image Copy Status:**
-Source: `quay.io/redhat-user-workloads/tekton-ecosystem-tenant/operator-1-15-index-{OCP}-application/index-{OCP}:{SHA}`
-Dest: `quay.io/openshift-pipeline/pipelines-index-{OCP}:1.15`
+### Plan 03-02: Dev Release 2nd Try (READY)
+- [ ] Task 1: Get all component image references from Konflux
+- [ ] Task 2: Copy all component images to devel registry
+- [ ] Task 3: Restart failed pods on test cluster
+- [ ] Task 4: Run verification tests
+- [ ] Task 5: Generate final QE handoff
 
-Commits for each OCP version:
-- v4.14: 86862110445eaeb7f0e85c69d81388f4802795e5
-- v4.15: 7652d9f419bed7ee355f6500abfde4f8d13b616a
-- v4.16: 1fdf34ca2ddf602479303ab46ece8799bf3c8398
-- v4.17: 71e5039e39f045013c4e3dd8d71273d0625e3beb
-- v4.18: efb8305e0f8f94e4084a441537d12dfe294e6379
+**Test Cluster:** OCP 4.18.30 (api.e8yd8-jboom-ft5.xazm.p3.openshiftapps.com)
+- CatalogSource: ✅ Ready
+- Operator CSV: ✅ v1.15.3 Succeeded
+- Component Pods: ❌ ImagePullBackOff (missing images)
 
-**To resume:** `/gsd:resume-work`
+**Next:** Execute Plan 03-02 to copy component images and complete deployment

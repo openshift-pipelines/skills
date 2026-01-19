@@ -15,7 +15,7 @@ None
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: Assessment** - Analyze Jira version, identify all blocking issues, check Konflux pipeline freshness
-- [ ] **Phase 2: Fix Blockers** - Resolve CVEs, upstream deps, build/CI issues, re-trigger stale Konflux builds
+- [x] **Phase 2: Fix Blockers** - Resolve CVEs, upstream deps, build/CI issues, re-trigger stale Konflux builds
 - [ ] **Phase 3: Dev Release** - Execute development release for internal testing
 - [ ] **Phase 4: Stage Release** - Execute stage release (CORE → CLI → OPERATOR → INDEX)
 - [ ] **Phase 5: Production Release** - Execute production release after QE validation
@@ -51,7 +51,7 @@ Plans:
 - [x] 02-01: Re-trigger stale Konflux on-push pipelines (8 components need rebuild)
 - [x] 02-02: Create /osp:component-builds skill (ISS-003 - status/watch/freshness modes)
 - [x] 02-03: Diagnose and fix PR #903 Konflux pipeline failure (PRs #906, #907 created)
-- [ ] 02-04: Verify all images built successfully before dev release
+- [x] 02-04: Verify all images built successfully, update operator bundle (PR #14206)
 
 ### Phase 3: Dev Release
 **Goal**: Execute development release for internal testing and validation
@@ -88,7 +88,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Assessment | 2/2 | Complete | 2026-01-19 |
-| 2. Fix Blockers | 3/4 | In progress | - |
+| 2. Fix Blockers | 4/4 | Complete | 2026-01-19 |
 | 3. Dev Release | 0/1 | Not started | - |
 | 4. Stage Release | 0/1 | Not started | - |
 | 5. Production Release | 0/1 | Not started | - |

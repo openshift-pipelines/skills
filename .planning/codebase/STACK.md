@@ -1,16 +1,16 @@
 # Technology Stack
 
-**Analysis Date:** 2026-01-15
+**Analysis Date:** 2026-01-19
 
 ## Languages
 
 **Primary:**
-- JavaScript (ES6+) - CLI installer and all application logic (`bin/install.js`)
-- Markdown - Skill definitions with YAML frontmatter (`commands/osp/*.md`)
+- JavaScript (ES6+) - All application code (`bin/install.js`)
+- Markdown - Skill definitions and documentation (`commands/osp/*.md`)
 
 **Secondary:**
-- YAML - Configuration examples and output templates (embedded in markdown files)
-- Bash - Script examples within skill definitions
+- YAML - Skill frontmatter configuration
+- Bash - Shell scripts embedded in skill commands
 
 ## Runtime
 
@@ -19,60 +19,60 @@
 - No browser runtime (CLI tool only)
 
 **Package Manager:**
-- npm (no specific version requirement)
-- Lockfile: Not tracked (`package-lock.json` commented out in `.gitignore`)
+- npm
+- Lockfile: `package-lock.json` present (tracked in repository)
 
 ## Frameworks
 
 **Core:**
-- None - Pure Node.js CLI application with no frameworks
+- None (vanilla Node.js CLI with stdlib only)
 
 **Testing:**
-- None configured (`package.json` test script: `echo "Error: no test specified" && exit 1`)
+- Vitest ^1.0.0 - Unit testing framework (`vitest.config.js`)
 
 **Build/Dev:**
-- None - No build step required, runs directly with Node.js
-- No TypeScript compilation
+- No build step required (pure JavaScript)
+- No transpilation (CommonJS modules)
 
 ## Key Dependencies
 
 **Critical:**
-- No external npm dependencies (zero production dependencies in `package.json`)
+- None - Zero runtime dependencies
 
-**Infrastructure:**
-- Node.js built-ins only: `fs`, `path`, `os`, `readline`
+**Dev Dependencies:**
+- vitest ^1.0.0 - Testing framework (`package.json`)
 
-**Runtime CLI Tools (not npm packages):**
-- `curl` - HTTP requests to Jira API
-- `jq` - JSON parsing and manipulation
-- `gh` - GitHub CLI for API access (optional)
-- `tkn` - Tekton CLI for pipeline operations
-- `kubectl`/`oc` - Kubernetes/OpenShift CLI
+**Infrastructure (Node.js built-ins):**
+- fs - File system operations
+- path - Path manipulation
+- os - OS utilities (homedir)
+- readline - Interactive prompts
 
 ## Configuration
 
 **Environment:**
-- `JIRA_TOKEN` - Jira Personal Access Token
-- `GITHUB_TOKEN` - GitHub token (optional, `gh` CLI preferred)
-- Config file: `~/.config/osp/config.json`
+- `JIRA_TOKEN` - Red Hat Jira authentication (`.env.example`)
+- `GITHUB_TOKEN` - GitHub API authentication (optional)
+- Config file: `~/.config/osp/config.json` (managed by `/osp:configure`)
 
 **Build:**
-- No build configuration files
-- `package.json` - Project metadata only
+- `vitest.config.js` - Test runner configuration
+- `package.json` - Project metadata and scripts
 
 ## Platform Requirements
 
 **Development:**
-- Any platform with Node.js >= 16.7.0
-- macOS, Linux, Windows supported
-- No external service dependencies for installation
+- macOS/Linux/Windows (any platform with Node.js)
+- No external dependencies
 
 **Production:**
 - Distributed as npm package
-- Installed via `npx github:openshift-pipelines/skills` or git clone
-- Runs in Claude Code IDE environment
+- Installed via `npx openshift-pipelines-skills`
+- Runs on user's Node.js installation
+- Requires GitHub CLI (`gh`) for GitHub operations
+- Requires `curl` and `jq` for API interactions
 
 ---
 
-*Stack analysis: 2026-01-15*
+*Stack analysis: 2026-01-19*
 *Update after major dependency changes*

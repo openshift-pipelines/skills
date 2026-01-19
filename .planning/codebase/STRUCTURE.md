@@ -1,116 +1,139 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-01-15
+**Analysis Date:** 2026-01-19
 
 ## Directory Layout
 
 ```
-openshift-pipelines-skills/
-├── bin/                    # CLI executable
-│   └── install.js         # NPX installer script
-├── commands/              # Skill definitions
-│   └── osp/              # OpenShift Pipelines namespace
-│       ├── configure.md  # Auth setup skill
-│       ├── debug.md      # Pipeline debugging skill
-│       ├── help.md       # Help reference skill
-│       ├── map-jira-to-upstream.md  # Jira-GitHub mapping
-│       ├── pipeline.md   # Pipeline creation skill
-│       ├── release-status.md  # Release tracking skill
-│       └── task.md       # Task creation skill
-├── .gitignore            # Git exclusions
-├── package.json          # NPM metadata
-└── README.md             # User documentation
+skills/
+├── bin/                    # Executable scripts
+│   └── install.js         # npx installer (main entry point)
+├── commands/               # Skill definitions (namespaced)
+│   └── osp/               # OpenShift Pipelines namespace
+│       ├── configure.md   # Auth setup
+│       ├── debug.md       # Run debugger
+│       ├── help.md        # Reference guide
+│       ├── map-jira-to-upstream.md
+│       ├── pipeline.md    # Tekton Pipeline creator
+│       ├── release-checklist.md
+│       ├── release-status.md
+│       ├── component-status.md
+│       ├── operator-release.md
+│       └── task.md        # Tekton Task creator
+├── tests/                  # Unit tests
+│   └── install.test.js    # Vitest suite for installer
+├── .github/                # GitHub configuration
+│   └── workflows/
+│       └── ci.yml         # CI/CD pipeline
+├── .planning/              # Development planning
+│   └── codebase/          # Codebase documentation
+├── package.json            # npm metadata
+├── package-lock.json       # npm lockfile
+├── vitest.config.js        # Test configuration
+├── .env.example            # Environment template
+├── .gitignore              # Git ignore rules
+├── README.md               # User documentation
+└── LICENSE                 # Apache-2.0
 ```
 
 ## Directory Purposes
 
 **bin/**
-- Purpose: Executable entry points for npm/npx
-- Contains: `install.js` - Interactive CLI installer
-- Key files: `install.js` (175 lines) - Main entry point
+- Purpose: CLI entry points
+- Contains: `install.js` - 229 lines, installer executable
+- Key files: Single file handles all installation logic
 - Subdirectories: None
 
 **commands/osp/**
-- Purpose: Skill definitions for Claude Code
-- Contains: Markdown files with YAML frontmatter
-- Key files:
-  - `help.md` - Command reference (93 lines)
-  - `configure.md` - Authentication setup (186 lines)
-  - `task.md` - Tekton Task creation (165 lines)
-  - `pipeline.md` - Tekton Pipeline creation (135 lines)
-  - `debug.md` - Run failure debugging (152 lines)
-  - `map-jira-to-upstream.md` - Jira-GitHub linking (258 lines)
-  - `release-status.md` - Release tracking (274 lines)
+- Purpose: Slash command definitions for Claude Code
+- Contains: 10 `.md` files (one per skill)
+- Key files: All files are runnable skills
 - Subdirectories: None (flat structure)
+
+**tests/**
+- Purpose: Unit tests for installer
+- Contains: `install.test.js` - 163 lines, Vitest suite
+- Key files: Tests parseArgs, expandTilde, copyDirectory
+- Subdirectories: None
+
+**.github/workflows/**
+- Purpose: CI/CD automation
+- Contains: `ci.yml` - tests on Node 18.x and 20.x
+- Key files: Validates tests and skill YAML frontmatter
+
+**.planning/codebase/**
+- Purpose: Auto-generated codebase documentation
+- Contains: 7 analysis documents
+- Key files: STACK.md, ARCHITECTURE.md, STRUCTURE.md, etc.
 
 ## Key File Locations
 
 **Entry Points:**
-- `bin/install.js` - NPX/npm installation entry
+- `bin/install.js` - CLI entry (npx entry point)
 
 **Configuration:**
-- `package.json` - Project metadata, bin entry, engines requirement
-- `.gitignore` - Excludes node_modules, .env, IDE files, coverage
+- `package.json` - Project metadata, scripts, engines
+- `vitest.config.js` - Test runner configuration
+- `.env.example` - Environment variable template
 
 **Core Logic:**
-- `bin/install.js` - All installation logic (file copying, prompts)
-- `commands/osp/*.md` - Skill execution instructions
+- `bin/install.js` - All installation logic (parseArgs, expandTilde, copyDirectory)
 
 **Testing:**
-- None configured (test script outputs error)
+- `tests/install.test.js` - Unit tests for installer functions
 
 **Documentation:**
-- `README.md` - Installation guide, usage examples, troubleshooting
+- `README.md` - User-facing installation and usage guide
+- `commands/osp/help.md` - In-app help reference
 
 ## Naming Conventions
 
 **Files:**
-- `kebab-case.md` - Skill definition files
-- `kebab-case.js` - JavaScript source files
-- `UPPERCASE.md` - Important project files (README)
+- kebab-case.md: Command/skill files (`map-jira-to-upstream.md`)
+- camelCase.js: JavaScript source (`install.js`)
+- .test.js suffix: Test files (`install.test.js`)
 
 **Directories:**
-- Lowercase for all directories
-- Plural for collections: `commands/`
+- lowercase: All directories (`bin/`, `commands/`, `tests/`)
+- Plural for collections: `commands/`, `tests/`
 
 **Special Patterns:**
-- `{skill-name}.md` - One file per skill
-- YAML frontmatter required in all skill files
+- `osp/` namespace: OpenShift Pipelines skills namespace
+- `.example` suffix: Template files (`.env.example`)
 
 ## Where to Add New Code
 
 **New Skill:**
-- Primary code: `commands/osp/{skill-name}.md`
-- Required sections: YAML frontmatter, `<objective>`, `<process>`, `<output>`
-- Update: `commands/osp/help.md` with new command entry
+- Definition: `commands/osp/{skill-name}.md`
+- Tests: N/A (skills are integration-tested by users)
+- Documentation: Update `commands/osp/help.md` skill list
 
-**New Installation Feature:**
+**New Installer Feature:**
 - Implementation: `bin/install.js`
-- Pattern: Add function, call from `main()`
+- Tests: `tests/install.test.js`
+- Documentation: Update `README.md`
 
 **New Namespace:**
-- Directory: `commands/{namespace}/`
-- Structure: Same as `osp/` (help.md, configure.md, etc.)
+- Create: `commands/{namespace}/`
+- Update: `bin/install.js` to handle multiple namespaces
 
 **Utilities:**
-- Current: All logic in `bin/install.js` (monolithic)
-- If extracted: `lib/` or `src/utils/` (not yet created)
+- Current: All utilities inline in `bin/install.js`
+- If extracted: Create `lib/` directory
 
 ## Special Directories
 
 **commands/**
-- Purpose: Source files for Claude Code skills
+- Purpose: Skills installed to `~/.claude/commands/`
 - Source: Copied by `bin/install.js` during installation
-- Destination: `~/.claude/commands/` (global) or `./.claude/commands/` (local)
 - Committed: Yes (source of truth)
 
-**Generated Directories (not in repo):**
-- `~/.claude/commands/osp/` - Installed skill files
-- `~/.config/osp/` - User configuration
-- `node_modules/` - npm dependencies (none currently)
-- `coverage/` - Test coverage reports (if tests added)
+**.planning/**
+- Purpose: Development documentation
+- Source: Generated by codebase mapping
+- Committed: Yes (tracked for reference)
 
 ---
 
-*Structure analysis: 2026-01-15*
+*Structure analysis: 2026-01-19*
 *Update when directory structure changes*

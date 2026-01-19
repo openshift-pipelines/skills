@@ -1,124 +1,127 @@
 # Architecture
 
-**Analysis Date:** 2026-01-15
+**Analysis Date:** 2026-01-19
 
 ## Pattern Overview
 
-**Overall:** Skill/Plugin Distribution System for Claude Code IDE
+**Overall:** Skills Distribution & Installation System (Plugin Architecture)
 
 **Key Characteristics:**
-- Declarative skill definitions in Markdown with YAML frontmatter
-- Zero-dependency Node.js installer
-- Stateless, file-based operation
-- Plugin architecture - each skill is completely independent
+- Single responsibility: Install Claude Code skills for OpenShift Pipelines
+- Stateless CLI installer with file copy operations
+- Markdown-based skill definitions (not programmatic)
+- Configuration-driven (environment variables + config file)
 
 ## Layers
 
-**Installation Layer (`bin/install.js`):**
-- Purpose: Distribute skill files to Claude Code's command directory
-- Contains: CLI argument parsing, file copying, user prompts
-- Depends on: Node.js built-ins only (fs, path, os, readline)
-- Used by: Users via npx or direct Node.js execution
+**Installation Layer:**
+- Purpose: Bootstrap skills into user's Claude Code environment
+- Contains: CLI argument parsing, file copying, interactive prompts
+- Location: `bin/install.js`
+- Depends on: Node.js stdlib only
+- Used by: npx installation command
 
-**Skill Definition Layer (`commands/osp/*.md`):**
-- Purpose: Define executable skill behavior for Claude Code
-- Contains: YAML metadata, XML-structured process steps, tool declarations
-- Depends on: Claude Code's skill execution engine
-- Used by: Claude Code when user invokes `/osp:{skill-name}`
+**Skill Definition Layer:**
+- Purpose: Define AI-guided workflows for OpenShift Pipelines operations
+- Contains: Markdown files with YAML frontmatter and structured XML instructions
+- Location: `commands/osp/*.md`
+- Depends on: Claude Code runtime
+- Used by: Claude Code when user invokes `/osp:*` commands
 
-**Configuration Layer (external):**
-- Purpose: Store authentication credentials
-- Contains: `~/.config/osp/config.json`, environment variables
-- Depends on: User setup via `/osp:configure`
-- Used by: Skills requiring Jira/GitHub API access
+**Configuration Layer:**
+- Purpose: Manage authentication and settings
+- Contains: Token storage, config file management
+- Location: `~/.config/osp/config.json`, environment variables
+- Depends on: User setup
+- Used by: Skills that access external APIs
 
 ## Data Flow
 
-**Skill Installation:**
+**Installation Flow:**
+```
+User runs: npx openshift-pipelines-skills
+    ↓
+bin/install.js: main()
+    ├→ parseArgs() [process CLI flags]
+    ├→ showBanner() [display UI]
+    ├→ promptLocation() [interactive mode]
+    ├→ expandTilde() [normalize path]
+    └→ install(targetDir)
+        ├→ copyDirectory(src/commands/osp, dest/commands/osp)
+        └→ Display installed skills list
+```
 
-1. User runs: `npx github:openshift-pipelines/skills`
-2. `bin/install.js` parses CLI arguments (`-g`, `-l`, `-c`)
-3. User selects installation location (global/local/custom)
-4. Installer copies `commands/osp/` to target directory
-5. Claude Code picks up skills on restart
-
-**Skill Execution:**
-
-1. User types `/osp:{skill-name}` in Claude Code
-2. Claude loads skill markdown from `~/.claude/commands/osp/`
-3. Parser reads YAML frontmatter (`allowed-tools`, `description`)
-4. Execution engine processes `<process>` steps sequentially
-5. Each `<step>` uses declared tools (Bash, Read, Write, WebFetch, etc.)
-6. Output section defines expected result format
-7. Success criteria validated
+**Skill Execution Flow (Claude Code runtime):**
+```
+User runs: /osp:<skill-name>
+    ↓
+Claude loads commands/osp/<skill>.md
+    ├→ Parse YAML frontmatter (allowed-tools, name, description)
+    ├→ Execute <process><step> instructions
+    ├→ Use tools: Bash, WebFetch, AskUserQuestion, etc.
+    └→ Return formatted results
+```
 
 **State Management:**
-- Stateless - each skill invocation is independent
-- Configuration persisted in `~/.config/osp/config.json`
-- No in-memory state between invocations
+- File-based: Config stored at `~/.config/osp/config.json`
+- Environment-based: Tokens in `JIRA_TOKEN`, `GITHUB_TOKEN`
+- No persistent in-memory state
+- Each skill execution is independent
 
 ## Key Abstractions
 
 **Skill:**
-- Purpose: Encapsulate a domain-specific workflow
-- Examples: `commands/osp/task.md`, `commands/osp/pipeline.md`, `commands/osp/debug.md`
-- Pattern: Markdown document with declarative execution instructions
+- Purpose: Self-contained workflow definition
+- Examples: `commands/osp/configure.md`, `commands/osp/release-status.md`
+- Pattern: Markdown + YAML frontmatter + XML-structured instructions
 
-**Step:**
-- Purpose: Single unit of work within a skill process
-- Examples: `<step name="gather_requirements">`, `<step name="check_configuration">`
-- Pattern: Named XML element containing instructions and tool invocations
+**Installer Functions:**
+- Purpose: Utilities for installation process
+- Examples: `parseArgs()`, `expandTilde()`, `copyDirectory()`
+- Pattern: Pure functions exported via CommonJS
 
-**Tool Declaration:**
-- Purpose: Authorize which Claude tools a skill can use
-- Examples: `Bash`, `Read`, `Write`, `WebFetch`, `AskUserQuestion`
-- Pattern: YAML list in frontmatter (`allowed-tools:`)
+**Configuration:**
+- Purpose: Centralized settings and credentials
+- Examples: Jira token, GitHub token, base URLs
+- Pattern: JSON file with nested structure + environment variables
 
 ## Entry Points
 
-**Installation Entry:**
+**CLI Entry:**
 - Location: `bin/install.js`
-- Triggers: `npx openshift-pipelines-skills` or `node bin/install.js`
-- Responsibilities: Parse args, prompt user, copy files
+- Triggers: User runs `npx openshift-pipelines-skills`
+- Responsibilities: Parse args, copy files, display UI
 
-**Skill Entry Points:**
-- Location: `commands/osp/{skill-name}.md`
-- Triggers: User types `/osp:{skill-name}` in Claude Code
-- Skills available:
-  - `/osp:help` → `commands/osp/help.md`
-  - `/osp:configure` → `commands/osp/configure.md`
-  - `/osp:task` → `commands/osp/task.md`
-  - `/osp:pipeline` → `commands/osp/pipeline.md`
-  - `/osp:debug` → `commands/osp/debug.md`
-  - `/osp:map-jira-to-upstream` → `commands/osp/map-jira-to-upstream.md`
-  - `/osp:release-status` → `commands/osp/release-status.md`
+**Skill Commands (10 skills):**
+- Location: `commands/osp/*.md`
+- Triggers: User runs `/osp:<skill>` in Claude Code
+- Responsibilities: Execute domain-specific workflows
 
 ## Error Handling
 
-**Strategy:** Validation at boundaries, graceful degradation
+**Strategy:** Throw errors with descriptive messages, catch at entry point
 
 **Patterns:**
-- Installation: `fs.existsSync()` checks before file operations (`bin/install.js`)
-- Skills: Authentication verification as mandatory first step
-- API calls: HTTP status code checks (200 success, 401 auth failure)
-- Bash scripts: `set -euo pipefail` pattern in generated scripts (`commands/osp/task.md`)
+- Installer: `console.error()` with colored output, `process.exit(1)`
+- Skills: Rely on Claude Code error handling
+- Validation: Early exit on invalid arguments
 
 ## Cross-Cutting Concerns
 
 **Logging:**
-- ANSI colored console output (`bin/install.js` colors object)
-- Markdown-formatted responses in skills
+- Console output with ANSI color codes
+- No structured logging (simple CLI tool)
 
 **Validation:**
-- Config file existence checks
-- Environment variable presence checks
-- API endpoint verification before proceeding
+- CLI argument validation in `parseArgs()`
+- Skills validate prerequisites (tokens, tools) within their process steps
 
 **Authentication:**
-- Multi-source: Environment variables preferred, config file fallback
-- Graceful degradation: GitHub optional, skills work without it (with warnings)
+- Environment variables: `JIRA_TOKEN`, `GITHUB_TOKEN`
+- Config file: `~/.config/osp/config.json`
+- Skills check auth before API calls
 
 ---
 
-*Architecture analysis: 2026-01-15*
+*Architecture analysis: 2026-01-19*
 *Update when major patterns change*

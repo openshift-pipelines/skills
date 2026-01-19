@@ -1,142 +1,208 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-01-15
+**Analysis Date:** 2026-01-19
 
 ## Test Framework
 
 **Runner:**
-- None configured
-- `package.json` line 14: `"test": "echo \"Error: no test specified\" && exit 1"`
+- Vitest 1.0.x
+- Config: `vitest.config.js` in project root
 
 **Assertion Library:**
-- Not applicable (no tests)
+- Vitest built-in expect
+- Matchers: toBe, toEqual, toBeNull, toBeTruthy, toBeFalsy
 
 **Run Commands:**
 ```bash
-npm test                    # Outputs error, exits 1
+npm test                              # Run all tests
+npm run test:watch                    # Watch mode (vitest)
+npm test -- path/to/file.test.js     # Single file
 ```
 
 ## Test File Organization
 
 **Location:**
-- No test files exist
-- No `__tests__/` directory
-- No `*.test.js` or `*.spec.js` files
+- Separate `tests/` directory
+- Pattern: `[module-name].test.js`
 
 **Naming:**
-- Not established (no tests to follow)
+- `install.test.js` - Tests for `bin/install.js`
 
 **Structure:**
 ```
-openshift-pipelines-skills/
+skills/
 ├── bin/
-│   └── install.js          # No install.test.js
-└── commands/
-    └── osp/                # Skills only, no tests
+│   └── install.js
+└── tests/
+    └── install.test.js
 ```
 
 ## Test Structure
 
 **Suite Organization:**
-- Not applicable
+```javascript
+const { parseArgs, expandTilde, copyDirectory } = require('../bin/install.js')
+const fs = require('fs')
+const path = require('path')
+const os = require('os')
+
+describe('parseArgs', () => {
+  let originalArgv
+
+  beforeEach(() => {
+    originalArgv = process.argv
+  })
+
+  afterEach(() => {
+    process.argv = originalArgv
+  })
+
+  it('returns default options when no args provided', () => {
+    process.argv = ['node', 'install.js']
+    const result = parseArgs()
+    expect(result.help).toBeFalsy()
+    expect(result.global).toBeFalsy()
+  })
+
+  it('parses --help flag', () => {
+    process.argv = ['node', 'install.js', '--help']
+    const result = parseArgs()
+    expect(result.help).toBeTruthy()
+  })
+})
+```
 
 **Patterns:**
-- Not established
+- Use `beforeEach` for per-test setup
+- Use `afterEach` to restore mocked state
+- One assertion focus per test
+- Descriptive test names with `it('should...')`
 
 ## Mocking
 
 **Framework:**
-- Not applicable
+- Manual mocking (no vi.mock in current tests)
+- process.argv manipulation for CLI tests
 
 **Patterns:**
-- Not established
+```javascript
+// Save and restore process.argv
+let originalArgv
+beforeEach(() => {
+  originalArgv = process.argv
+})
+afterEach(() => {
+  process.argv = originalArgv
+})
+```
+
+**What to Mock:**
+- process.argv for CLI argument tests
+- Temporary directories for file operations
+
+**What NOT to Mock:**
+- Pure functions (test directly)
+- File system in integration tests (use temp dirs)
 
 ## Fixtures and Factories
 
 **Test Data:**
-- Not applicable
+```javascript
+// Temp directory setup for file tests
+let tempDir, srcDir, destDir
+
+beforeEach(() => {
+  tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'install-test-'))
+  srcDir = path.join(tempDir, 'src')
+  destDir = path.join(tempDir, 'dest')
+  fs.mkdirSync(srcDir)
+})
+
+afterEach(() => {
+  fs.rmSync(tempDir, { recursive: true, force: true })
+})
+```
 
 **Location:**
-- Not applicable
+- Inline in test file (no separate fixtures directory)
 
 ## Coverage
 
 **Requirements:**
-- None (no tests to measure)
-- `.gitignore` includes `coverage/` and `.nyc_output/` (prepared for future)
+- No enforced coverage target
+- Focus on critical paths (installer functions)
 
 **Configuration:**
-- Not configured
+- Not explicitly configured
+
+**View Coverage:**
+```bash
+npm test -- --coverage    # If configured
+```
 
 ## Test Types
 
 **Unit Tests:**
-- Not implemented
-- Would cover: `bin/install.js` functions (parseArgs, expandTilde, copyDirectory)
+- `parseArgs()` - CLI argument parsing (11 test cases)
+- `expandTilde()` - Path expansion (5 test cases)
+- `copyDirectory()` - Directory copying (4 test cases)
 
 **Integration Tests:**
-- Not implemented
-- Would cover: Full installation flow, skill loading
+- `copyDirectory()` tests use real file system with temp directories
 
 **E2E Tests:**
 - Not implemented
-- Manual testing in Claude Code environment
+- Skills are integration-tested by users in Claude Code
 
-## Alternative Quality Assurance
+## Common Patterns
 
-**Success Criteria Pattern:**
-Each skill includes a `<success_criteria>` section with checklist validation:
-
-```markdown
-<success_criteria>
-- [ ] Jira authentication is verified
-- [ ] Version details are fetched successfully
-- [ ] All issues for the version are retrieved
-- [ ] Summary report is generated with accurate counts
-</success_criteria>
+**Async Testing:**
+```javascript
+// Not currently used (all functions are synchronous)
 ```
 
-**Skills with success criteria:**
-- `commands/osp/configure.md` - 5 criteria
-- `commands/osp/task.md` - 6 criteria
-- `commands/osp/pipeline.md` - 6 criteria
-- `commands/osp/debug.md` - 4 criteria
-- `commands/osp/map-jira-to-upstream.md` - 5 criteria
-- `commands/osp/release-status.md` - 8 criteria
-
-**Installation Validation:**
-`bin/install.js` includes runtime validation:
-- Directory existence checks (`fs.existsSync()`)
-- Copy verification with file listing
-- User confirmation prompts
-
-**API Validation:**
-Skills include authentication testing:
-```bash
-# From configure.md
-curl -s -o /dev/null -w "%{http_code}" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  "https://issues.redhat.com/rest/api/2/myself"
-# Expected: 200 for success, 401 for invalid token
+**Error Testing:**
+```javascript
+it('returns null for paths without tilde', () => {
+  const result = expandTilde('/absolute/path')
+  expect(result).toBe('/absolute/path')
+})
 ```
 
-## Recommended Test Additions
+**File System Testing:**
+```javascript
+describe('copyDirectory', () => {
+  beforeEach(() => {
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'install-test-'))
+    srcDir = path.join(tempDir, 'src')
+    destDir = path.join(tempDir, 'dest')
+    fs.mkdirSync(srcDir)
+  })
 
-**Priority 1 - Installation:**
-- Test `parseArgs()` function with various inputs
-- Test `expandTilde()` with edge cases
-- Test `copyDirectory()` with mock filesystem
+  afterEach(() => {
+    fs.rmSync(tempDir, { recursive: true, force: true })
+  })
 
-**Priority 2 - Skill Validation:**
-- YAML frontmatter parsing validation
-- Required fields presence check
-- Tool declaration validation
+  it('copies files from source to destination', () => {
+    fs.writeFileSync(path.join(srcDir, 'test.txt'), 'content')
+    copyDirectory(srcDir, destDir)
+    expect(fs.existsSync(path.join(destDir, 'test.txt'))).toBeTruthy()
+  })
+})
+```
 
-**Priority 3 - Integration:**
-- Full installation flow with temp directories
-- Skill file copying verification
+**Snapshot Testing:**
+- Not used in this codebase
+
+## CI Integration
+
+**GitHub Actions (`.github/workflows/ci.yml`):**
+- Runs on Node.js 18.x and 20.x
+- Triggers on push and pull request
+- Steps: checkout, setup-node, npm ci, npm test
+- Also validates YAML frontmatter in skill files
 
 ---
 
-*Testing analysis: 2026-01-15*
+*Testing analysis: 2026-01-19*
 *Update when test patterns change*

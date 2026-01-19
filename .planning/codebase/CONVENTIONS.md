@@ -1,126 +1,120 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-01-15
+**Analysis Date:** 2026-01-19
 
 ## Naming Patterns
 
 **Files:**
-- `kebab-case.md` for skill definitions (`map-jira-to-upstream.md`, `release-status.md`)
-- `kebab-case.js` for JavaScript files (`install.js`)
-- UPPERCASE for important files (`README.md`)
+- kebab-case for markdown files (`map-jira-to-upstream.md`, `release-status.md`)
+- camelCase for JavaScript files (`install.js`)
+- .test.js suffix for test files (`install.test.js`)
 
 **Functions:**
-- camelCase for all functions (`showBanner()`, `expandTilde()`, `parseArgs()`, `copyDirectory()`)
-- No special prefix for async functions
-- Descriptive verbs (`show`, `expand`, `parse`, `copy`, `prompt`)
+- camelCase for all functions (`parseArgs`, `expandTilde`, `copyDirectory`)
+- Descriptive verb-based names (`showBanner`, `showHelp`, `promptLocation`)
+- No async prefix (async functions named same as sync)
 
 **Variables:**
-- camelCase for variables (`packageJson`, `targetDir`, `commandsSource`)
-- UPPER_SNAKE_CASE for constants (`VERSION`, `NAMESPACE`)
+- camelCase for variables (`targetDir`, `configDir`, `options`)
+- SCREAMING_SNAKE_CASE for constants (`VERSION`, `NAMESPACE`)
+- No underscore prefix for private members
 
 **Types:**
-- No TypeScript - plain JavaScript
-- JSDoc not used
+- No TypeScript (pure JavaScript)
+- JSDoc comments not used
 
 ## Code Style
 
 **Formatting:**
-- 2-space indentation (`bin/install.js`)
-- No trailing semicolons (modern JavaScript style)
-- Single quotes for strings
-- Template literals for multi-line strings and interpolation
-
-**Example from `bin/install.js`:**
-```javascript
-const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  dim: '\x1b[2m',
-  red: '\x1b[31m',
-}
-```
+- 2-space indentation (consistent throughout)
+- Single quotes for string literals
+- Template literals (backticks) for multiline strings
+- Semicolons required at end of statements
 
 **Linting:**
-- None configured (no .eslintrc, .prettierrc)
-- Style maintained through manual consistency
+- No ESLint or Prettier configured
+- Code style maintained through convention and review
+- Run: N/A (no linting scripts)
 
 ## Import Organization
 
 **Order:**
-1. Node.js built-ins (fs, path, os, readline)
-2. No external packages (zero dependencies)
+1. Node.js built-in modules (`fs`, `path`, `os`, `readline`)
+2. Local modules (`../package.json`)
 
-**Example from `bin/install.js`:**
-```javascript
-const fs = require('fs')
-const path = require('path')
-const os = require('os')
-const readline = require('readline')
-```
+**Grouping:**
+- No blank lines between imports
+- Alphabetical order not enforced
 
-**Path Aliases:**
-- None (no module bundler, no path mapping)
+**Path Style:**
+- CommonJS: `require()` / `module.exports`
+- Relative paths for local imports
 
 ## Error Handling
 
 **Patterns:**
-- Check conditions before operations (`fs.existsSync()`)
-- Console error messages with colored output
-- `process.exit(1)` for fatal errors
+- Console.error with colored output for user-facing errors
+- Process.exit(1) for fatal errors
+- Early return on validation failures
 
-**Example:**
-```javascript
-if (!fs.existsSync(commandsSource)) {
-  console.error(`${colors.red}Error: Commands directory not found${colors.reset}`)
-  process.exit(1)
-}
-```
+**Error Types:**
+- String messages with template literals
+- ANSI color codes for visibility: `${colors.red}Error: ...${colors.reset}`
 
 ## Logging
 
 **Framework:**
-- Console only (console.log, console.error)
-- ANSI color codes for formatting
+- Console.log for normal output
+- Console.error for errors
+- ANSI color codes via `colors` object
 
 **Patterns:**
-- Colored output for user feedback
-- `console.log('')` for visual spacing
-- Template literals for message formatting
+- Colored output for CLI feedback
+- No structured logging
+- No log levels
 
 ## Comments
 
 **When to Comment:**
-- Single-line comments for code clarification
-- No JSDoc for functions
-- Comments used sparingly
+- Section headers for code organization (`// ANSI color codes`, `// Load package info`)
+- Brief inline comments for non-obvious logic
 
-**Skill Documentation:**
-- YAML frontmatter for metadata
-- XML tags for structure (`<objective>`, `<process>`, `<step>`)
-- Markdown headings for hierarchy
+**JSDoc/TSDoc:**
+- Not used in this codebase
+
+**TODO Comments:**
+- Pattern: `// TODO: description`
+- None currently present in codebase
 
 ## Function Design
 
 **Size:**
-- Functions kept focused (10-30 lines typical)
+- Functions kept reasonably short (under 50 lines)
 - Main function orchestrates flow
 
 **Parameters:**
-- Simple positional parameters
-- No destructuring in parameters
+- Minimal parameters (1-3 per function)
+- Object destructuring not used
 
 **Return Values:**
 - Explicit returns
-- Boolean returns for conditions
+- Some functions return void (side effects only)
 
 ## Module Design
 
 **Exports:**
-- Single-file modules (no exports, executed directly)
-- CommonJS style (`require()`)
+- Named exports at end of file:
+  ```javascript
+  module.exports = {
+    parseArgs,
+    expandTilde,
+    copyDirectory,
+  };
+  ```
+- Export only what's needed for testing
 
 **Barrel Files:**
-- Not used (flat structure)
+- Not used (single entry point)
 
 ## Skill Definition Conventions
 
@@ -128,35 +122,49 @@ if (!fs.existsSync(commandsSource)) {
 ```yaml
 ---
 name: skill-name
-description: Brief description
+description: Human-readable description
 allowed-tools:
   - Bash
   - Read
-  - Write
+  - WebFetch
+  - AskUserQuestion
 ---
 ```
 
-**XML Structure:**
-```xml
-<objective>What the skill does</objective>
-<execution_context>Background info</execution_context>
+**Document Structure:**
+```markdown
+# Title
+
+<objective>
+What this skill accomplishes
+</objective>
+
+<execution_context>
+Background and prerequisites
+</execution_context>
+
 <process>
-  <step name="step_name">Instructions</step>
+<step name="step_name">
+Instructions with code examples
+</step>
 </process>
-<output>Expected output format</output>
-<success_criteria>Checklist</success_criteria>
+
+<output>
+Expected output description
+</output>
+
+<success_criteria>
+- [ ] Criteria 1
+- [ ] Criteria 2
+</success_criteria>
 ```
 
-**Step Naming:**
-- snake_case for step names (`check_configuration`, `gather_requirements`)
-- Descriptive action verbs
-
-**Bash Scripts:**
-- `set -euo pipefail` for strict error handling
-- Inline error checks with `|| echo "fallback"`
-- `2>/dev/null` for optional error suppression
+**Code Blocks in Skills:**
+- Use triple backticks with language identifier
+- Bash for shell commands
+- Variable placeholders: `${VARIABLE}` or `{PLACEHOLDER}`
 
 ---
 
-*Convention analysis: 2026-01-15*
+*Convention analysis: 2026-01-19*
 *Update when patterns change*

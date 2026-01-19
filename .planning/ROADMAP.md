@@ -37,7 +37,7 @@ Plans:
 **Depends on**: Phase 1
 **Research**: Likely (need to check upstream releases, dependency versions, CVE fix versions)
 **Research topics**: Upstream tektoncd/* release branches, CVE fix versions for jwt-go/oauth2/x/crypto, Konflux pipeline status
-**Plans**: 3 plans (updated from assessment)
+**Plans**: 4 plans (updated from assessment + ISS-003)
 
 **Assessment Findings (from 01-01 and 01-02):**
 - CVEs: 2/3 already fixed (jwt-go v4.5.2, x/crypto v0.35.0), 1 pending in PR #903 (oauth2)
@@ -48,9 +48,10 @@ Plans:
 - See: `.planning/phases/01-assessment/KONFLUX-FRESHNESS-REPORT.md` for full details
 
 Plans:
-- [ ] 02-01: Re-trigger stale Konflux on-push pipelines (8 components need rebuild)
-- [ ] 02-02: Diagnose and fix PR #903 Konflux pipeline failure
-- [ ] 02-03: Verify all images built successfully before dev release
+- [x] 02-01: Re-trigger stale Konflux on-push pipelines (8 components need rebuild)
+- [ ] 02-02: Create /osp:wait-for-builds skill (ISS-003 - poll every 15min, 3hr timeout)
+- [ ] 02-03: Diagnose and fix PR #903 Konflux pipeline failure
+- [ ] 02-04: Verify all images built successfully before dev release
 
 ### Phase 3: Dev Release
 **Goal**: Execute development release for internal testing and validation
@@ -87,7 +88,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Assessment | 2/2 | Complete | 2026-01-19 |
-| 2. Fix Blockers | 0/? | Not started | - |
+| 2. Fix Blockers | 1/4 | In progress | - |
 | 3. Dev Release | 0/1 | Not started | - |
 | 4. Stage Release | 0/1 | Not started | - |
 | 5. Production Release | 0/1 | Not started | - |

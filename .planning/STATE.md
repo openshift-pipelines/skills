@@ -95,22 +95,28 @@ See .planning/ISSUES.md:
 ## Session Continuity
 
 Last session: 2026-01-19
-Stopped at: 03-01-PLAN.md Task 2 — blocked by ISS-005 (index PR Konflux pipeline failures)
-Resume file: None
+Stopped at: ISS-005 fix in progress — PR #14224 created, awaiting merge
+Resume file: `.planning/phases/03-dev-release/.continue-here.md`
 
 **Phase 3 Execution Progress:**
 - [x] Task 1: Run index-render-template workflow ✅ (run #21140605709)
-- [ ] Task 2: Merge index PRs — **BLOCKED** (all 6 PRs fail Konflux CI)
+- [ ] Task 2: Merge index PRs — **FIX PENDING** (PR #14224 adds serviceAccountName)
 - [ ] Task 3: Copy images to devel registry (skopeo copy)
 - [ ] Task 4: Verify and generate QE handoff
 
-**Next actions (in order of preference):**
-1. **Fix ISS-005** — Update hack repo or operator .tekton files to add service account
-2. **Workaround** — Force merge with `/override` if blocking release
-3. **Wait** — For upstream fix from hack repo maintainers
+**ISS-005 Fix Status:**
+- Attempted hack repo fix (Option 2) — failed due to filename pattern mismatch
+- Reverted hack repo changes, created revert PR #437
+- Created direct fix PR #14224 to operator repo (Option B)
+- PR adds `serviceAccountName` to all 12 index pipeline files
 
-**To resume:** `/gsd:progress` or `/gsd:execute-plan .planning/phases/03-dev-release/03-01-PLAN.md`
+**Open PRs to merge:**
+1. https://github.com/openshift-pipelines/operator/pull/14224 (THE FIX)
+2. https://github.com/openshift-pipelines/hack/pull/437 (revert - cleanup)
 
-**Plan updates made this session:**
-- Added Task 3 (skopeo copy) to 03-01-PLAN.md — per release guide "Get Devel Build" section
-- Updated /osp:operator-release skill with devel image copy step
+**After fix merged:**
+- Retrigger catalog PRs #14207-#14210 (4.15-4.18)
+- Once passing, merge them
+- Resume Task 3 (skopeo copy)
+
+**To resume:** `/gsd:resume-work`

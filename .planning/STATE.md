@@ -61,10 +61,10 @@ See .planning/ISSUES.md:
 - ~~ISS-001: Create /osp:pr-pipeline-status skill~~ (CLOSED)
 - ~~ISS-002: Register release-checklist skill~~ (CLOSED)
 - ~~ISS-003: Create /osp:wait-for-builds skill~~ (CLOSED - implemented as /osp:component-builds)
-- **ISS-004: Document registry usage for different release stages in skills** (OPEN)
-  - Registry flow: quay.io (dev) → registry.stage.redhat.io (stage) → registry.redhat.io (prod)
-  - PAC_BUILDER update workflow for CLI
-  - Dockerfile version updates on upstream sync
+- ~~ISS-004: Document registry usage for different release stages in skills~~ (CLOSED - created /osp:registry-info skill)
+- ~~ISS-005: Index PR Konflux pipelines failing~~ (CLOSED - PR #14224 merged)
+
+**All deferred issues resolved.**
 
 ### Blockers/Concerns
 
@@ -87,9 +87,11 @@ See .planning/ISSUES.md:
 
 ## Session Continuity
 
-Last session: 2026-01-20T11:00:00Z
-Stopped at: Catalog PRs merged, investigating ubi8 update
+Last session: 2026-01-20T17:45:00Z
+Stopped at: Discovered wrong upstream sync (PR #14238) causing build failures
 Resume file: .planning/phases/03-dev-release/.continue-here.md
+
+**Critical finding:** PR #14238 synced from wrong upstream branch (release-v0.71.x instead of release-v0.73.x), bringing Go 1.25.0 requirement that breaks all operator/proxy/webhook builds.
 
 **Phase 3: Dev Release**
 

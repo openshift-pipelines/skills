@@ -44,6 +44,32 @@ Use this skill to monitor build progress after triggering rebuilds, verify all c
 - Freshness: 72 hours (images older are considered STALE)
 - Watch timeout: 3 hours
 - Poll interval: 15 minutes
+
+**Triggering Rebuilds (Critical Knowledge):**
+
+Konflux uses CEL path filtering — **empty commits do NOT trigger pipelines**.
+
+To trigger a rebuild, you must change a file in a watched path. Recommended pattern:
+
+```dockerfile
+# Rebuild trigger: 1.15.4 release 2026-01-20
+```
+
+Add this comment to `.konflux/dockerfiles/*.Dockerfile` files. The actual file change (not just commit) triggers the pipeline.
+
+**Why this works:**
+- Konflux pipeline configs use `pathChanged()` CEL expressions
+- Only changes to watched paths (`.konflux/`, source code) trigger builds
+- Empty commits or README changes are ignored
+
+**Build Order (Important):**
+Components must build in dependency order:
+1. **CORE** — pipeline, triggers, chains, results, hub, git-clone, pac
+2. **CLI** — depends on PAC CLI image for tkn-pac binary
+3. **OPERATOR** — depends on all component images
+4. **INDEX** — depends on operator bundle
+
+Use `/osp:component-builds watch` to monitor completion before proceeding to next layer.
 </execution_context>
 
 <process>
@@ -160,6 +186,26 @@ done
 
 echo ""
 echo "**Summary:** ${PASSED} passed, ${FAILED} failed, ${PENDING} pending, ${NO_RUNS} no-runs"
+```
+
+### Understanding "no-runs" Status
+
+If components show "no-runs", it means no on-push pipeline has been triggered on that branch recently.
+
+| Cause | Solution |
+|-------|----------|
+| Branch never built | Push initial commit with Dockerfile change |
+| CEL path filtering | Recent commits didn't change watched paths (`.konflux/`, source code) |
+| Pipeline config missing | Check `.tekton/` directory exists for this branch |
+| Workflows not synced | Konflux config PR may need to be merged first |
+
+**Do NOT use empty commits** — Konflux ignores them due to CEL path filtering.
+
+**To trigger a build:**
+```bash
+# Add rebuild trigger comment to a Dockerfile
+echo "# Rebuild trigger: $(date +%Y-%m-%d)" >> .konflux/dockerfiles/<component>.Dockerfile
+git add . && git commit -m "chore: trigger rebuild" && git push
 ```
 
 If failures found, list commands to diagnose:

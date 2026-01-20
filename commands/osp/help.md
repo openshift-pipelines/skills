@@ -70,6 +70,38 @@ Present the following command reference to the user in a clear, formatted manner
 5. **Map Jira to upstream**: `/osp:map-jira-to-upstream` - Cross-reference with tektoncd
 6. **Track release**: `/osp:release-status` - Check Jira version status and generate todos
 
+## Common Workflows
+
+### "My build is failing"
+1. `/osp:pr-pipeline-status <repo> <pr>` — Check pipeline details and error patterns
+2. `/osp:component-builds status` — Check all component build status
+3. `/osp:registry-info` — Verify base images exist in target registry
+
+### "Check release progress"
+1. `/osp:release-status <version>` — Jira issue status with PR correlation
+2. `/osp:component-builds freshness` — Image age check (72-hour threshold)
+
+### "Trigger rebuild"
+Konflux CEL filtering requires actual file changes (empty commits are ignored):
+```dockerfile
+# Rebuild trigger: 1.15.4 release 2026-01-20
+```
+Add this comment to `.konflux/dockerfiles/*.Dockerfile` and push to trigger rebuild.
+
+### "Copy images for release"
+1. `/osp:konflux-image snapshot <app>` — Get image digest from Snapshots API (recommended)
+2. `/osp:registry-info` — Check which registry to use for release stage
+
+## Troubleshooting Quick Reference
+
+| Symptom | Skill | Likely Cause |
+|---------|-------|--------------|
+| "No runs" for component | `/osp:component-builds` | Empty commits don't trigger Konflux (use Dockerfile comment) |
+| PR pipeline failing | `/osp:pr-pipeline-status` | Base image expired or Enterprise Contract failure |
+| Konflux 401 error | `/osp:configure` | SSO cookie expired (8-24h lifetime) |
+| "manifest unknown" | `/osp:registry-info` | Image purged from registry, use quay.io fallback |
+| CVE "To Do" but code fixed | `/osp:release-status` | Jira-GitHub sync gap (verify in go.mod) |
+
 ## Release Workflow
 
 For release captains managing OpenShift Pipelines releases:

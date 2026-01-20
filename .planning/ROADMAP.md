@@ -17,6 +17,7 @@ None
 - [x] **Phase 1: Assessment** - Analyze Jira version, identify all blocking issues, check Konflux pipeline freshness
 - [x] **Phase 2: Fix Blockers** - Resolve CVEs, upstream deps, build/CI issues, re-trigger stale Konflux builds
 - [x] **Phase 3: Dev Release** - Execute development release for internal testing ✅ **COMPLETE**
+- [ ] **Phase 3.1: Skill Refinement** - Improve skills based on project learnings (INSERTED)
 - [ ] **Phase 4: Stage Release** - Execute stage release (CORE → CLI → OPERATOR → INDEX) ⚠️ **BLOCKED** (ISS-006)
 - [ ] **Phase 5: Production Release** - Execute production release after QE validation
 
@@ -71,9 +72,35 @@ Plans:
 - TaskRun verification passed
 - QE handoff: `.planning/phases/03-dev-release/QE-HANDOFF.md`
 
+### Phase 3.1: Skill Refinement (INSERTED)
+**Goal**: Improve OSP skills based on project learnings — add domain knowledge, fix discoverability, add cross-references
+**Depends on**: Phase 3
+**Research**: Unlikely (reviewing existing skills and project history)
+**Plans**: 1 plan
+**Status**: Not started
+
+Plans:
+- [ ] 03.1-01: Review and improve all OSP skills with project learnings
+
+**Scope:**
+- Update skills with knowledge gained during 1.15.4 release
+- Improve specificity and discoverability
+- Add cross-references between related skills
+- Document common workflows and patterns
+- Fix any gaps identified during execution
+
+**Skills to Review:**
+- `/osp:release-status` — Jira version tracking
+- `/osp:release-checklist` — Release readiness analysis
+- `/osp:component-builds` — Konflux pipeline monitoring
+- `/osp:konflux-image` — Image reference and copying
+- `/osp:configure` — Authentication setup
+- `/osp:help` — Skill discoverability
+- `/osp:registry-info` — Registry documentation
+
 ### Phase 4: Stage Release
 **Goal**: Execute stage release — CORE → CLI → OPERATOR → INDEX to registry.stage.redhat.io
-**Depends on**: Phase 3
+**Depends on**: Phase 3.1
 **Research**: Unlikely (following established /osp:stage-release workflow)
 **Plans**: 1 plan
 **Status**: ⚠️ **BLOCKED** by ISS-006 (Snyk SAST false positives)
@@ -107,5 +134,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Assessment | 2/2 | Complete | 2026-01-19 |
 | 2. Fix Blockers | 4/4 | Complete | 2026-01-19 |
 | 3. Dev Release | 2/2 | Complete | 2026-01-20 |
+| 3.1 Skill Refinement | 0/1 | Not started (INSERTED) | - |
 | 4. Stage Release | 0/1 | ⚠️ **BLOCKED** (ISS-006) | - |
 | 5. Production Release | 0/1 | Not started | - |

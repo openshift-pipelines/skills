@@ -102,16 +102,39 @@ Extract:
 </step>
 
 <step name="fetch_version_issues">
-Fetch all issues for the version:
+Fetch all issues for the version with pagination (handles releases with >200 issues):
 
 ```bash
 TOKEN=$(jq -r '.jira.token' ~/.config/osp/config.json 2>/dev/null || echo "$JIRA_TOKEN")
 VERSION_ID="12453355"
 
-# Fetch issues with relevant fields
-curl -s -H "Authorization: Bearer ${TOKEN}" \
-  "https://issues.redhat.com/rest/api/2/search?jql=fixVersion=${VERSION_ID}&maxResults=200&fields=key,summary,status,issuetype,priority,assignee,components,issuelinks,description" | jq .
+# Fetch issues with pagination
+ALL_ISSUES="[]"
+START_AT=0
+MAX_RESULTS=200
+TOTAL=1  # Initialize to enter loop
+
+while [ $START_AT -lt $TOTAL ]; do
+  RESPONSE=$(curl -s -H "Authorization: Bearer ${TOKEN}" \
+    "https://issues.redhat.com/rest/api/2/search?jql=fixVersion=${VERSION_ID}&maxResults=${MAX_RESULTS}&startAt=${START_AT}&fields=key,summary,status,issuetype,priority,assignee,components,issuelinks,description")
+
+  TOTAL=$(echo "$RESPONSE" | jq '.total')
+  FETCHED=$(echo "$RESPONSE" | jq '.issues | length')
+  ALL_ISSUES=$(echo "$ALL_ISSUES" "$RESPONSE" | jq -s '.[0] + (.[1].issues // [])')
+
+  START_AT=$((START_AT + FETCHED))
+
+  # Progress indicator for large releases
+  if [ $TOTAL -gt $MAX_RESULTS ]; then
+    echo "Fetched $START_AT of $TOTAL issues..." >&2
+  fi
+done
+
+echo "$ALL_ISSUES" | jq .
+echo "Total issues fetched: $(echo "$ALL_ISSUES" | jq 'length')" >&2
 ```
+
+**Note**: If pagination was needed (>200 issues), a warning will be displayed.
 
 For each issue, extract:
 - `key`: Issue key (SRVKP-1234)
@@ -126,26 +149,42 @@ For each issue, extract:
 </step>
 
 <step name="categorize_issues">
-Group issues by completion status:
+Group issues by completion status (with pagination for large releases):
 
 ```bash
-# Parse and categorize issues
+# Parse and categorize issues with pagination
 TOKEN=$(jq -r '.jira.token' ~/.config/osp/config.json 2>/dev/null || echo "$JIRA_TOKEN")
 
-curl -s -H "Authorization: Bearer ${TOKEN}" \
-  "https://issues.redhat.com/rest/api/2/search?jql=fixVersion=${VERSION_ID}&maxResults=200&fields=key,summary,status,issuetype,priority,assignee,components" | \
-  jq '{
-    total: .total,
-    done: [.issues[] | select(.fields.status.name | test("Closed|Verified|Release Pending"; "i"))],
-    in_progress: [.issues[] | select(.fields.status.name | test("In Progress|Code Review|Review"; "i"))],
-    pending: [.issues[] | select(.fields.status.name | test("To Do|New|Open|Blocked"; "i"))]
-  } | {
-    total: .total,
-    done_count: (.done | length),
-    in_progress_count: (.in_progress | length),
-    pending_count: (.pending | length),
-    pending_issues: [.pending[] | {key: .key, summary: .fields.summary, status: .fields.status.name, type: .fields.issuetype.name, assignee: (.fields.assignee.displayName // "Unassigned")}]
-  }'
+# Fetch all issues with pagination
+ALL_ISSUES="[]"
+START_AT=0
+MAX_RESULTS=200
+TOTAL=1
+
+while [ $START_AT -lt $TOTAL ]; do
+  RESPONSE=$(curl -s -H "Authorization: Bearer ${TOKEN}" \
+    "https://issues.redhat.com/rest/api/2/search?jql=fixVersion=${VERSION_ID}&maxResults=${MAX_RESULTS}&startAt=${START_AT}&fields=key,summary,status,issuetype,priority,assignee,components")
+
+  TOTAL=$(echo "$RESPONSE" | jq '.total')
+  FETCHED=$(echo "$RESPONSE" | jq '.issues | length')
+  ALL_ISSUES=$(echo "$ALL_ISSUES" "$RESPONSE" | jq -s '.[0] + (.[1].issues // [])')
+
+  START_AT=$((START_AT + FETCHED))
+done
+
+# Categorize all fetched issues
+echo "$ALL_ISSUES" | jq '{
+  total: length,
+  done: [.[] | select(.fields.status.name | test("Closed|Verified|Release Pending"; "i"))],
+  in_progress: [.[] | select(.fields.status.name | test("In Progress|Code Review|Review"; "i"))],
+  pending: [.[] | select(.fields.status.name | test("To Do|New|Open|Blocked"; "i"))]
+} | {
+  total: .total,
+  done_count: (.done | length),
+  in_progress_count: (.in_progress | length),
+  pending_count: (.pending | length),
+  pending_issues: [.pending[] | {key: .key, summary: .fields.summary, status: .fields.status.name, type: .fields.issuetype.name, assignee: (.fields.assignee.displayName // "Unassigned")}]
+}'
 ```
 </step>
 
@@ -229,6 +268,45 @@ Based on the analysis, the following actions are recommended:
 2. **Missing PRs**: {list issues without linked PRs}
 3. **Open PRs Needing Review**: {list PRs that need review/merge}
 4. **Status Updates Needed**: {issues with merged PRs but not closed}
+
+## Important: Jira-GitHub Sync Gap
+
+**Warning:** CVE fixes merged in GitHub may still show as "To Do" in Jira.
+
+This is common because:
+- PRs don't always reference Jira keys in commit messages
+- `update-sources` workflow pulls upstream fixes without Jira context
+- Automated bot PRs don't link to downstream Jira issues
+
+**Example from 1.15.4 release:**
+- SRVKP-7344 (jwt-go v4.5.2) — Jira: To Do, Code: **Fixed**
+- SRVKP-7201 (oauth2 v0.27.0) — Jira: To Do, PR #908: **Merged**
+- SRVKP-7198 (x/crypto v0.35.0) — Jira: To Do, Code: **Fixed**
+
+### Verify CVE Fix Status
+
+For each CVE marked "To Do", verify if actually fixed:
+
+```bash
+# Check actual dependency version in release branch
+COMPONENT="tektoncd-cli"  # or: tektoncd-pipeline, pac-downstream, etc.
+VERSION="1.15"
+
+gh api "repos/openshift-pipelines/${COMPONENT}/contents/upstream/go.mod?ref=release-v${VERSION}.x" \
+  --jq '.content' | base64 -d | grep -E "(jwt|oauth2|crypto)"
+```
+
+**Decision:**
+- Current version >= Fix version → **FIXED** (close Jira)
+- Current version < Fix version → **NEEDS FIX** (create PR)
+
+### Status Indicators
+
+| Indicator | Meaning |
+|-----------|---------|
+| [SYNC GAP] | PR merged but Jira not updated |
+| [VERIFIED FIXED] | Dependency version confirmed >= fix version |
+| [NEEDS FIX] | Dependency version below fix version |
 ```
 </step>
 

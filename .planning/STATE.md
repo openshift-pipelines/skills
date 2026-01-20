@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-01-19)
 
 **Core value:** Ship 1.15.4 with all blocking CVEs and issues resolved.
-**Current focus:** Phase 4 — Stage Release (pending ISS-006 resolution)
+**Current focus:** QE validation of dev release; Phase 4 blocked by ISS-006
 
 ## Current Position
 
-Phase: 3 of 5 (Dev Release) **COMPLETE**
+Phase: 3 of 5 (Dev Release) **COMPLETE** — with QE
 Plan: 2 of 2 in current phase
-Status: **COMPLETE** — 1.15.4 deployed and verified on OCP 4.18.30
-Last activity: 2026-01-20 — Dev release deployed, TaskRun verified, QE handoff generated
+Status: **QE VALIDATION** — 1.15.4 deployed on OCP 4.18.30, awaiting QE sign-off
+Last activity: 2026-01-20 — Dev release with QE, Jira status checked (39 issues, 82% done)
 
 Progress: ██████████ 100% (Phase 3)
 
@@ -55,6 +55,10 @@ Recent decisions affecting current work:
 | 02-04 | Trigger operator-update-images manually | Ensures operator bundle has fresh component images before dev release |
 | 02-04 | Release build order: CORE → CLI → OPERATOR → INDEX | Each layer must complete before next to pick up fresh images |
 
+### Roadmap Evolution
+
+- Phase 3.1 inserted after Phase 3: Skill Refinement (INSERTED) — improve skills with project learnings while waiting for ISS-006 resolution
+
 ### Deferred Issues
 
 See .planning/ISSUES.md:
@@ -82,15 +86,58 @@ See .planning/ISSUES.md:
 - ~~ISS-005: Index PR Konflux pipelines failing~~ → **FIXED** (PR #14224 merged)
 - All 5 catalog PRs merged and on-push pipelines passed
 - All 5 index images copied to quay.io/openshift-pipeline
-- Dev release ready for QE testing
+- Dev release deployed and verified
+- **QE handoff delivered** — testing in progress
 
-**No current blockers.**
+**Recent Progress (2026-01-20):**
+- PR #14352: Go builder updated to v1.25 (for Go 1.25.0 support)
+- PR #14353-14355: Operator/proxy/webhook rebuilt with new builder
+- Dev release images contain all CVE fixes (jwt-go, oauth2, x/crypto)
+
+**Pending: ISS-006** — Snyk SAST false positives (stage release blocker)
+
+## Jira Version Status
+
+**Last checked:** 2026-01-20
+**Source:** https://issues.redhat.com/projects/SRVKP/versions/12453355
+
+| Status | Count | % |
+|--------|-------|---|
+| Closed | 30 | 77% |
+| Verified | 2 | 5% |
+| In Progress | 1 | 3% |
+| To Do | 6 | 15% |
+| **Total** | **39** | 100% |
+
+### Issues Needing Jira Update (Fixed but not closed)
+
+| Key | CVE | Status | Fix |
+|-----|-----|--------|-----|
+| SRVKP-7344 | jwt-go memory allocation | To Do | ✅ jwt-go v4.5.2 in images |
+| SRVKP-7201 | oauth2 memory consumption | To Do | ✅ PR #908 merged |
+| SRVKP-7198 | x/crypto DoS | To Do | ✅ x/crypto v0.35.0 in images |
+
+### Still In Progress
+
+| Key | Issue | Assignee |
+|-----|-------|----------|
+| SRVKP-9931 | CVE-2025-66506 Fulcio DoS (chains) | Anitha Natarajan |
+
+### Pending (Not Release Blockers)
+
+| Key | Issue | Assignee |
+|-----|-------|----------|
+| SRVKP-10435 | QE: ResourceIcon colors | Jayesh Garg |
+| SRVKP-7482 | Performance regression testing | Unassigned |
+| SRVKP-7480 | Release Operator story | Unassigned |
 
 ## Session Continuity
 
-Last session: 2026-01-20T14:55:00Z
-Stopped at: Phase 3 complete — dev release deployed and verified
+Last session: 2026-01-20T21:30:00Z
+Stopped at: Phase 3 complete — dev release with QE for validation
 Resume file: N/A (phase complete)
+
+**Dev Release:** With QE for testing (OCP 4.18.30 cluster)
 
 **Phase 3: Dev Release — COMPLETE**
 

@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-19)
 
 **Core value:** Ship 1.15.4 with all blocking CVEs and issues resolved.
-**Current focus:** Phase 3 — Dev Release (testing deployment on cluster)
+**Current focus:** Phase 4 — Stage Release (pending ISS-006 resolution)
 
 ## Current Position
 
-Phase: 3 of 5 (Dev Release)
+Phase: 3 of 5 (Dev Release) **COMPLETE**
 Plan: 2 of 2 in current phase
-Status: **READY** — Plan 03-02 created
-Last activity: 2026-01-19 — Deployment test revealed missing component images
+Status: **COMPLETE** — 1.15.4 deployed and verified on OCP 4.18.30
+Last activity: 2026-01-20 — Dev release deployed, TaskRun verified, QE handoff generated
 
-Progress: █████████░ 85%
+Progress: ██████████ 100% (Phase 3)
 
 ## Performance Metrics
 
@@ -88,39 +88,29 @@ See .planning/ISSUES.md:
 
 ## Session Continuity
 
-Last session: 2026-01-20T14:22:37Z
-Stopped at: Ready to copy images to dev registry; waiting for new cluster
-Resume file: .planning/phases/03-dev-release/.continue-here.md
+Last session: 2026-01-20T14:55:00Z
+Stopped at: Phase 3 complete — dev release deployed and verified
+Resume file: N/A (phase complete)
 
-**Current state:** PR #14352 merged, all component nudge PRs merged. project.yaml has fresh digests. Ready to copy images and test deployment. User providing new cluster.
+**Phase 3: Dev Release — COMPLETE**
 
-**Phase 3: Dev Release**
-
-### Plan 03-01: Index Images (COMPLETE - 2nd attempt succeeded)
+### Plan 03-01: Index Images (COMPLETE)
 - [x] Task 1: Run index-render-template workflow ✅
 - [x] Task 2: Fix duplicate bundle issue (PR #14345) ✅
 - [x] Task 3: Merge catalog PRs (v4.14-v4.18) ✅
 - [x] Task 4: Close OCP 4.12 (EOL) ✅
 
-**Catalog PRs Merged:**
-- #14346 (v4.14), #14347 (v4.18), #14348 (v4.15), #14350 (v4.16), #14340 (v4.17)
+### Plan 03-02: Component Images & Deployment (COMPLETE)
+- [x] Copy 28 component images to quay.io/openshift-pipeline ✅
+- [x] Create CatalogSource on OCP 4.18.30 cluster ✅
+- [x] Install operator via Subscription ✅
+- [x] Verify TektonConfig Ready (version 1.15.4) ✅
+- [x] Verify all 14 pods running ✅
+- [x] Execute test TaskRun (passed) ✅
+- [x] Generate QE handoff document ✅
 
-### Plan 03-02: Dev Release (IN PROGRESS)
-**New blocker discovered:** ubi8/ubi base images are 2 months stale
+**Test Cluster:** OCP 4.18.30 (api.zjdmf-xyift-oaz.6ccc.p3.openshiftapps.com)
 
-**UBI8 Status:**
-- ubi8/ubi:latest (operator/proxy/webhook): sha256:bcfca5f (Nov 2025) - STALE
-- ubi8/ubi-minimal (bundle): sha256:b3b8ab0 (Jan 2026) - CURRENT
-- Konflux nudge PR #14184 exists but has failing pipelines
-
-**Remaining tasks:**
-- [ ] Investigate/fix ubi8 nudge PR #14184 failures
-- [ ] Merge ubi8 update and trigger component rebuilds
-- [ ] Copy index images to dev registry
-- [ ] Copy component images to dev registry
-- [ ] Test deployment on OCP 4.18 cluster
-- [ ] Generate QE handoff
-
-**Test Cluster:** OCP 4.18.30 (api.e8yd8-jboom-ft5.xazm.p3.openshiftapps.com)
-
-**Next:** Investigate PR #14184 Konflux pipeline failures
+**Next Phase:** Phase 4 — Stage Release
+- **Blocker:** ISS-006 (Snyk SAST false positives) must be fixed before stage release
+- See .planning/ISSUES.md for details

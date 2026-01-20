@@ -16,8 +16,8 @@ None
 
 - [x] **Phase 1: Assessment** - Analyze Jira version, identify all blocking issues, check Konflux pipeline freshness
 - [x] **Phase 2: Fix Blockers** - Resolve CVEs, upstream deps, build/CI issues, re-trigger stale Konflux builds
-- [ ] **Phase 3: Dev Release** - Execute development release for internal testing ⚠️ **BLOCKED** (ISS-005)
-- [ ] **Phase 4: Stage Release** - Execute stage release (CORE → CLI → OPERATOR → INDEX)
+- [x] **Phase 3: Dev Release** - Execute development release for internal testing ✅ **COMPLETE**
+- [ ] **Phase 4: Stage Release** - Execute stage release (CORE → CLI → OPERATOR → INDEX) ⚠️ **BLOCKED** (ISS-006)
 - [ ] **Phase 5: Production Release** - Execute production release after QE validation
 
 ## Phase Details
@@ -57,26 +57,36 @@ Plans:
 **Goal**: Execute development release for internal testing and validation
 **Depends on**: Phase 2
 **Research**: Unlikely (following established workflow)
-**Plans**: 1 plan
-**Status**: ⚠️ **BLOCKED** by ISS-005 (index PR Konflux pipelines failing)
+**Plans**: 2 plans
+**Status**: ✅ **COMPLETE** (2026-01-20)
 
 Plans:
-- [ ] 03-01: Execute dev release workflow — Task 1 complete, Task 2 blocked
+- [x] 03-01: Execute dev release workflow — Index images copied to dev registry
+- [x] 03-02: Copy component images, deploy to cluster, verify, create QE handoff
 
-**Blocker Details (ISS-005):**
-- All 6 index PRs fail Konflux PR pipelines (clone-repository task)
-- Root cause: Missing `serviceAccountName` in `.tekton/operator-1-15-index-*-pull-request.yaml`
-- Fix needed in hack repo or operator .tekton files
-- See `.planning/ISSUES.md` for full investigation details
+**Completed:**
+- 28 component images copied to quay.io/openshift-pipeline
+- Deployed on OCP 4.18.30 cluster
+- TektonConfig Ready, version 1.15.4
+- TaskRun verification passed
+- QE handoff: `.planning/phases/03-dev-release/QE-HANDOFF.md`
 
 ### Phase 4: Stage Release
 **Goal**: Execute stage release — CORE → CLI → OPERATOR → INDEX to registry.stage.redhat.io
 **Depends on**: Phase 3
 **Research**: Unlikely (following established /osp:stage-release workflow)
 **Plans**: 1 plan
+**Status**: ⚠️ **BLOCKED** by ISS-006 (Snyk SAST false positives)
 
 Plans:
 - [ ] 04-01: Execute stage release using /osp:stage-release
+
+**Blocker Details (ISS-006):**
+- Snyk SAST scanner flags Kubernetes Secret resource names as "hardcoded credentials"
+- Affects operator/proxy/webhook PRs (15-16 findings each)
+- EC checks fail but GitHub merge still works
+- Must fix before stage release
+- See `.planning/ISSUES.md` for fix options
 
 ### Phase 5: Production Release
 **Goal**: Execute production release after QE validation — all images to registry.redhat.io
@@ -96,6 +106,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Assessment | 2/2 | Complete | 2026-01-19 |
 | 2. Fix Blockers | 4/4 | Complete | 2026-01-19 |
-| 3. Dev Release | 0/1 | ⚠️ **BLOCKED** (ISS-005) | - |
-| 4. Stage Release | 0/1 | Not started | - |
+| 3. Dev Release | 2/2 | Complete | 2026-01-20 |
+| 4. Stage Release | 0/1 | ⚠️ **BLOCKED** (ISS-006) | - |
 | 5. Production Release | 0/1 | Not started | - |

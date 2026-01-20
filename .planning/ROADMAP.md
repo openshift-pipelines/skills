@@ -18,7 +18,8 @@ None
 - [x] **Phase 2: Fix Blockers** - Resolve CVEs, upstream deps, build/CI issues, re-trigger stale Konflux builds
 - [x] **Phase 3: Dev Release** - Execute development release for internal testing ✅ **COMPLETE**
 - [x] **Phase 3.1: Skill Refinement** - Improve skills based on project learnings (INSERTED) ✅ **COMPLETE**
-- [ ] **Phase 4: Stage Release** - Execute stage release (CORE → CLI → OPERATOR → INDEX) ⚠️ **BLOCKED** (ISS-006)
+- [ ] **Phase 3.2: Fix Snyk SAST False Positives** - Resolve ISS-006 EC failures (INSERTED)
+- [ ] **Phase 4: Stage Release** - Execute stage release (CORE → CLI → OPERATOR → INDEX)
 - [ ] **Phase 5: Production Release** - Execute production release after QE validation
 
 ## Phase Details
@@ -103,12 +104,37 @@ Plans:
 - SSO cookies expire after 8-24h
 - 72-hour freshness threshold for release images
 
+### Phase 3.2: Fix Snyk SAST False Positives (INSERTED)
+**Goal**: Resolve ISS-006 — Snyk SAST false positives causing EC failures on operator/proxy/webhook PRs
+**Depends on**: Phase 3.1
+**Research**: Complete (see 03.2-RESEARCH.md)
+**Plans**: 2 plans
+**Status**: Planned
+
+Plans:
+- [ ] 03.2-01: Locate false positives and test #nosec suppression approach
+- [ ] 03.2-02: Implement fix and verify EC passes
+
+**Problem (ISS-006):**
+- Snyk SAST scanner flags 15-16 "hardcoded credentials" false positives
+- Kubernetes Secret resource names (e.g., `"tekton-results-postgres"`) flagged as credentials
+- Environment variable keys (e.g., `"POSTGRES_PASSWORD"`) flagged as credentials
+- These are NOT actual credentials, just string constants for names/keys
+- EC checks fail but GitHub merge still works (workaround)
+
+**Approach (from research):**
+1. Primary: Add `#nosec G101` comments with justification (most maintainable)
+2. Fallback: Use IGNORE_FILE_PATHS if #nosec doesn't work with Snyk Code
+3. Alternative: Snyk Web UI ignores (requires org access)
+
+**Must complete before:** Phase 4 (Stage Release)
+
 ### Phase 4: Stage Release
 **Goal**: Execute stage release — CORE → CLI → OPERATOR → INDEX to registry.stage.redhat.io
-**Depends on**: Phase 3.1
+**Depends on**: Phase 3.2 (ISS-006 must be resolved first)
 **Research**: Unlikely (following established /osp:stage-release workflow)
 **Plans**: 1 plan
-**Status**: ⚠️ **BLOCKED** by ISS-006 (Snyk SAST false positives)
+**Status**: Waiting on Phase 3.2
 
 Plans:
 - [ ] 04-01: Execute stage release using /osp:stage-release
@@ -140,5 +166,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Fix Blockers | 4/4 | Complete | 2026-01-19 |
 | 3. Dev Release | 2/2 | Complete | 2026-01-20 |
 | 3.1 Skill Refinement | 1/1 | ✅ Complete (INSERTED) | 2026-01-21 |
-| 4. Stage Release | 0/1 | ⚠️ **BLOCKED** (ISS-006) | - |
+| 3.2 Fix Snyk SAST | 0/2 | Planned (INSERTED) | - |
+| 4. Stage Release | 0/1 | Waiting on 3.2 | - |
 | 5. Production Release | 0/1 | Not started | - |

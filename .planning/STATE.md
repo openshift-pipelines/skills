@@ -87,32 +87,37 @@ See .planning/ISSUES.md:
 
 ## Session Continuity
 
-Last session: 2026-01-19T18:25:00Z
-Stopped at: Plan 03-02 rewritten, ready for execution
+Last session: 2026-01-20T11:00:00Z
+Stopped at: Catalog PRs merged, investigating ubi8 update
 Resume file: .planning/phases/03-dev-release/.continue-here.md
 
 **Phase 3: Dev Release**
 
-### Plan 03-01: Index Images (COMPLETE with issues)
+### Plan 03-01: Index Images (COMPLETE - 2nd attempt succeeded)
 - [x] Task 1: Run index-render-template workflow ✅
-- [x] Task 2: Merge catalog PRs ✅
-- [x] Task 3: Copy INDEX images to devel registry ✅
-- [x] Task 4: Verify index images ✅
-- [x] Task 5: Test deployment ❌ **FAILED** — ImagePullBackOff
+- [x] Task 2: Fix duplicate bundle issue (PR #14345) ✅
+- [x] Task 3: Merge catalog PRs (v4.14-v4.18) ✅
+- [x] Task 4: Close OCP 4.12 (EOL) ✅
 
-**Root Cause:** Only copied INDEX images, not COMPONENT images.
-Bundle references `quay.io/openshift-pipeline/` but component images don't exist there.
+**Catalog PRs Merged:**
+- #14346 (v4.14), #14347 (v4.18), #14348 (v4.15), #14350 (v4.16), #14340 (v4.17)
 
-### Plan 03-02: Dev Release 2nd Try (READY)
-- [ ] Task 1: Get all component image references from Konflux
-- [ ] Task 2: Copy all component images to devel registry
-- [ ] Task 3: Restart failed pods on test cluster
-- [ ] Task 4: Run verification tests
-- [ ] Task 5: Generate final QE handoff
+### Plan 03-02: Dev Release (IN PROGRESS)
+**New blocker discovered:** ubi8/ubi base images are 2 months stale
+
+**UBI8 Status:**
+- ubi8/ubi:latest (operator/proxy/webhook): sha256:bcfca5f (Nov 2025) - STALE
+- ubi8/ubi-minimal (bundle): sha256:b3b8ab0 (Jan 2026) - CURRENT
+- Konflux nudge PR #14184 exists but has failing pipelines
+
+**Remaining tasks:**
+- [ ] Investigate/fix ubi8 nudge PR #14184 failures
+- [ ] Merge ubi8 update and trigger component rebuilds
+- [ ] Copy index images to dev registry
+- [ ] Copy component images to dev registry
+- [ ] Test deployment on OCP 4.18 cluster
+- [ ] Generate QE handoff
 
 **Test Cluster:** OCP 4.18.30 (api.e8yd8-jboom-ft5.xazm.p3.openshiftapps.com)
-- CatalogSource: ✅ Ready
-- Operator CSV: ✅ v1.15.3 Succeeded
-- Component Pods: ❌ ImagePullBackOff (missing images)
 
-**Next:** Execute Plan 03-02 to copy component images and complete deployment
+**Next:** Investigate PR #14184 Konflux pipeline failures

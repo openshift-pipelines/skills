@@ -63,8 +63,9 @@ See .planning/ISSUES.md:
 - ~~ISS-003: Create /osp:wait-for-builds skill~~ (CLOSED - implemented as /osp:component-builds)
 - ~~ISS-004: Document registry usage for different release stages in skills~~ (CLOSED - created /osp:registry-info skill)
 - ~~ISS-005: Index PR Konflux pipelines failing~~ (CLOSED - PR #14224 merged)
+- **ISS-006: Snyk SAST false positives causing EC failures** (OPEN - deferred post-1.15.4)
 
-**All deferred issues resolved.**
+**1 open issue** — ISS-006 is a **stage release blocker** (must fix before Phase 4).
 
 ### Blockers/Concerns
 
@@ -87,11 +88,11 @@ See .planning/ISSUES.md:
 
 ## Session Continuity
 
-Last session: 2026-01-20T17:45:00Z
-Stopped at: Discovered wrong upstream sync (PR #14238) causing build failures
+Last session: 2026-01-20T19:30:00Z
+Stopped at: Waiting on PR #14352 approval; ISS-006 (Snyk false positives) documented as stage blocker
 Resume file: .planning/phases/03-dev-release/.continue-here.md
 
-**Critical finding:** PR #14238 synced from wrong upstream branch (release-v0.71.x instead of release-v0.73.x), bringing Go 1.25.0 requirement that breaks all operator/proxy/webhook builds.
+**Current state:** PR #14352 (Go builder update) awaiting team approval. EC failures are pre-existing Snyk SAST false positives (ISS-006). Dev release can proceed after merge; ISS-006 must be fixed before stage release.
 
 **Phase 3: Dev Release**
 

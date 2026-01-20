@@ -10,7 +10,25 @@ Enhancements discovered during execution. Not critical - address in future phase
 
 ## Open Enhancements
 
-*No open enhancements*
+### ISS-006: Snyk SAST false positives causing EC failures on operator/proxy/webhook
+
+- **Discovered:** Phase 3 Plan 2 (2026-01-20) — during PR #14352 EC failure investigation
+- **Severity:** HIGH (must fix before production release)
+- **Impact:** All PRs touching operator/proxy/webhook show EC failures due to pre-existing Snyk findings
+- **Root Cause:** Snyk SAST scanner flags 15-16 "hardcoded credentials" false positives:
+  - Kubernetes Secret resource names (e.g., `"tekton-results-postgres"`)
+  - Environment variable keys (e.g., `"POSTGRES_PASSWORD"`)
+  - These are NOT actual credentials, just string constants for names/keys
+- **Additional findings (MEDIUM):**
+  - MD5 usage in `hash/hash.go` (used for checksums, not security)
+  - exec.Command in test file `debug_commands.go`
+  - File operations in CLI tool `cmd/tool/`
+- **Options to fix:**
+  1. Add `#nosec G101` comments to upstream code (requires upstream PR)
+  2. Add exclusions to KFP repo (gitlab.cee.redhat.com/osh/known-false-positives)
+  3. Use `IGNORE_FILE_PATHS` parameter in pipeline config
+- **Workaround:** EC failures don't block GitHub merge — PRs can still be approved/merged with `lgtm` + `approved` labels. On-push builds and release pipelines succeed.
+- **Timeline:** Must fix BEFORE stage release (blocker for Phase 4)
 
 ## Closed Enhancements
 

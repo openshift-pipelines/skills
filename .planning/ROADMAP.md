@@ -17,7 +17,7 @@ None
 - [x] **Phase 1: Assessment** - Analyze Jira version, identify all blocking issues, check Konflux pipeline freshness
 - [x] **Phase 2: Fix Blockers** - Resolve CVEs, upstream deps, build/CI issues, re-trigger stale Konflux builds
 - [x] **Phase 3: Dev Release** - Execute development release for internal testing ✅ **COMPLETE**
-- [ ] **Phase 3.1: Skill Refinement** - Improve skills based on project learnings (INSERTED)
+- [x] **Phase 3.1: Skill Refinement** - Improve skills based on project learnings (INSERTED) ✅ **COMPLETE**
 - [ ] **Phase 4: Stage Release** - Execute stage release (CORE → CLI → OPERATOR → INDEX) ⚠️ **BLOCKED** (ISS-006)
 - [ ] **Phase 5: Production Release** - Execute production release after QE validation
 
@@ -76,11 +76,11 @@ Plans:
 **Goal**: Improve OSP skills based on project learnings — add domain knowledge, fix discoverability, add cross-references
 **Depends on**: Phase 3
 **Research**: Unlikely (reviewing existing skills and project history)
-**Plans**: 1 plan
-**Status**: Not started
+**Plans**: 1 plan (executed via checkpoint)
+**Status**: ✅ **COMPLETE** (2026-01-21)
 
 Plans:
-- [ ] 03.1-01: Review and improve all OSP skills with project learnings
+- [x] 03.1-01: Review and improve all OSP skills with project learnings
 
 **Scope:**
 - Update skills with knowledge gained during 1.15.4 release
@@ -89,14 +89,19 @@ Plans:
 - Document common workflows and patterns
 - Fix any gaps identified during execution
 
-**Skills to Review:**
-- `/osp:release-status` — Jira version tracking
-- `/osp:release-checklist` — Release readiness analysis
-- `/osp:component-builds` — Konflux pipeline monitoring
-- `/osp:konflux-image` — Image reference and copying
-- `/osp:configure` — Authentication setup
-- `/osp:help` — Skill discoverability
-- `/osp:registry-info` — Registry documentation
+**Skills Updated:**
+- `/osp:help` — Added Common Workflows section, Troubleshooting Quick Reference
+- `/osp:release-status` — Added Jira-GitHub sync gap warning with verification steps
+- `/osp:component-builds` — Added CEL path filtering, rebuild triggers, build order docs
+- `/osp:konflux-image` — Added Snapshots API rationale, comprehensive troubleshooting section
+- `/osp:configure` — Added cookie expiration warning, cluster auth section
+- `/osp:registry-info` — Added 72-hour freshness rule, registry decision tree
+
+**Key Learnings Encoded:**
+- Snapshots API is authoritative (not PipelineRuns)
+- Empty commits don't trigger Konflux (CEL path filtering)
+- SSO cookies expire after 8-24h
+- 72-hour freshness threshold for release images
 
 ### Phase 4: Stage Release
 **Goal**: Execute stage release — CORE → CLI → OPERATOR → INDEX to registry.stage.redhat.io
@@ -134,6 +139,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Assessment | 2/2 | Complete | 2026-01-19 |
 | 2. Fix Blockers | 4/4 | Complete | 2026-01-19 |
 | 3. Dev Release | 2/2 | Complete | 2026-01-20 |
-| 3.1 Skill Refinement | 0/1 | Not started (INSERTED) | - |
+| 3.1 Skill Refinement | 1/1 | ✅ Complete (INSERTED) | 2026-01-21 |
 | 4. Stage Release | 0/1 | ⚠️ **BLOCKED** (ISS-006) | - |
 | 5. Production Release | 0/1 | Not started | - |

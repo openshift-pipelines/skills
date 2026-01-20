@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-19)
 
 ## Current Position
 
-Phase: 3 of 5 (Dev Release) **COMPLETE** — with QE
-Plan: 2 of 2 in current phase
-Status: **QE VALIDATION** — 1.15.4 deployed on OCP 4.18.30, awaiting QE sign-off
-Last activity: 2026-01-20 — Dev release with QE, Jira status checked (39 issues, 82% done)
+Phase: 3.1 of 5 (Skill Refinement) **COMPLETE**
+Plan: 1 of 1 in current phase (informal execution via checkpoint)
+Status: **PHASE 3.1 COMPLETE** — All 6 skills updated with 1.15.4 learnings
+Last activity: 2026-01-21 — Completed skill refinement (konflux-image, configure, registry-info)
 
-Progress: ██████████ 100% (Phase 3)
+Progress: █████████░ 90% (Phase 3.1 complete, Phase 4 blocked)
 
 ## Performance Metrics
 

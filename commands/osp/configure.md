@@ -11,8 +11,26 @@ allowed-tools:
 # Configure OpenShift Pipelines Skills
 
 <objective>
-Set up authentication and configuration for OpenShift Pipelines skills, including Jira API access, GitHub, and Konflux console.
+Set up authentication and configuration for OpenShift Pipelines skills, including Jira API access, GitHub, Konflux console, and OpenShift cluster access.
 </objective>
+
+<important_warning>
+## ⚠️ Cookie Expiration — Read This First
+
+**Konflux SSO cookies expire after 8-24 hours.** If you're starting a release session that will span multiple hours or days, refresh your cookie BEFORE starting.
+
+**Signs your cookie has expired:**
+- HTTP 401 or 403 errors from Konflux API
+- "Cookie expired or invalid" messages
+- Skill commands fail with authentication errors
+
+**Quick fix:** Run `/osp:configure` → Select Konflux authentication
+
+**Best practice for releases:**
+1. Refresh cookie at the start of each work session
+2. If you take a break > 4 hours, refresh before resuming
+3. Keep browser logged into Konflux to extend session
+</important_warning>
 
 <process>
 <step name="check_existing_config">
@@ -44,9 +62,12 @@ Use AskUserQuestion to determine what the user wants to configure:
 **Question**: What would you like to configure?
 - Jira authentication (required for `/osp:release-status`, `/osp:map-jira-to-upstream`)
 - GitHub authentication (optional, increases API rate limits)
-- Konflux authentication (required for `/osp:pr-pipeline-status` pipeline diagnostics)
+- Konflux authentication (required for `/osp:konflux-image`, `/osp:component-builds`)
+- OpenShift cluster authentication (required for deployment testing)
 - View current configuration
 - Reset all configuration
+
+**Multiple selections allowed** — user may need to set up several services at once.
 </step>
 
 <step name="configure_jira">
@@ -117,14 +138,29 @@ If configuring Konflux:
 
 Konflux uses Red Hat SSO. To access pipeline logs and details, you need to:
 1. Log in via browser
-2. Extract the session cookie
-3. Save it for API access
+2. Session cookie is automatically extracted
+3. Cookie is saved for API access
 
 **Why a cookie?** Konflux doesn't have a public API with token auth.
 The cookie is stored in ~/.config/osp/config.json (outside any git repo).
 ```
 
-2. Guide user through SSO login:
+2. **Automated method (recommended):** Run the auth helper script:
+```bash
+# This opens a browser, waits for you to log in, then extracts the cookie
+node /path/to/skills/bin/konflux-auth.js
+
+# Or if skills are installed globally:
+node ~/.claude/commands/osp/../bin/konflux-auth.js
+```
+
+The script will:
+- Open Chromium browser to Konflux URL
+- Wait for you to complete SSO login
+- Automatically extract the session cookie
+- Save it to `~/.config/osp/config.json`
+
+3. **Manual method (fallback):** If automated method fails:
 ```
 ## Step 1: Log in to Konflux
 
@@ -134,7 +170,6 @@ https://konflux-ui.apps.kflux-prd-rh02.0fk9.p1.openshiftapps.com
 Log in with your Red Hat SSO credentials.
 ```
 
-3. Guide user to extract session cookie:
 ```
 ## Step 2: Extract Session Cookie
 
@@ -143,7 +178,7 @@ After logging in:
 **Chrome/Edge:**
 1. Open DevTools (F12)
 2. Go to Application → Cookies → konflux-ui.apps.kflux-prd-rh02...
-3. Find the cookie named `_oauth_proxy` or `_oauth2_proxy`
+3. Find the cookie named `__Host-konflux-ci-cookie`
 4. Copy its value
 
 **Firefox:**
@@ -151,12 +186,9 @@ After logging in:
 2. Go to Storage → Cookies
 3. Find the session cookie
 4. Copy its value
-
-**Alternative - Using browser extension:**
-Install "Cookie Editor" extension and export the session cookie.
 ```
 
-4. Save the cookie to config:
+4. Save the cookie to config (manual method only):
 ```bash
 mkdir -p ~/.config/osp
 chmod 700 ~/.config/osp
@@ -209,6 +241,101 @@ gh auth status 2>&1 || echo "gh CLI not authenticated"
 - Use `gh auth login` (interactive)
 - Set `GITHUB_TOKEN` environment variable
 - Add to config file
+</step>
+
+<step name="configure_cluster">
+If configuring OpenShift cluster access (for deployment testing):
+
+1. Explain what cluster auth is needed for:
+```
+## OpenShift Cluster Authentication
+
+Cluster access via `oc` CLI is needed for:
+- Dev release deployment testing (`/osp:deploy-dev`)
+- Creating CatalogSource resources
+- Verifying TektonConfig status
+- Running test TaskRuns
+
+This is separate from Konflux authentication — you need both for full release workflow.
+```
+
+2. Check current cluster status:
+```bash
+# Check if logged in
+oc whoami 2>/dev/null && echo "Logged in" || echo "Not logged in"
+
+# Show current context
+oc whoami --show-context 2>/dev/null || echo "No context"
+
+# Show server URL
+oc whoami --show-server 2>/dev/null || echo "No server"
+```
+
+3. If not logged in, guide through login:
+```
+## Login Options
+
+**Option 1: Web Console Token (Recommended)**
+1. Go to your cluster's web console (e.g., https://console-openshift-console.apps.CLUSTER/)
+2. Click your username → "Copy login command"
+3. Click "Display Token"
+4. Copy the `oc login` command and run it
+
+**Option 2: Service Account Token**
+If you have a service account token:
+```bash
+oc login --token=TOKEN --server=https://api.CLUSTER:6443
+```
+
+**Option 3: Username/Password**
+```bash
+oc login -u USERNAME -p PASSWORD https://api.CLUSTER:6443
+```
+```
+
+4. Common clusters for release testing:
+```
+## Common Test Clusters
+
+| Purpose | Cluster | Login URL |
+|---------|---------|-----------|
+| Dev testing | ROSA cluster | https://console-openshift-console.apps.XXX.openshiftapps.com |
+| Stage validation | Internal cluster | (varies by team) |
+
+**Note:** ROSA clusters may have different auth methods (OIDC, htpasswd).
+Check with your cluster admin for the correct login method.
+```
+
+5. Verify access after login:
+```bash
+# Verify connectivity
+oc get nodes --no-headers 2>/dev/null | wc -l | xargs echo "Nodes:"
+
+# Check for openshift-pipelines namespace
+oc get ns openshift-pipelines 2>/dev/null && echo "OpenShift Pipelines namespace exists" || echo "OpenShift Pipelines not installed"
+
+# Check for TektonConfig if pipelines installed
+oc get tektonconfig config -o jsonpath='{.status.version}' 2>/dev/null && echo " (current version)" || echo "No TektonConfig found"
+```
+
+6. Cluster auth persistence:
+```
+## Session Persistence
+
+`oc` login creates a kubeconfig context that persists until:
+- Token expires (varies by cluster config, typically 24h)
+- You explicitly log out (`oc logout`)
+- You switch to a different context
+
+**Multi-cluster tip:** Use named contexts to switch between clusters:
+```bash
+# List contexts
+oc config get-contexts
+
+# Switch context
+oc config use-context MY_CONTEXT
+```
+```
 </step>
 
 <step name="verify_configuration">

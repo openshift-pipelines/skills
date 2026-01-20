@@ -12,6 +12,84 @@ allowed-tools:
 Quick reference for understanding the OpenShift Pipelines container registry flow across different release stages. Use this when you need to know which registry to use, check image availability, or understand the PAC_BUILDER lifecycle.
 </objective>
 
+<important_note>
+## ⚠️ 72-Hour Freshness Rule
+
+**Before any release, verify images are < 72 hours old.** Stale images may miss:
+- Base image security updates
+- Konflux nudge PR fixes
+- Latest Go builder patches
+
+**Why 72 hours?** This is the threshold for "stale" in release criteria. Images older than 72h should be rebuilt before proceeding with stage/prod releases.
+
+**Quick check:**
+```bash
+# Check image age
+skopeo inspect docker://quay.io/openshift-pipeline/IMAGE:TAG 2>/dev/null | \
+  jq -r '"Created: \(.Created)"'
+```
+
+**If stale:** Trigger rebuild via `/osp:component-builds` or by pushing a Dockerfile change.
+</important_note>
+
+<decision_tree>
+## Which Registry Should I Use?
+
+```
+START: What are you trying to do?
+│
+├─► "Run a dev/test deployment"
+│   └─► Use: quay.io/openshift-pipeline/
+│       • Public, no auth needed
+│       • Contains latest Konflux on-push builds
+│       • For: local testing, dev clusters, CI
+│
+├─► "Prepare stage release"
+│   └─► Use: registry.stage.redhat.io/openshift-pipelines/
+│       • Requires RH SSO auth
+│       • Contains stage-approved images
+│       • For: stage release process, QE validation
+│
+├─► "Prepare prod release"
+│   └─► Use: registry.redhat.io/openshift-pipelines/
+│       • Requires RH SSO auth
+│       • Contains prod-released images
+│       • For: production release, customer clusters
+│
+├─► "Copy images from Konflux"
+│   └─► Source: quay.io/redhat-user-workloads/tekton-ecosystem-tenant/
+│       • Requires Konflux/RH SSO auth
+│       • Contains raw Konflux build outputs
+│       • Use /osp:konflux-image to get refs
+│
+└─► "Debug a build issue"
+    └─► Check: quay.io/redhat-user-workloads/...
+        • Raw pipeline outputs
+        • Multi-arch manifests
+        • Useful for comparing digests
+```
+
+## Quick Reference Table
+
+| Scenario | Registry | Auth | Skill |
+|----------|----------|------|-------|
+| Get latest dev image | quay.io/openshift-pipeline | None | `/osp:konflux-image` |
+| Copy Konflux build to dev | quay.io/redhat-user-workloads | SSO | `/osp:konflux-image` |
+| Check stage readiness | registry.stage.redhat.io | SSO | skopeo inspect |
+| Check prod availability | registry.redhat.io | SSO | skopeo inspect |
+| Trigger new build | (push to repo) | GH | `/osp:component-builds` |
+
+## Image Availability by Release Stage
+
+| Stage | Index Available | Bundle Available | Components |
+|-------|-----------------|------------------|------------|
+| **Dev** | ✓ (quay.io) | ✓ | All 31 images |
+| **Stage** | ✓ (after release pipeline) | ✓ | All images |
+| **Prod** | ✓ (after release pipeline) | ✓ | All images |
+
+**Note:** Stage/Prod images only appear AFTER the respective release pipeline completes. Don't expect images there until the release is processed.
+</decision_tree>
+
 <execution_context>
 **Registry Flow Overview:**
 

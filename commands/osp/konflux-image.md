@@ -1,6 +1,6 @@
 ---
 name: konflux-image
-description: Extract image references (URL, digest) from Konflux pipeline results
+description: Extract image references (URL, digest) from Konflux for skopeo copy operations
 allowed-tools:
   - Bash
   - Read
@@ -11,11 +11,13 @@ allowed-tools:
 # Konflux Image Extractor
 
 <objective>
-Extract IMAGE_URL and IMAGE_DIGEST from Konflux pipeline results. Use this to get the full image reference for skopeo copy operations during releases.
+Extract full image references (with digest) from Konflux for skopeo copy operations during releases.
 
-Supports two modes:
-1. **From PipelineRun URL** - Extract from a specific pipeline run
-2. **From component name** - Find the latest successful on-push pipeline for a component
+Supports multiple modes:
+1. **snapshot** (recommended) - Get latest image from Snapshot API (most reliable)
+2. **component** - Get image from Component status
+3. **pipelinerun** - Extract from a specific pipeline run
+4. **batch** - Get all index images for a release version
 </objective>
 
 <execution_context>
@@ -33,6 +35,23 @@ Supports two modes:
 - `IMAGE_REF` - Alternative name for image reference
 
 **Default Namespace:** `tekton-ecosystem-tenant`
+
+## Why Snapshots API is Authoritative
+
+**Critical Knowledge:** Always use Snapshots API over PipelineRuns for release image references.
+
+| Source | Reliability | Why |
+|--------|-------------|-----|
+| **Snapshots** ✅ | Authoritative | Contains exact images that passed Enterprise Contract (EC) checks |
+| PipelineRuns | Unreliable | May show failed runs, get pruned after ~7 days, or have incomplete results |
+| Component status | Stale | Updated async, may not reflect latest build |
+
+**The Snapshot represents what's actually releasable.** During the 1.15.4 release, we discovered that PipelineRun results can be misleading:
+- PipelineRuns are pruned after ~7 days (older builds disappear)
+- A PipelineRun may succeed at building but fail EC (image exists but isn't release-ready)
+- Component status updates are eventually consistent, not immediate
+
+The Snapshot is created only after the full build-test-EC pipeline succeeds. If you can find an image in a Snapshot, it's ready for release.
 </execution_context>
 
 <process>
@@ -100,6 +119,130 @@ if [ "$TEST_RESULT" != "200" ]; then
 fi
 
 echo "Konflux authentication: OK"
+```
+</step>
+
+<step name="get_from_snapshot">
+**Mode: snapshot** (RECOMMENDED) - Get image from latest Snapshot.
+
+The Snapshots API is the most reliable way to get image references because it contains the exact images that passed Enterprise Contract and are ready for release.
+
+```bash
+KONFLUX_URL=$(jq -r '.konflux.base_url' ~/.config/osp/config.json)
+KONFLUX_COOKIE_NAME=$(jq -r '.konflux.cookie_name' ~/.config/osp/config.json)
+KONFLUX_COOKIE=$(jq -r '.konflux.cookie' ~/.config/osp/config.json)
+NAMESPACE="${NAMESPACE:-tekton-ecosystem-tenant}"
+
+# Input: component name (e.g., "operator-1-15-index-4-18")
+COMPONENT="$1"
+
+# Derive application name (component + "-application")
+APPLICATION="${COMPONENT}-application"
+
+echo "Looking up: ${COMPONENT}"
+echo "Application: ${APPLICATION}"
+echo ""
+
+# Get latest snapshot for this application
+SNAPSHOT=$(curl -s \
+  -H "Cookie: ${KONFLUX_COOKIE_NAME}=${KONFLUX_COOKIE}" \
+  "${KONFLUX_URL}/api/k8s/apis/appstudio.redhat.com/v1alpha1/namespaces/${NAMESPACE}/snapshots?labelSelector=appstudio.openshift.io/application=${APPLICATION}&limit=1")
+
+# Extract image for the component
+IMAGE=$(echo "$SNAPSHOT" | jq -r ".items[0].spec.components[] | select(.name == \"${COMPONENT}\") | .containerImage")
+
+if [ -n "$IMAGE" ] && [ "$IMAGE" != "null" ]; then
+  SNAPSHOT_NAME=$(echo "$SNAPSHOT" | jq -r '.items[0].metadata.name')
+  CREATED=$(echo "$SNAPSHOT" | jq -r '.items[0].metadata.creationTimestamp')
+
+  echo "## Image Reference"
+  echo ""
+  echo "Snapshot: ${SNAPSHOT_NAME}"
+  echo "Created: ${CREATED}"
+  echo ""
+  echo "**Full Image Reference:**"
+  echo "\`${IMAGE}\`"
+  echo ""
+  echo "## Skopeo Copy Command"
+  echo ""
+  echo "\`\`\`bash"
+  echo "skopeo copy --all \\"
+  echo "  docker://${IMAGE} \\"
+  echo "  docker://quay.io/openshift-pipeline/YOUR_DEST_TAG"
+  echo "\`\`\`"
+else
+  echo "ERROR: No snapshot found for application ${APPLICATION}"
+  echo ""
+  echo "Check available applications:"
+  curl -s \
+    -H "Cookie: ${KONFLUX_COOKIE_NAME}=${KONFLUX_COOKIE}" \
+    "${KONFLUX_URL}/api/k8s/apis/appstudio.redhat.com/v1alpha1/namespaces/${NAMESPACE}/applications" | \
+    jq -r '.items[].metadata.name' | grep -i "${COMPONENT%%index*}" | head -5
+fi
+```
+</step>
+
+<step name="batch_index_images">
+**Mode: batch** - Get all index images for a release version.
+
+Use this to get all OCP index images for skopeo copy during dev/stage/prod release.
+
+```bash
+KONFLUX_URL=$(jq -r '.konflux.base_url' ~/.config/osp/config.json)
+KONFLUX_COOKIE_NAME=$(jq -r '.konflux.cookie_name' ~/.config/osp/config.json)
+KONFLUX_COOKIE=$(jq -r '.konflux.cookie' ~/.config/osp/config.json)
+NAMESPACE="tekton-ecosystem-tenant"
+
+VERSION="${1:-1.15}"
+VERSION_DASH="${VERSION//./-}"
+
+echo "## Index Images for OpenShift Pipelines ${VERSION}"
+echo ""
+echo "| OCP | Full Image Reference |"
+echo "|-----|----------------------|"
+
+# Store for skopeo commands
+declare -a IMAGES
+
+for OCP in 4.14 4.15 4.16 4.17 4.18; do
+  OCP_DASH="${OCP//./-}"
+  COMPONENT="operator-${VERSION_DASH}-index-${OCP_DASH}"
+  APPLICATION="${COMPONENT}-application"
+
+  # Get from snapshot
+  IMAGE=$(curl -s \
+    -H "Cookie: ${KONFLUX_COOKIE_NAME}=${KONFLUX_COOKIE}" \
+    "${KONFLUX_URL}/api/k8s/apis/appstudio.redhat.com/v1alpha1/namespaces/${NAMESPACE}/snapshots?labelSelector=appstudio.openshift.io/application=${APPLICATION}&limit=1" | \
+    jq -r ".items[0].spec.components[] | select(.name == \"${COMPONENT}\") | .containerImage")
+
+  if [ -n "$IMAGE" ] && [ "$IMAGE" != "null" ]; then
+    # Truncate for table display
+    SHORT="${IMAGE:0:70}..."
+    echo "| v${OCP} | ${SHORT} |"
+    IMAGES+=("${OCP}|${IMAGE}")
+  else
+    echo "| v${OCP} | NOT_FOUND |"
+  fi
+done
+
+echo ""
+echo "## Skopeo Copy Commands"
+echo ""
+echo "Copy to devel registry (\`quay.io/openshift-pipeline\`):"
+echo ""
+echo "\`\`\`bash"
+for ENTRY in "${IMAGES[@]}"; do
+  OCP="${ENTRY%%|*}"
+  IMAGE="${ENTRY#*|}"
+  echo "skopeo copy --all \\"
+  echo "  \"docker://${IMAGE}\" \\"
+  echo "  \"docker://quay.io/openshift-pipeline/pipelines-index-${OCP}:${VERSION}\""
+  echo ""
+done
+echo "\`\`\`"
+echo ""
+echo "**Note:** Requires authentication to source registry (quay.io/redhat-user-workloads)."
+echo "Run \`skopeo login quay.io\` with your Red Hat SSO-linked quay.io credentials."
 ```
 </step>
 
@@ -326,15 +469,134 @@ skopeo copy --all \
 </process>
 
 <output>
-- Image URL and digest for the specified component/pipeline
-- Full image reference for skopeo operations
+- Full image reference with digest (e.g., `quay.io/.../image@sha256:...`)
 - Generated skopeo copy commands for release workflow
+- Batch mode provides all index images for a release version
 </output>
 
 <success_criteria>
 - [ ] Konflux authentication verified
-- [ ] PipelineRun fetched successfully
-- [ ] IMAGE_URL and IMAGE_DIGEST extracted
-- [ ] Full reference generated for skopeo
+- [ ] Image reference extracted from Snapshot or PipelineRun
+- [ ] Full reference includes @sha256 digest
+- [ ] Skopeo copy command generated
 - [ ] Ready for image copy operations
 </success_criteria>
+
+<examples>
+**Get single component image:**
+```
+/osp:konflux-image operator-1-15-index-4-18
+```
+
+**Get all index images for 1.15:**
+```
+/osp:konflux-image batch 1.15
+```
+
+**Get image from specific pipeline run:**
+```
+/osp:konflux-image operator-1-15-index-4-18-on-push-abc123
+```
+</examples>
+
+<troubleshooting>
+## Common Errors and Solutions
+
+### Cookie Expired (HTTP 401/403)
+
+**Symptom:** API calls return 401 Unauthorized or 403 Forbidden
+```
+ERROR: Konflux cookie expired or invalid (HTTP 401)
+```
+
+**Cause:** SSO cookies expire after 8-24 hours depending on session activity.
+
+**Solution:**
+```bash
+# Re-authenticate via /osp:configure
+/osp:configure
+# Select: Konflux authentication
+```
+
+**Prevention:** Before starting a multi-hour release session, refresh your cookie.
+
+---
+
+### No Snapshot Found
+
+**Symptom:**
+```
+ERROR: No snapshot found for application operator-1-15-index-4-18-application
+```
+
+**Possible Causes:**
+1. **Build hasn't completed** — Pipeline still running or recently triggered
+2. **EC check failed** — Build succeeded but Enterprise Contract rejected it
+3. **Wrong component name** — Typo or incorrect version in component name
+
+**Diagnosis:**
+```bash
+# Check if pipeline is still running
+/osp:component-builds status operator-1-15-index-4-18
+
+# Check application exists
+curl -s -H "Cookie: ..." \
+  "${KONFLUX_URL}/api/.../applications" | jq '.items[].metadata.name' | grep index
+```
+
+**Solution:** Wait for pipeline to complete, or check for EC failures in Konflux UI.
+
+---
+
+### Manifest Unknown (skopeo copy fails)
+
+**Symptom:**
+```
+FATA[0001] Error reading manifest sha256:abc123... in quay.io/...: manifest unknown
+```
+
+**Cause:** The digest in your reference points to an image that no longer exists in the source registry (may have been garbage collected or overwritten).
+
+**Solution:**
+1. Re-run `/osp:konflux-image` to get fresh Snapshot reference
+2. Use `--all` flag with skopeo to copy all architectures
+3. Verify source image exists: `skopeo inspect docker://SOURCE_IMAGE`
+
+---
+
+### Authentication to quay.io/redhat-user-workloads
+
+**Symptom:**
+```
+Error: unauthorized: access to the requested resource is not authorized
+```
+
+**Cause:** The source registry `quay.io/redhat-user-workloads` requires Red Hat SSO authentication.
+
+**Solution:**
+```bash
+# Login to quay.io with your Red Hat SSO-linked account
+skopeo login quay.io
+
+# Or use robot account credentials if available
+skopeo login quay.io -u "robot$account" -p "token"
+```
+
+---
+
+### Image Reference Has Tag Instead of Digest
+
+**Symptom:** Image reference shows `:tag` instead of `@sha256:...`
+
+**Risk:** Tags are mutable — the underlying image can change between copy operations.
+
+**Solution:** Always use the full reference from Snapshot which includes the digest:
+```
+quay.io/redhat-user-workloads/tekton-ecosystem-tenant/1-15/index-4-18@sha256:abc123...
+```
+
+If you only have a tag, resolve it to digest:
+```bash
+skopeo inspect docker://IMAGE:TAG | jq -r '.Digest'
+```
+</troubleshooting>

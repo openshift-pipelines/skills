@@ -54,3 +54,30 @@
 
 **Summary:** All 16 images copied successfully. Each image includes manifest lists with 4 architectures (amd64, arm64, ppc64le, s390x).
 
+## Post-Copy Verification
+
+All 16 images verified accessible from `quay.io/openshift-pipeline` with correct digests:
+
+| # | Image | Accessible | Digest Match |
+|---|-------|------------|--------------|
+| 1 | pipelines-chains-controller-rhel8 | ✓ | ✓ (f02af8475c33...) |
+| 2 | pipelines-console-plugin-rhel8 | ✓ | ✓ |
+| 3 | pipelines-entrypoint-rhel8 | ✓ | ✓ |
+| 4 | pipelines-hub-api-rhel8 | ✓ | ✓ |
+| 5 | pipelines-hub-ui-rhel8 | ✓ | ✓ |
+| 6 | pipelines-manual-approval-gate-controller-rhel8 | ✓ | ✓ |
+| 7 | pipelines-manual-approval-gate-webhook-rhel8 | ✓ | ✓ |
+| 8 | pipelines-operator-proxy-rhel8 | ✓ | ✓ |
+| 9 | pipelines-pipelines-as-code-controller-rhel8 | ✓ | ✓ |
+| 10 | pipelines-pipelines-as-code-watcher-rhel8 | ✓ | ✓ |
+| 11 | pipelines-pipelines-as-code-webhook-rhel8 | ✓ | ✓ |
+| 12 | pipelines-results-api-rhel8 | ✓ | ✓ |
+| 13 | pipelines-results-watcher-rhel8 | ✓ | ✓ |
+| 14 | pipelines-triggers-core-interceptors-rhel8 | ✓ | ✓ |
+| 15 | pipelines-triggers-webhook-rhel8 | ✓ | ✓ |
+| 16 | pipelines-webhook-rhel8 | ✓ | ✓ (9c87878a52d9...) |
+
+**Summary:** 16/16 images verified accessible and digest-matched.
+
+**Status:** Ready for QE verification on OCP 4.18.30 cluster.
+

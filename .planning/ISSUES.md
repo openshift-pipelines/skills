@@ -4,33 +4,47 @@ Enhancements discovered during execution. Not critical - address in future phase
 
 ## Blockers
 
-*No active blockers*
+### ISS-008: CVE-2025-59375 (libexpat) causing EC verification failures
+
+- **Discovered:** Phase 3.2 (2026-01-22) — during operator EC verification log analysis
+- **Severity:** HIGH (blocking EC verification)
+- **Impact:** ALL operator image architectures fail EC with `cve.cve_blockers` violation (amd64, arm64, ppc64le, s390x)
+- **Root Cause:** libexpat < 2.7.2 in UBI8 base image has resource exhaustion vulnerability via XML parsing
+- **CVE Details:**
+  - ID: CVE-2025-59375
+  - Type: CWE-770 (Allocation of Resources Without Limits or Throttling)
+  - Fix: libexpat >= 2.7.2
+  - Published: 2025-09-15
+- **Options to fix:**
+  1. **Wait for UBI8 update** — Red Hat releases UBI8 image with libexpat >= 2.7.2
+  2. **EC policy exclusion** — Add `"cve.cve_blockers:CVE-2025-59375"` to policy config (temporary)
+  3. **Check for new base image** — Verify if updated UBI8 already available
+- **References:**
+  - https://nvd.nist.gov/vuln/detail/CVE-2025-59375
+  - https://access.redhat.com/security/cve/cve-2025-59375
+- **Timeline:** Must fix BEFORE stage release (blocker for Phase 4)
 
 ---
 
 ## Open Enhancements
 
-### ISS-006: Snyk SAST false positives causing EC failures on operator/proxy/webhook
-
-- **Discovered:** Phase 3 Plan 2 (2026-01-20) — during PR #14352 EC failure investigation
-- **Severity:** HIGH (must fix before production release)
-- **Impact:** All PRs touching operator/proxy/webhook show EC failures due to pre-existing Snyk findings
-- **Root Cause:** Snyk SAST scanner flags 15-16 "hardcoded credentials" false positives:
-  - Kubernetes Secret resource names (e.g., `"tekton-results-postgres"`)
-  - Environment variable keys (e.g., `"POSTGRES_PASSWORD"`)
-  - These are NOT actual credentials, just string constants for names/keys
-- **Additional findings (MEDIUM):**
-  - MD5 usage in `hash/hash.go` (used for checksums, not security)
-  - exec.Command in test file `debug_commands.go`
-  - File operations in CLI tool `cmd/tool/`
-- **Options to fix:**
-  1. Add `#nosec G101` comments to upstream code (requires upstream PR)
-  2. Add exclusions to KFP repo (gitlab.cee.redhat.com/osh/known-false-positives)
-  3. Use `IGNORE_FILE_PATHS` parameter in pipeline config
-- **Workaround:** EC failures don't block GitHub merge — PRs can still be approved/merged with `lgtm` + `approved` labels. On-push builds and release pipelines succeed.
-- **Timeline:** Must fix BEFORE stage release (blocker for Phase 4)
+*None*
 
 ## Closed Enhancements
+
+### ISS-007: Missing dev images in quay.io/openshift-pipeline
+
+- **Discovered:** Phase 3.2 (2026-01-21) — QE reported 16 images missing during dev release testing
+- **Resolved:** Phase 3.2 (2026-01-22)
+- **Resolution:** Copied all 16 missing images from Konflux registry (`quay.io/redhat-user-workloads/tekton-ecosystem-tenant/1-15`) to dev registry (`quay.io/openshift-pipeline`). Images verified accessible with correct SHA256 digests. See `.planning/phases/03.2-fix-missing-dev-images/COPY-LOG.md`.
+
+### ISS-006: Snyk SAST false positives on operator/proxy/webhook (DOWNGRADED)
+
+- **Discovered:** Phase 3 Plan 2 (2026-01-20) — during PR #14352 EC failure investigation
+- **Resolved:** Phase 3.2 (2026-01-22) — downgraded to warning-only
+- **Resolution:** Analysis of EC verification logs revealed Snyk SAST findings are classified as "informative tests" (`test.no_failed_informative_tests`), which produce **warnings only** — they do NOT cause EC verification to fail. The findings (15-16 "hardcoded credentials" false positives for Kubernetes Secret names) can be safely ignored. Phase 3.3 (Snyk SAST fix) is no longer needed.
+- **Original concern:** Thought these caused EC failures blocking stage release
+- **Actual status:** Warnings don't block — PRs merge fine, builds succeed
 
 ### ISS-004: Document registry usage for different release stages in skills
 

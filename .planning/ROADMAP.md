@@ -18,8 +18,10 @@ None
 - [x] **Phase 2: Fix Blockers** - Resolve CVEs, upstream deps, build/CI issues, re-trigger stale Konflux builds
 - [x] **Phase 3: Dev Release** - Execute development release for internal testing ✅ **COMPLETE**
 - [x] **Phase 3.1: Skill Refinement** - Improve skills based on project learnings (INSERTED) ✅ **COMPLETE**
-- [ ] **Phase 3.2: Fix Snyk SAST False Positives** - Resolve ISS-006 EC failures (INSERTED)
-- [ ] **Phase 4: Stage Release** - Execute stage release (CORE → CLI → OPERATOR → INDEX)
+- [x] **Phase 3.2: Fix Missing Dev Images** - Copy missing images reported by QE (INSERTED) ✅ **COMPLETE**
+- [x] **Phase 3.3: Fix Snyk SAST False Positives** - ~~Resolve ISS-006 EC failures~~ **CANCELLED** (warnings only, don't block EC)
+- [ ] **Phase 3.4: Cherry-pick FIPS Fix** - Cherry-pick nop.Dockerfile FIPS fix to release-v1.15.x (INSERTED)
+- [ ] **Phase 4: Stage Release** - Execute stage release (CORE → CLI → OPERATOR → INDEX) — **BLOCKED** on CVE-2025-59375
 - [ ] **Phase 5: Production Release** - Execute production release after QE validation
 
 ## Phase Details
@@ -104,47 +106,79 @@ Plans:
 - SSO cookies expire after 8-24h
 - 72-hour freshness threshold for release images
 
-### Phase 3.2: Fix Snyk SAST False Positives (INSERTED)
-**Goal**: Resolve ISS-006 — Snyk SAST false positives causing EC failures on operator/proxy/webhook PRs
+### Phase 3.2: Fix Missing Dev Images (INSERTED)
+**Goal**: Copy 16 missing images reported by QE to quay.io/openshift-pipeline dev registry
 **Depends on**: Phase 3.1
-**Research**: Complete (see 03.2-RESEARCH.md)
-**Plans**: 2 plans
-**Status**: Planned
+**Research**: Unlikely (straightforward image copy operation)
+**Plans**: 1 plan
+**Status**: ✅ **COMPLETE** (2026-01-22)
 
 Plans:
-- [ ] 03.2-01: Locate false positives and test #nosec suppression approach
-- [ ] 03.2-02: Implement fix and verify EC passes
+- [x] 03.2-01: Copy missing images to dev registry and verify QE cluster access
 
-**Problem (ISS-006):**
-- Snyk SAST scanner flags 15-16 "hardcoded credentials" false positives
-- Kubernetes Secret resource names (e.g., `"tekton-results-postgres"`) flagged as credentials
-- Environment variable keys (e.g., `"POSTGRES_PASSWORD"`) flagged as credentials
-- These are NOT actual credentials, just string constants for names/keys
-- EC checks fail but GitHub merge still works (workaround)
+**Completed:**
+- All 16 images copied from Konflux registry to quay.io/openshift-pipeline
+- Images verified accessible with correct SHA256 digests
+- Multi-arch support preserved (4 architectures per image)
+- See: `.planning/phases/03.2-fix-missing-dev-images/COPY-LOG.md`
 
-**Approach (from research):**
-1. Primary: Add `#nosec G101` comments with justification (most maintainable)
-2. Fallback: Use IGNORE_FILE_PATHS if #nosec doesn't work with Snyk Code
-3. Alternative: Snyk Web UI ignores (requires org access)
+### Phase 3.3: Fix Snyk SAST False Positives (INSERTED) — CANCELLED
+**Goal**: ~~Resolve ISS-006 — Snyk SAST false positives causing EC failures~~
+**Status**: ❌ **CANCELLED** (2026-01-22)
+
+**Reason for cancellation:**
+Analysis of EC verification logs revealed that Snyk SAST findings are classified as "informative tests" (`test.no_failed_informative_tests`), which produce **warnings only**. They do NOT cause EC verification to fail or block releases.
+
+The actual EC failure is caused by **CVE-2025-59375** (libexpat in UBI8 base image), not Snyk SAST.
+
+Plans cancelled:
+- ~~03.3-01: Locate false positives and test #nosec suppression approach~~
+- ~~03.3-02: Implement fix and verify EC passes~~
+
+See ISS-006 in ISSUES.md (closed as warning-only).
+
+### Phase 3.4: Cherry-pick FIPS Fix (INSERTED)
+**Goal**: Cherry-pick FIPS nop.Dockerfile fix from release-v1.20.x to release-v1.15.x
+**Depends on**: Phase 3.2
+**Research**: None needed
+**Plans**: 1 plan
+**Status**: Not started
+
+Plans:
+- [ ] 03.4-01: Cherry-pick commit and create PR
+
+**Details:**
+- **Repo:** openshift-pipelines/tektoncd-pipeline
+- **Commit:** `2bb10e0fa71a3c91f79472eb6315ebf142ca57cc`
+- **Message:** "Update nop.Dockerfile for fips"
+- **Source branch:** release-v1.20.x
+- **Target branch:** release-v1.15.x
 
 **Must complete before:** Phase 4 (Stage Release)
 
 ### Phase 4: Stage Release
 **Goal**: Execute stage release — CORE → CLI → OPERATOR → INDEX to registry.stage.redhat.io
-**Depends on**: Phase 3.2 (ISS-006 must be resolved first)
+**Depends on**: Phase 3.4 + CVE-2025-59375 resolution
 **Research**: Unlikely (following established /osp:stage-release workflow)
 **Plans**: 1 plan
-**Status**: Waiting on Phase 3.2
+**Status**: **BLOCKED** on CVE-2025-59375
 
 Plans:
 - [ ] 04-01: Execute stage release using /osp:stage-release
 
-**Blocker Details (ISS-006):**
-- Snyk SAST scanner flags Kubernetes Secret resource names as "hardcoded credentials"
-- Affects operator/proxy/webhook PRs (15-16 findings each)
-- EC checks fail but GitHub merge still works
-- Must fix before stage release
-- See `.planning/ISSUES.md` for fix options
+**Pre-requisites (must complete before stage release):**
+
+1. **CVE-2025-59375 (libexpat) fix** — BLOCKING
+   - HIGH severity CVE in UBI8 base image
+   - All operator image architectures fail EC verification
+   - Fix: libexpat >= 2.7.2 in base image
+   - Options: Wait for UBI8 update OR request EC policy exclusion
+   - See ISS-008 in ISSUES.md
+
+2. **Phase 3.4: Cherry-pick FIPS fix** — Required
+   - See Phase 3.4 details above
+
+**Note:** ISS-006 (Snyk SAST) is NOT a blocker — findings are warnings only.
 
 ### Phase 5: Production Release
 **Goal**: Execute production release after QE validation — all images to registry.redhat.io
@@ -158,14 +192,16 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 1 → 2 → 3 → 3.1 → 3.2 → ~~3.3~~ → 3.4 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Assessment | 2/2 | Complete | 2026-01-19 |
-| 2. Fix Blockers | 4/4 | Complete | 2026-01-19 |
-| 3. Dev Release | 2/2 | Complete | 2026-01-20 |
+| 1. Assessment | 2/2 | ✅ Complete | 2026-01-19 |
+| 2. Fix Blockers | 4/4 | ✅ Complete | 2026-01-19 |
+| 3. Dev Release | 2/2 | ✅ Complete | 2026-01-20 |
 | 3.1 Skill Refinement | 1/1 | ✅ Complete (INSERTED) | 2026-01-21 |
-| 3.2 Fix Snyk SAST | 0/2 | Planned (INSERTED) | - |
-| 4. Stage Release | 0/1 | Waiting on 3.2 | - |
+| 3.2 Fix Missing Images | 1/1 | ✅ Complete (INSERTED) | 2026-01-22 |
+| 3.3 Fix Snyk SAST | - | ❌ Cancelled (warnings only) | 2026-01-22 |
+| 3.4 Cherry-pick FIPS | 0/1 | Not started (INSERTED) | - |
+| 4. Stage Release | 0/1 | ⏸️ Blocked on CVE-2025-59375 | - |
 | 5. Production Release | 0/1 | Not started | - |

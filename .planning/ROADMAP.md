@@ -20,7 +20,8 @@ None
 - [x] **Phase 3.1: Skill Refinement** - Improve skills based on project learnings (INSERTED) ✅ **COMPLETE**
 - [x] **Phase 3.2: Fix Missing Dev Images** - Copy missing images reported by QE (INSERTED) ✅ **COMPLETE**
 - [x] **Phase 3.3: Fix Snyk SAST False Positives** - ~~Resolve ISS-006 EC failures~~ **CANCELLED** (warnings only, don't block EC)
-- [ ] **Phase 3.4: Cherry-pick FIPS Fix** - Cherry-pick nop.Dockerfile FIPS fix to release-v1.15.x (INSERTED)
+- [x] **Phase 3.4: Cherry-pick FIPS Fix** - Cherry-pick nop.Dockerfile FIPS fix to release-v1.15.x (INSERTED) ✅ **COMPLETE**
+- [ ] **Phase 3.5: Dev Release v2** - Re-execute dev release with FIPS fix, fresh images for QE (INSERTED)
 - [ ] **Phase 4: Stage Release** - Execute stage release (CORE → CLI → OPERATOR → INDEX) — **BLOCKED** on CVE-2025-59375
 - [ ] **Phase 5: Production Release** - Execute production release after QE validation
 
@@ -142,19 +143,41 @@ See ISS-006 in ISSUES.md (closed as warning-only).
 **Depends on**: Phase 3.2
 **Research**: None needed
 **Plans**: 1 plan
+**Status**: ✅ **COMPLETE** (2026-01-22)
+
+Plans:
+- [x] 03.4-01: Cherry-pick commit and create PR
+
+**Completed:**
+- PR #1540 created and merged to release-v1.15.x
+- Merge commit: `ad8982f1db020880b3376c88ea058d4f82b24f12`
+- Konflux on-push pipeline triggered for tektoncd-pipeline component
+- FIPS nop.Dockerfile fix now in release-v1.15.x branch
+
+### Phase 3.5: Dev Release v2 (INSERTED)
+**Goal**: Re-execute dev release with FIPS fix, provide fresh images to QE for validation
+**Depends on**: Phase 3.4
+**Research**: None needed (following established workflow from Phase 3)
+**Plans**: 1 plan
 **Status**: Not started
 
 Plans:
-- [ ] 03.4-01: Cherry-pick commit and create PR
+- [ ] 03.5-01: Wait for Konflux nudge, copy fresh images, update QE handoff
 
-**Details:**
-- **Repo:** openshift-pipelines/tektoncd-pipeline
-- **Commit:** `2bb10e0fa71a3c91f79472eb6315ebf142ca57cc`
-- **Message:** "Update nop.Dockerfile for fips"
-- **Source branch:** release-v1.20.x
-- **Target branch:** release-v1.15.x
+**Context:**
+- Phase 3.4 FIPS fix merged — tektoncd-pipeline will rebuild
+- Need to wait for Konflux nudge to propagate to operator
+- Then copy fresh images to quay.io/openshift-pipeline
+- Update QE handoff with new image SHAs
+- This should be smoother than Phase 3 — established workflow, fewer unknowns
 
-**Must complete before:** Phase 4 (Stage Release)
+**Workflow:**
+1. Wait for tektoncd-pipeline Konflux build to complete
+2. Trigger operator-update-images workflow (or wait for nudge)
+3. Wait for operator on-push build to complete
+4. Copy fresh images to quay.io/openshift-pipeline
+5. Update QE-HANDOFF.md with new SHAs
+6. Notify QE of new images
 
 ### Phase 4: Stage Release
 **Goal**: Execute stage release — CORE → CLI → OPERATOR → INDEX to registry.stage.redhat.io
@@ -192,7 +215,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 3.1 → 3.2 → ~~3.3~~ → 3.4 → 4 → 5
+Phases execute in numeric order: 1 → 2 → 3 → 3.1 → 3.2 → ~~3.3~~ → 3.4 → 3.5 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -202,6 +225,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 3.1 → 3.2 → ~~3.3~~ → 3
 | 3.1 Skill Refinement | 1/1 | ✅ Complete (INSERTED) | 2026-01-21 |
 | 3.2 Fix Missing Images | 1/1 | ✅ Complete (INSERTED) | 2026-01-22 |
 | 3.3 Fix Snyk SAST | - | ❌ Cancelled (warnings only) | 2026-01-22 |
-| 3.4 Cherry-pick FIPS | 0/1 | Not started (INSERTED) | - |
+| 3.4 Cherry-pick FIPS | 1/1 | ✅ Complete (INSERTED) | 2026-01-22 |
+| 3.5 Dev Release v2 | 0/1 | Not started (INSERTED) | - |
 | 4. Stage Release | 0/1 | ⏸️ Blocked on CVE-2025-59375 | - |
 | 5. Production Release | 0/1 | Not started | - |

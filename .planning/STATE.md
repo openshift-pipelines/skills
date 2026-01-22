@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-19)
 
 **Core value:** Ship 1.15.4 with all blocking CVEs and issues resolved.
-**Current focus:** Phase 3.4 (Cherry-pick FIPS fix), then resolve CVE-2025-59375 before Stage Release
+**Current focus:** Phase 3.5 (Dev Release v2 with FIPS fix), then resolve CVE-2025-59375 before Stage Release
 
 ## Current Position
 
-Phase: 3.2 of 5 (Fix Missing Dev Images) — **COMPLETE**
-Plan: 1 of 1 (executed)
-Status: **BLOCKED** — CVE-2025-59375 in UBI8 base image blocks EC verification
-Last activity: 2026-01-22 — Analyzed EC logs, discovered new CVE blocker, closed ISS-006/ISS-007
+Phase: 3.5 of 5 (Dev Release v2) — **NOT STARTED**
+Plan: 0 of 1
+Status: Ready to execute — waiting for Konflux pipeline builds
+Last activity: 2026-01-22 — Completed Phase 3.4 (FIPS cherry-pick), inserted Phase 3.5
 
-Progress: █████████░ 90% (Phase 3.2 complete, blocked on base image CVE)
+Progress: █████████░ 92% (Phase 3.4 complete, Phase 3.5 ready)
 
 ## Performance Metrics
 
@@ -60,7 +60,8 @@ Recent decisions affecting current work:
 - Phase 3.1 inserted after Phase 3: Skill Refinement (INSERTED) — improve skills with project learnings while waiting for ISS-006 resolution
 - Phase 3.2 inserted: Fix Missing Dev Images (INSERTED) — 16 images missing from quay.io/openshift-pipeline reported by QE
 - Phase 3.3: Fix Snyk SAST False Positives — **CANCELLED** (warnings only, don't block EC)
-- Phase 3.4 inserted: Cherry-pick FIPS Fix (INSERTED) — nop.Dockerfile FIPS fix needed on release-v1.15.x
+- Phase 3.4 inserted: Cherry-pick FIPS Fix (INSERTED) — nop.Dockerfile FIPS fix needed on release-v1.15.x — **COMPLETE**
+- Phase 3.5 inserted: Dev Release v2 (INSERTED) — re-execute dev release with FIPS fix, fresh images for QE
 
 ### Deferred Issues
 
@@ -85,15 +86,10 @@ See .planning/ISSUES.md:
 - Options: Wait for UBI8 update OR request EC policy exclusion
 - See ISS-008 in ISSUES.md
 
-**Phase 3.4: Cherry-pick FIPS Fix (INSERTED):**
-- Cherry-pick FIPS nop.Dockerfile fix to tektoncd-pipeline release-v1.15.x
-  - Commit: 2bb10e0fa71a3c91f79472eb6315ebf142ca57cc
-  - Source: release-v1.20.x → Target: release-v1.15.x
-  - PR needed in openshift-pipelines/tektoncd-pipeline
-
 **RESOLVED:**
 - ~~Phase 3.2 — Missing Dev Images~~ → 16 images copied to quay.io/openshift-pipeline
 - ~~Phase 3.3 — Snyk SAST~~ → Downgraded to warning-only, doesn't block EC
+- ~~Phase 3.4 — Cherry-pick FIPS Fix~~ → PR #1540 merged, Konflux rebuild triggered
 
 **Phase 2 Complete — All blockers resolved:**
 - ~~CVEs needing fixes (jwt-go, oauth2, x/crypto)~~ → **ALL FIXED** (jwt-go v4.5.2, x/crypto v0.35.0, oauth2 v0.27.0 via PR #908)
@@ -153,21 +149,29 @@ See .planning/ISSUES.md:
 
 ## Session Continuity
 
-Last session: 2026-01-22T10:00:00Z
-Stopped at: Analyzed EC verification logs, discovered CVE-2025-59375 blocker
-Resume file: .planning/phases/03.2-fix-missing-dev-images/.continue-here.md
+Last session: 2026-01-22T16:30:00Z
+Stopped at: Completed Phase 3.4 (FIPS cherry-pick), inserted Phase 3.5
+Resume file: .planning/phases/03.5-dev-release-v2/.continue-here.md
 
-**Dev Release:** With QE for testing — images copied, QE verification pending
+**Phase 3.4: Cherry-pick FIPS Fix — COMPLETE**
 
-**Phase 3.2: Fix Missing Dev Images — COMPLETE**
+- PR #1540 merged to release-v1.15.x
+- Merge commit: `ad8982f1db020880b3376c88ea058d4f82b24f12`
+- Konflux on-push pipeline triggered for tektoncd-pipeline
 
-All 16 images copied from Konflux registry to quay.io/openshift-pipeline.
-See: `.planning/phases/03.2-fix-missing-dev-images/COPY-LOG.md`
+**Phase 3.5: Dev Release v2 — NEXT**
+
+Need to:
+1. Wait for tektoncd-pipeline Konflux build to complete
+2. Wait for Konflux nudge to propagate to operator (or trigger manually)
+3. Copy fresh images to quay.io/openshift-pipeline
+4. Update QE-HANDOFF.md with new SHAs
 
 **Test Cluster:** OCP 4.18.30 (api.zjdmf-xyift-oaz.6ccc.p3.openshiftapps.com)
 
 **Before Stage Release:**
-1. **Phase 3.4** — Cherry-pick FIPS fix (tektoncd-pipeline commit 2bb10e0fa71a3c91f79472eb6315ebf142ca57cc to release-v1.15.x)
-2. **CVE-2025-59375 fix** — Wait for UBI8 base image update with libexpat >= 2.7.2
+1. ~~**Phase 3.4** — Cherry-pick FIPS fix~~ ✅ DONE
+2. **Phase 3.5** — Dev Release v2 with FIPS fix
+3. **CVE-2025-59375 fix** — Wait for UBI8 base image update with libexpat >= 2.7.2
 
-**Next Phase:** Phase 3.4 — Cherry-pick FIPS Fix (then Phase 4 blocked on CVE fix)
+**Next Phase:** Phase 3.5 — Dev Release v2 (then Phase 4 blocked on CVE fix)

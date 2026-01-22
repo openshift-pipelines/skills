@@ -155,33 +155,39 @@ Plans:
 - FIPS nop.Dockerfile fix now in release-v1.15.x branch
 
 ### Phase 3.5: Dev Release v2 (INSERTED)
-**Goal**: Re-execute dev release with FIPS fix, provide fresh images to QE for validation
+**Goal**: Re-execute dev release with FIPS fix and CPE labels, provide fresh images to QE for validation
 **Depends on**: Phase 3.4
-**Research**: None needed (following established workflow from Phase 3)
-**Plans**: 1 plan
+**Research**: Completed (see 03.5-RESEARCH.md)
+**Plans**: 3 plans in 2 waves
 **Status**: Not started
 
 Plans:
-- [ ] 03.5-01: Wait for Konflux nudge, copy fresh images, update QE handoff
+- [ ] 03.5-01: Add CPE labels to pac-downstream and p12n-manual-approval-gate Dockerfiles (Wave 1)
+- [ ] 03.5-02: Monitor FIPS nop rebuild status and confirm new SHA (Wave 1)
+- [ ] 03.5-03: Trigger operator-update-images, copy fresh images, update QE handoff (Wave 2)
+
+**Wave Structure:**
+| Wave | Plans | Can Run Parallel |
+|------|-------|------------------|
+| 1 | 03.5-01, 03.5-02 | Yes (independent) |
+| 2 | 03.5-03 | No (depends on Wave 1) |
 
 **Context:**
-- Phase 3.4 FIPS fix merged — tektoncd-pipeline will rebuild
-- Need to wait for Konflux nudge to propagate to operator
-- Then copy fresh images to quay.io/openshift-pipeline
-- Update QE handoff with new image SHAs
-- This should be smoother than Phase 3 — established workflow, fewer unknowns
+- Phase 3.4 FIPS fix merged — tektoncd-pipeline nop image will rebuild
+- Research identified 5 Dockerfiles missing CPE label (pac-downstream: 3, manual-approval-gate: 2)
+- CPE labels required for stage/prod release (enforceContainerFirstSecurityLabels will be enabled)
+- After Wave 1 completes, Wave 2 propagates all changes to dev registry
 
 **Workflow:**
-1. Wait for tektoncd-pipeline Konflux build to complete
-2. Trigger operator-update-images workflow (or wait for nudge)
-3. Wait for operator on-push build to complete
-4. Copy fresh images to quay.io/openshift-pipeline
-5. Update QE-HANDOFF.md with new SHAs
-6. Notify QE of new images
+1. [Wave 1] Add CPE labels to 5 Dockerfiles, merge PRs, trigger Konflux rebuilds
+2. [Wave 1] Monitor FIPS nop rebuild, confirm new SHA available
+3. [Wave 2] Trigger operator-update-images workflow
+4. [Wave 2] Copy fresh images to quay.io/openshift-pipeline
+5. [Wave 2] Update QE-HANDOFF.md with v2 section
 
 ### Phase 4: Stage Release
 **Goal**: Execute stage release — CORE → CLI → OPERATOR → INDEX to registry.stage.redhat.io
-**Depends on**: Phase 3.4 + CVE-2025-59375 resolution
+**Depends on**: Phase 3.5 + CVE-2025-59375 resolution
 **Research**: Unlikely (following established /osp:stage-release workflow)
 **Plans**: 1 plan
 **Status**: **BLOCKED** on CVE-2025-59375
@@ -198,8 +204,8 @@ Plans:
    - Options: Wait for UBI8 update OR request EC policy exclusion
    - See ISS-008 in ISSUES.md
 
-2. **Phase 3.4: Cherry-pick FIPS fix** — Required
-   - See Phase 3.4 details above
+2. **Phase 3.5: Dev Release v2** — Required
+   - FIPS fix and CPE labels must be in dev images first
 
 **Note:** ISS-006 (Snyk SAST) is NOT a blocker — findings are warnings only.
 
@@ -226,6 +232,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 3.1 → 3.2 → ~~3.3~~ → 3
 | 3.2 Fix Missing Images | 1/1 | ✅ Complete (INSERTED) | 2026-01-22 |
 | 3.3 Fix Snyk SAST | - | ❌ Cancelled (warnings only) | 2026-01-22 |
 | 3.4 Cherry-pick FIPS | 1/1 | ✅ Complete (INSERTED) | 2026-01-22 |
-| 3.5 Dev Release v2 | 0/1 | Not started (INSERTED) | - |
+| 3.5 Dev Release v2 | 0/3 | Not started (INSERTED) | - |
 | 4. Stage Release | 0/1 | ⏸️ Blocked on CVE-2025-59375 | - |
 | 5. Production Release | 0/1 | Not started | - |

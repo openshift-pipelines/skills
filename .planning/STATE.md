@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-19)
 
 ## Current Position
 
-Phase: 3.5 of 5 (Dev Release v2) — **NOT STARTED**
-Plan: 0 of 1
-Status: Ready to execute — waiting for Konflux pipeline builds
-Last activity: 2026-01-22 — Completed Phase 3.4 (FIPS cherry-pick), inserted Phase 3.5
+Phase: 3.5 of 5 (Dev Release v2) — **IN PROGRESS**
+Plan: 3 of 4
+Status: Plans 1-3 complete (partial) — Component images copied, index blocked
+Last activity: 2026-01-26 — Completed 03.5-02 (FIPS verify), 03.5-03 (partial - component images copied)
 
-Progress: █████████░ 92% (Phase 3.4 complete, Phase 3.5 ready)
+Progress: █████████░ 95% (Phase 3.5 Plans 1-3 complete, Plan 4 deferred, index images pending)
 
 ## Performance Metrics
 
@@ -54,6 +54,8 @@ Recent decisions affecting current work:
 | 02-04 | Close PR #903, use update-sources workflow | Fresh sync via workflow cleaner than rebasing stale PR |
 | 02-04 | Trigger operator-update-images manually | Ensures operator bundle has fresh component images before dev release |
 | 02-04 | Release build order: CORE → CLI → OPERATOR → INDEX | Each layer must complete before next to pick up fresh images |
+| 03.5-01 | pac-downstream already had CPE labels | Research was outdated - no PR needed for pac-downstream |
+| 03.5-01 | Merged PR #38 for Konflux configs | Required for v1.15.x on-push pipelines to trigger |
 
 ### Roadmap Evolution
 
@@ -149,29 +151,31 @@ See .planning/ISSUES.md:
 
 ## Session Continuity
 
-Last session: 2026-01-22T16:30:00Z
-Stopped at: Completed Phase 3.4 (FIPS cherry-pick), inserted Phase 3.5
+Last session: 2026-01-26T12:15:00Z
+Stopped at: Phase 3.5 Plans 02/03 executed — component images copied, index blocked on auth
 Resume file: .planning/phases/03.5-dev-release-v2/.continue-here.md
 
-**Phase 3.4: Cherry-pick FIPS Fix — COMPLETE**
+**Phase 3.5: Dev Release v2 — IN PROGRESS**
 
-- PR #1540 merged to release-v1.15.x
-- Merge commit: `ad8982f1db020880b3376c88ea058d4f82b24f12`
-- Konflux on-push pipeline triggered for tektoncd-pipeline
+✅ Completed:
+- Plan 03.5-01: CPE labels added
+- Plan 03.5-02: FIPS rebuild verified (new nop SHA: `96ea90a4...`)
+- Plan 03.5-03 (partial): Component images copied to dev registry:
+  - pipelines-pipeline-nop-rhel8 (FIPS fix)
+  - pipelines-operator-bundle-rhel8
+  - pipelines-pipelines-as-code-controller/watcher/cli-rhel8
 
-**Phase 3.5: Dev Release v2 — NEXT**
+⚠️ Blocked:
+- Index images: Need Konflux auth for index namespace
+- Plan 03.5-04: Konflux component registration for 4.19/4.20/4.21
 
-Need to:
-1. Wait for tektoncd-pipeline Konflux build to complete
-2. Wait for Konflux nudge to propagate to operator (or trigger manually)
-3. Copy fresh images to quay.io/openshift-pipeline
-4. Update QE-HANDOFF.md with new SHAs
+**QE-HANDOFF.md:** Updated with v2 section at `.planning/phases/03-dev-release/QE-HANDOFF.md`
 
 **Test Cluster:** OCP 4.18.30 (api.zjdmf-xyift-oaz.6ccc.p3.openshiftapps.com)
 
 **Before Stage Release:**
 1. ~~**Phase 3.4** — Cherry-pick FIPS fix~~ ✅ DONE
-2. **Phase 3.5** — Dev Release v2 with FIPS fix
+2. **Phase 3.5** — Dev Release v2 ⚠️ Partial (component images done, index pending)
 3. **CVE-2025-59375 fix** — Wait for UBI8 base image update with libexpat >= 2.7.2
 
-**Next Phase:** Phase 3.5 — Dev Release v2 (then Phase 4 blocked on CVE fix)
+**Next:** Get Konflux auth for index images, then Phase 4 (blocked on CVE fix)

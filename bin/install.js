@@ -157,6 +157,15 @@ async function install(targetDir) {
   // Copy commands
   copyDirectory(commandsSource, commandsDest);
 
+  // Copy templates if they exist
+  const templatesSource = path.join(__dirname, '..', 'docs', 'templates');
+  const templatesDest = path.join(targetDir, 'templates', NAMESPACE);
+
+  if (fs.existsSync(templatesSource)) {
+    console.log(`${colors.dim}Installing templates to: ${templatesDest}${colors.reset}`);
+    copyDirectory(templatesSource, templatesDest);
+  }
+
   // List installed commands
   const commands = fs.readdirSync(commandsDest)
     .filter(f => f.endsWith('.md'))
@@ -213,7 +222,17 @@ async function main() {
   await install(targetDir);
 }
 
-main().catch((err) => {
-  console.error(`${colors.red}Error: ${err.message}${colors.reset}`);
-  process.exit(1);
-});
+// Run if executed directly
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(`${colors.red}Error: ${err.message}${colors.reset}`);
+    process.exit(1);
+  });
+}
+
+// Export for testing
+module.exports = {
+  parseArgs,
+  expandTilde,
+  copyDirectory,
+};

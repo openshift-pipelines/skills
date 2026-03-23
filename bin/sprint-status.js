@@ -770,6 +770,44 @@ function renderDashboard(data, teamName) {
   return tempFile;
 }
 
+// Fetch historical snapshots from Meilisearch for trends
+async function fetchHistoricalSnapshots(teamName, config) {
+  try {
+    const meiliKey = config.meilisearch?.key;
+    if (!meiliKey) return { sprintSnapshots: [], issueSnapshots: [] };
+
+    // Check if Meilisearch is reachable
+    const health = await httpRequest('GET', 'http://localhost:7700/health', {}, null);
+    if (!health || health.status !== 'available') return { sprintSnapshots: [], issueSnapshots: [] };
+
+    const headers = {
+      'Authorization': `Bearer ${meiliKey}`,
+      'Content-Type': 'application/json'
+    };
+
+    // Fetch sprint snapshots
+    const sprintResult = await httpRequest('POST', 'http://localhost:7700/indexes/sprint-snapshots/search', headers, {
+      filter: `team = "${teamName}"`,
+      sort: ['snapshotDate:asc'],
+      limit: 50
+    });
+
+    // Fetch issue snapshots (latest per issue)
+    const issueResult = await httpRequest('POST', 'http://localhost:7700/indexes/issue-snapshots/search', headers, {
+      filter: `team = "${teamName}"`,
+      sort: ['snapshotDate:desc'],
+      limit: 500
+    });
+
+    return {
+      sprintSnapshots: sprintResult?.hits || [],
+      issueSnapshots: issueResult?.hits || []
+    };
+  } catch (e) {
+    return { sprintSnapshots: [], issueSnapshots: [] };
+  }
+}
+
 // Index to Meilisearch
 async function indexToMeilisearch(data, config) {
   // Check Docker availability
@@ -1068,13 +1106,19 @@ async function main() {
   console.log(`${colors.cyan}Computing metrics...${colors.reset}`);
   const data = computeMetrics(issues, historicalSprints, futureSprint, epicProgress, extractedTeamName, sprintInfo);
 
-  // 9. Render dashboard
-  console.log(`${colors.cyan}Rendering dashboard...${colors.reset}`);
-  const dashboardFile = renderDashboard(data, extractedTeamName);
-
-  // 10. Index to Meilisearch
+  // 9. Index to Meilisearch (before rendering so we can fetch history)
   console.log(`${colors.cyan}Indexing to Meilisearch...${colors.reset}`);
   await indexToMeilisearch(data, config);
+
+  // 10. Fetch historical snapshots from Meilisearch for trends tab
+  console.log(`${colors.cyan}Fetching historical trends...${colors.reset}`);
+  const historicalData = await fetchHistoricalSnapshots(extractedTeamName, config);
+  data.trends = historicalData;
+  console.log(`${colors.green}Historical snapshots: ${historicalData.sprintSnapshots.length} sprints, ${historicalData.issueSnapshots.length} issues${colors.reset}`);
+
+  // 11. Render dashboard
+  console.log(`${colors.cyan}Rendering dashboard...${colors.reset}`);
+  const dashboardFile = renderDashboard(data, extractedTeamName);
 
   // 11. Print summary
   printSummary(data);

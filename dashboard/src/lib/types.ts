@@ -159,6 +159,10 @@ export interface DashboardData {
   sprintDay: number
   completionPercent: number
   healthScore: 'green' | 'yellow' | 'red'
+  trends: {
+    sprintSnapshots: SprintSnapshot[]
+    issueSnapshots: IssueSnapshot[]
+  }
 }
 
 // Analytics types

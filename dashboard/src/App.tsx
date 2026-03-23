@@ -21,6 +21,7 @@ import { DoDCharts } from './components/DoDCharts'
 import { RoadmapCharts } from './components/RoadmapCharts'
 import { PeopleCharts } from './components/PeopleCharts'
 import { ComponentCharts } from './components/ComponentCharts'
+import { TrendsView } from './components/TrendsView'
 import { formatDate } from './lib/utils'
 
 declare global {
@@ -37,6 +38,7 @@ const TABS = [
   { id: 'roadmap', label: 'Roadmap' },
   { id: 'people', label: 'People' },
   { id: 'components', label: 'Components' },
+  { id: 'trends', label: 'Trends' },
 ] as const
 
 type TabId = typeof TABS[number]['id']
@@ -415,6 +417,11 @@ function App() {
               <FilterBar value={filter} onChange={setFilter} />
               <ComponentBreakdown components={filteredData.components} jiraBaseUrl={data.meta.jiraBaseUrl} filter={filterLower} />
             </div>
+          )}
+
+          {/* TRENDS TAB */}
+          {activeTab === 'trends' && (
+            <TrendsView sprintSnapshots={data.trends?.sprintSnapshots || []} />
           )}
 
         </div>

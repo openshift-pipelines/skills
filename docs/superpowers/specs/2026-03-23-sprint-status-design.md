@@ -237,13 +237,23 @@ Recommended priority order for future sprint issues:
 
 Output as a rank-ordered list (read-only, no Jira writes).
 
+## Per-Assignee Breakdown
+
+All metrics are also computed per assignee:
+- Issues grouped by `assignee.displayName`
+- For each assignee: total issues, total SPs, status breakdown, blocked count, carry-forward count, Code Review issues pending
+- Unassigned issues grouped as "Unassigned"
+- Helps PO identify individual workload, bottlenecks, and who is overloaded or underutilized
+
+Dashboard renders as a collapsible section with a summary row per assignee (issues/SPs/status) that expands to show full issue list.
+
 ## Per-Component Breakdown
 
 All metrics above are also computed per component (`components` field):
 - Tekton Pipelines, Tekton Triggers, Tekton CLI, Tekton Results, Hub, PAC, UI, QA, Manual Approval Gate, OPC, etc.
 - Issues with no component grouped as "Unassigned"
 
-Aggregate summary at the top of the dashboard, per-component breakdown in collapsible sections below.
+Aggregate summary at the top of the dashboard, per-component and per-assignee breakdowns in collapsible sections below.
 
 ## Companion UI (sprint-dashboard.html)
 
@@ -332,6 +342,16 @@ The temp file path: `/tmp/sprint-dashboard-{team}-{timestamp}.html`
       "..."
     ]
   },
+  "assignees": {
+    "Vibhav Bobade": {
+      "totalIssues": 4, "totalSP": 12,
+      "byStatus": { "Code Review": { "count": 2, "sp": 6 }, "..." : {} },
+      "blocked": 0,
+      "carryForwardCount": 2,
+      "issues": [ { "key": "SRVKP-1801", "summary": "...", "status": "Code Review", "sp": 3 }, "..." ]
+    },
+    "...": {}
+  },
   "components": {
     "Tekton Pipelines": {
       "totalIssues": 8, "totalSP": 22,
@@ -357,7 +377,8 @@ The temp file path: `/tmp/sprint-dashboard-{team}-{timestamp}.html`
 8. **High Priority Bugs**: Table with closure proximity indicators (colored dots)
 9. **Carry-Forward Worst Offenders**: Table sorted by sprint count, with latest comment
 10. **Future Sprint Priority**: Rank-ordered recommendation list
-11. **Per-Component Breakdown**: Collapsible sections, each containing status breakdown, blocked, carry-forwards, bugs
+11. **Per-Assignee Breakdown**: Collapsible sections per assignee with workload, status breakdown, blocked, carry-forwards
+12. **Per-Component Breakdown**: Collapsible sections, each containing status breakdown, blocked, carry-forwards, bugs
 
 ### Empty States
 

@@ -45,6 +45,7 @@ Present the following command reference to the user in a clear, formatted manner
 | Command | Description |
 |---------|-------------|
 | `/osp:sprint-status` | Sprint health dashboard — velocity, blockers, carry-forwards, roadmap alignment |
+| `/osp:sprint-history` | Historical sprint analytics — velocity trends, issue lifecycle, cross-sprint patterns |
 
 ### Release Management
 | Command | Description |
@@ -99,7 +100,9 @@ Add this comment to `.konflux/dockerfiles/*.Dockerfile` and push to trigger rebu
 2. `/osp:registry-info` — Check which registry to use for release stage
 
 ### "Sprint health check"
-1. `/osp:sprint-status <team>` — Full sprint health dashboard (velocity, blockers, carry-forwards, roadmap alignment)
+1. `/osp:sprint-status <team>` — Full sprint health dashboard
+2. `/osp:sprint-history <team> trends` — Historical analytics with charts
+3. Or use standalone: `node bin/sprint-status.js <team>` (no LLM tokens)
 
 ## Troubleshooting Quick Reference
 
@@ -187,6 +190,23 @@ For patch releases (e.g., 1.19.2):
 ```
 Component PRs → Konflux builds → operator-update-images (devel)
     → index-render-template → QE testing → staging → production
+```
+
+## Standalone Scripts (No LLM Tokens)
+
+Run sprint tools directly without Claude:
+
+```bash
+# Sprint status dashboard
+node bin/sprint-status.js <team-name>
+node bin/sprint-status.js pioneers
+
+# Sprint history analytics
+node bin/sprint-history.js <team> velocity          # Velocity trend table
+node bin/sprint-history.js <team> issue <key>        # Issue lifecycle
+node bin/sprint-history.js <team> trends             # Analytics dashboard
+node bin/sprint-history.js <team> search <query>     # Full-text search
+node bin/sprint-history.js <team> compare <team2>    # Team comparison
 ```
 
 ## Configuration

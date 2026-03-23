@@ -157,7 +157,9 @@ async function fetchAllSprintIssues(sprintId, auth) {
     'customfield_10020', // Sprint array
     'customfield_10517', // Blocked
     'customfield_10483', // Blocked Reason
-    'customfield_10021'  // Flagged
+    'customfield_10021', // Flagged
+    'updated',           // Last updated timestamp
+    'comment'            // Comments (for staleness detection)
   ].join(',');
 
   let allIssues = [];
@@ -335,12 +337,7 @@ function computeMetrics(issues, historicalSprints, futureSprint, epicProgress, t
     totalIssues: issues.length,
     totalSPs: issues.reduce((sum, i) => sum + (i.fields.customfield_10028 || 0), 0),
     byStatus: statusGroups,
-    blocked: {
-      count: issues.filter(i => i.fields.customfield_10517 === true || (i.fields.customfield_10021 || []).length > 0).length,
-      sp: issues
-        .filter(i => i.fields.customfield_10517 === true || (i.fields.customfield_10021 || []).length > 0)
-        .reduce((sum, i) => sum + (i.fields.customfield_10028 || 0), 0)
-    },
+    blocked: { count: 0, sp: 0 }, // Will be computed after blocked detection below
     noStoryPoints: issues.filter(i => !i.fields.customfield_10028).length
   };
 
@@ -375,16 +372,57 @@ function computeMetrics(issues, historicalSprints, futureSprint, epicProgress, t
       };
     });
 
-  // 4. Blocked Issues
+  // 4. Blocked Issues (flag-blocked + stale-blocked)
+  const currentTime = Date.now();
+  const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+
+  const isFlagBlocked = (i) =>
+    i.fields.customfield_10517 === true || (i.fields.customfield_10021 || []).length > 0;
+
+  const isStaleBlocked = (i) => {
+    // Only check non-closed, non-done issues
+    if (/Closed|Verified|Release Pending|Done/i.test(i.fields.status?.name || '')) return false;
+    // Check last comment date
+    const comments = i.fields.comment?.comments || [];
+    const lastComment = comments.length > 0 ? comments[comments.length - 1] : null;
+    const lastCommentDate = lastComment ? new Date(lastComment.created).getTime() : 0;
+    // Check last updated date
+    const updatedDate = i.fields.updated ? new Date(i.fields.updated).getTime() : 0;
+    // Stale if neither comment nor update in last 3 days
+    const lastActivity = Math.max(lastCommentDate, updatedDate);
+    return lastActivity > 0 && (currentTime - lastActivity) > THREE_DAYS_MS;
+  };
+
   const blocked = issues
-    .filter(i => i.fields.customfield_10517 === true || (i.fields.customfield_10021 || []).length > 0)
-    .map(i => ({
-      key: i.key,
-      summary: i.fields.summary,
-      priority: i.fields.priority.name,
-      reason: i.fields.customfield_10483 || 'No reason provided',
-      assignee: i.fields.assignee?.displayName || 'Unassigned'
-    }));
+    .filter(i => isFlagBlocked(i) || isStaleBlocked(i))
+    .map(i => {
+      const flagged = isFlagBlocked(i);
+      const stale = isStaleBlocked(i);
+      const lastUpdated = i.fields.updated ? new Date(i.fields.updated) : null;
+      const daysSinceUpdate = lastUpdated ? Math.floor((currentTime - lastUpdated.getTime()) / (24 * 60 * 60 * 1000)) : null;
+
+      let reason = i.fields.customfield_10483 || '';
+      if (flagged && !reason) reason = 'Flagged as blocked';
+      if (stale && !flagged) reason = `No activity for ${daysSinceUpdate} days`;
+      if (stale && flagged) reason = `${reason} (also stale: ${daysSinceUpdate} days)`;
+
+      return {
+        key: i.key,
+        summary: i.fields.summary,
+        priority: i.fields.priority.name,
+        reason,
+        assignee: i.fields.assignee?.displayName || 'Unassigned',
+        blockedType: flagged ? (stale ? 'flagged+stale' : 'flagged') : 'stale'
+      };
+    });
+
+  // Update summary blocked count now that we have the full list
+  summary.blocked = {
+    count: blocked.length,
+    sp: issues
+      .filter(i => isFlagBlocked(i) || isStaleBlocked(i))
+      .reduce((sum, i) => sum + (i.fields.customfield_10028 || 0), 0)
+  };
 
   // 5. High Priority Bugs
   const highPriorityBugs = issues

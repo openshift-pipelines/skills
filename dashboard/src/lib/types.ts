@@ -94,6 +94,7 @@ export interface BlockedItem {
   priority: string
   reason: string
   assignee: string
+  blockedType?: 'flagged' | 'stale' | 'flagged+stale'
 }
 
 export interface BugItem {

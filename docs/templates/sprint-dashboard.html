@@ -257,6 +257,21 @@
       color: white;
     }
 
+    .tag.complete {
+      background: var(--green);
+      color: white;
+    }
+
+    .tag.atRisk {
+      background: var(--yellow);
+      color: #1a1a2e;
+    }
+
+    .tag.incomplete {
+      background: var(--red);
+      color: white;
+    }
+
     .roadmap-bar {
       display: flex;
       height: 28px;
@@ -400,6 +415,107 @@
     .section {
       margin-bottom: 3rem;
     }
+
+    /* Health Score Badge */
+    .health-score {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin: 1rem 0;
+    }
+
+    .health-score.health-green {
+      background: var(--green);
+      color: #1a1a2e;
+    }
+
+    .health-score.health-yellow {
+      background: var(--yellow);
+      color: #1a1a2e;
+    }
+
+    .health-score.health-red {
+      background: var(--red);
+      color: white;
+    }
+
+    .health-score .health-label {
+      font-size: 0.85rem;
+      font-weight: normal;
+      opacity: 0.8;
+    }
+
+    /* Days Remaining Bar */
+    .days-remaining {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin: 1rem 0 2rem;
+      flex-wrap: wrap;
+    }
+
+    .days-remaining .progress-track {
+      flex: 1;
+      min-width: 200px;
+      height: 16px;
+      background: var(--bg-card);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .days-remaining .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 8px;
+      transition: width 0.3s ease;
+    }
+
+    .days-remaining .day-text {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .days-remaining .completion-pct {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--green);
+      white-space: nowrap;
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+      margin: 1rem 0 2rem;
+    }
+
+    .filter-bar input {
+      width: 100%;
+      padding: 10px 16px;
+      font-size: 1rem;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .filter-bar input:focus {
+      border-color: var(--accent);
+    }
+
+    .filter-bar input::placeholder {
+      color: var(--text-dim);
+    }
+
+    tr.filter-hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -409,21 +525,29 @@
     const DATA = {};
 
     // Safe DOM helper
-    function $(tag, attrs = {}, ...children) {
-      const el = document.createElement(tag);
+    function $(tag, attrs, children) {
+      var args = Array.prototype.slice.call(arguments);
+      var el = document.createElement(args[0]);
+      var a = args.length > 1 && args[1] !== null && typeof args[1] === 'object' && !args[1].nodeType ? args[1] : null;
+      var startIdx = a ? 2 : 1;
 
-      for (const [key, value] of Object.entries(attrs)) {
-        if (key === 'className') {
-          el.className = value;
-        } else if (key.startsWith('on') && typeof value === 'function') {
-          const event = key.substring(2).toLowerCase();
-          el.addEventListener(event, value);
-        } else {
-          el.setAttribute(key, value);
+      if (a) {
+        for (var keys = Object.keys(a), ki = 0; ki < keys.length; ki++) {
+          var key = keys[ki];
+          var value = a[key];
+          if (key === 'className') {
+            el.className = value;
+          } else if (key.startsWith('on') && typeof value === 'function') {
+            var event = key.substring(2).toLowerCase();
+            el.addEventListener(event, value);
+          } else {
+            el.setAttribute(key, value);
+          }
         }
       }
 
-      for (const child of children) {
+      for (var i = startIdx; i < args.length; i++) {
+        var child = args[i];
         if (typeof child === 'string' || typeof child === 'number') {
           el.appendChild(document.createTextNode(String(child)));
         } else if (child && child.nodeType) {
@@ -445,21 +569,125 @@
       }
       return $(
         'a',
-        { href: `${DATA.meta.jiraBaseUrl}/browse/${key}`, target: '_blank' },
+        { href: DATA.meta.jiraBaseUrl + '/browse/' + key, target: '_blank' },
         key
       );
+    }
+
+    // Helper: get count from byStatus
+    function getStatusCount(statusName) {
+      if (!DATA.summary || !DATA.summary.byStatus || !DATA.summary.byStatus[statusName]) return 0;
+      return DATA.summary.byStatus[statusName].count || 0;
+    }
+
+    function getStatusSP(statusName) {
+      if (!DATA.summary || !DATA.summary.byStatus || !DATA.summary.byStatus[statusName]) return 0;
+      return DATA.summary.byStatus[statusName].sp || 0;
+    }
+
+    // Compute Sprint Health Score
+    function computeHealthScore() {
+      if (!DATA.summary) return { score: 0, label: 'Unknown', level: 'red' };
+
+      var totalSP = DATA.summary.totalSPs || 0;
+      var completedSP = getStatusSP('Closed');
+      var blockedCount = DATA.summary.blocked ? DATA.summary.blocked.count : 0;
+      var totalIssues = DATA.summary.totalIssues || 1;
+      var completionRate = totalSP > 0 ? (completedSP / totalSP * 100) : 0;
+      var blockedRate = totalIssues > 0 ? (blockedCount / totalIssues * 100) : 0;
+
+      // Check carry-forward severity
+      var carryForwardSevere = false;
+      if (DATA.carryForward && Array.isArray(DATA.carryForward)) {
+        var severeCount = 0;
+        for (var i = 0; i < DATA.carryForward.length; i++) {
+          if ((DATA.carryForward[i].sprintCount || 0) >= 4) severeCount++;
+        }
+        carryForwardSevere = severeCount >= 3;
+      }
+
+      var level, label;
+      if (completionRate >= 70 && blockedRate < 10 && !carryForwardSevere) {
+        level = 'green';
+        label = 'Healthy';
+      } else if (completionRate < 50 || blockedRate >= 20 || carryForwardSevere) {
+        level = 'red';
+        label = 'At Risk';
+      } else {
+        level = 'yellow';
+        label = 'Needs Attention';
+      }
+
+      return { score: Math.round(completionRate), label: label, level: level };
+    }
+
+    // Compute days remaining
+    function computeDaysInfo() {
+      if (!DATA.meta || !DATA.meta.sprint) return null;
+      var sprint = DATA.meta.sprint;
+      if (!sprint.startDate || !sprint.endDate) return null;
+
+      var start = new Date(sprint.startDate);
+      var end = new Date(sprint.endDate);
+      var now = DATA.meta.generatedAt ? new Date(DATA.meta.generatedAt) : new Date();
+
+      var totalMs = end.getTime() - start.getTime();
+      var elapsedMs = now.getTime() - start.getTime();
+      var totalDays = Math.max(1, Math.ceil(totalMs / (1000 * 60 * 60 * 24)));
+      var elapsedDays = Math.max(0, Math.min(totalDays, Math.ceil(elapsedMs / (1000 * 60 * 60 * 24))));
+      var remainingDays = totalDays - elapsedDays;
+      var pct = Math.round(elapsedDays / totalDays * 100);
+
+      return {
+        dayNum: elapsedDays,
+        totalDays: totalDays,
+        remainingDays: remainingDays,
+        pct: pct
+      };
+    }
+
+    // Compute completion percentage
+    function computeCompletionPct() {
+      if (!DATA.summary) return 0;
+      var totalSP = DATA.summary.totalSPs || 0;
+      if (totalSP === 0) return 0;
+      var completedSP = getStatusSP('Closed');
+      return Math.round(completedSP / totalSP * 100);
+    }
+
+    // Render collapsible section with openByDefault parameter
+    function renderCollapsible(title, contentFn, openByDefault) {
+      var header = $('h2', { className: openByDefault ? 'collapsible open' : 'collapsible' }, title);
+      var content = $('div', { className: openByDefault ? 'collapsible-content open' : 'collapsible-content' });
+
+      header.addEventListener('click', function() {
+        header.classList.toggle('open');
+        content.classList.toggle('open');
+      });
+
+      var inner = contentFn();
+      if (inner) {
+        content.appendChild(inner);
+      }
+      return $('div', {}, header, content);
     }
 
     // Render functions
     function renderHeader() {
       if (!DATA.meta) return null;
 
-      const container = $('div', { className: 'section' });
-      container.appendChild($('h1', {}, DATA.meta.sprintName || 'Sprint Dashboard'));
+      var container = $('div', { className: 'section' });
 
-      const metaText = [];
-      if (DATA.meta.team) metaText.push(`Team: ${DATA.meta.team}`);
-      if (DATA.meta.endDate) metaText.push(`End Date: ${DATA.meta.endDate}`);
+      var sprintName = (DATA.meta.sprint && DATA.meta.sprint.name) ? DATA.meta.sprint.name : 'Sprint Dashboard';
+      container.appendChild($('h1', {}, sprintName));
+
+      var metaText = [];
+      if (DATA.meta.team) metaText.push('Team: ' + DATA.meta.team);
+      if (DATA.meta.sprint && DATA.meta.sprint.endDate) metaText.push('End Date: ' + DATA.meta.sprint.endDate);
+      if (DATA.meta.generatedAt) {
+        var genDate = new Date(DATA.meta.generatedAt);
+        metaText.push('Generated: ' + genDate.toLocaleString());
+      }
 
       if (metaText.length > 0) {
         container.appendChild($('div', { className: 'meta' }, metaText.join(' | ')));
@@ -468,41 +696,98 @@
       return container;
     }
 
+    function renderHealthScore() {
+      var health = computeHealthScore();
+      var badge = $('div', { className: 'health-score health-' + health.level });
+      badge.appendChild($('span', {}, health.label));
+      badge.appendChild($('span', { className: 'health-label' }, health.score + '% Complete'));
+      return badge;
+    }
+
+    function renderDaysRemaining() {
+      var info = computeDaysInfo();
+      if (!info) return null;
+
+      var container = $('div', { className: 'days-remaining' });
+
+      container.appendChild($('span', { className: 'day-text' }, 'Day ' + info.dayNum + ' of ' + info.totalDays + ' (' + info.remainingDays + ' remaining)'));
+
+      var track = $('div', { className: 'progress-track' });
+      track.appendChild($('div', { className: 'progress-fill', style: 'width: ' + Math.min(100, info.pct) + '%' }));
+      container.appendChild(track);
+
+      var completionPct = computeCompletionPct();
+      container.appendChild($('span', { className: 'completion-pct' }, completionPct + '% Complete'));
+
+      return container;
+    }
+
+    function renderFilterBar() {
+      var container = $('div', { className: 'filter-bar' });
+      var input = $('input', {
+        type: 'text',
+        placeholder: 'Filter by issue key, summary, assignee, or component...',
+        id: 'global-filter'
+      });
+
+      input.addEventListener('keyup', function() {
+        var query = input.value.toLowerCase().trim();
+        var rows = document.querySelectorAll('tr[data-filter]');
+        for (var i = 0; i < rows.length; i++) {
+          var filterText = rows[i].getAttribute('data-filter') || '';
+          if (query === '' || filterText.toLowerCase().indexOf(query) !== -1) {
+            rows[i].classList.remove('filter-hidden');
+          } else {
+            rows[i].classList.add('filter-hidden');
+          }
+        }
+      });
+
+      container.appendChild(input);
+      return container;
+    }
+
     function renderSummaryCards() {
       if (!DATA.summary) return null;
 
-      const container = $('div', { className: 'section' });
+      var container = $('div', { className: 'section' });
       container.appendChild($('h2', {}, 'Summary'));
 
-      const cards = $('div', { className: 'cards' });
+      var cards = $('div', { className: 'cards' });
 
       // Total
-      const totalCard = $('div', { className: 'card' });
+      var totalCard = $('div', { className: 'card' });
       totalCard.appendChild($('div', { className: 'label' }, 'Total'));
-      totalCard.appendChild($('div', { className: 'value' }, `${DATA.summary.totalIssues || 0} (${DATA.summary.totalStoryPoints || 0} SP)`));
+      totalCard.appendChild($('div', { className: 'value' }, (DATA.summary.totalIssues || 0) + ' (' + (DATA.summary.totalSPs || 0) + ' SP)'));
       cards.appendChild(totalCard);
 
-      // Completed
-      const completedCard = $('div', { className: 'card green' });
+      // Completed (from byStatus.Closed)
+      var closedCount = getStatusCount('Closed');
+      var closedSP = getStatusSP('Closed');
+      var completedCard = $('div', { className: 'card green' });
       completedCard.appendChild($('div', { className: 'label' }, 'Completed'));
-      completedCard.appendChild($('div', { className: 'value' }, `${DATA.summary.completed || 0} (${DATA.summary.completedStoryPoints || 0} SP)`));
+      completedCard.appendChild($('div', { className: 'value' }, closedCount + ' (' + closedSP + ' SP)'));
       cards.appendChild(completedCard);
 
-      // Code Review
-      const codeReviewCard = $('div', { className: 'card yellow' });
+      // Code Review (from byStatus["Code Review"])
+      var crCount = getStatusCount('Code Review');
+      var crSP = getStatusSP('Code Review');
+      var codeReviewCard = $('div', { className: 'card yellow' });
       codeReviewCard.appendChild($('div', { className: 'label' }, 'Code Review'));
-      codeReviewCard.appendChild($('div', { className: 'value' }, `${DATA.summary.codeReview || 0} (${DATA.summary.codeReviewStoryPoints || 0} SP)`));
+      codeReviewCard.appendChild($('div', { className: 'value' }, crCount + ' (' + crSP + ' SP)'));
       cards.appendChild(codeReviewCard);
 
-      // Blocked
-      const blockedCard = $('div', { className: 'card red' });
+      // Blocked (from summary.blocked.count / .sp)
+      var blockedCount = DATA.summary.blocked ? DATA.summary.blocked.count : 0;
+      var blockedSP = DATA.summary.blocked ? DATA.summary.blocked.sp : 0;
+      var blockedCard = $('div', { className: 'card red' });
       blockedCard.appendChild($('div', { className: 'label' }, 'Blocked'));
-      blockedCard.appendChild($('div', { className: 'value' }, `${DATA.summary.blocked || 0} (${DATA.summary.blockedStoryPoints || 0} SP)`));
+      blockedCard.appendChild($('div', { className: 'value' }, blockedCount + ' (' + blockedSP + ' SP)'));
       cards.appendChild(blockedCard);
 
       // No Story Points (conditional)
       if (DATA.summary.noStoryPoints > 0) {
-        const noSPCard = $('div', { className: 'card' });
+        var noSPCard = $('div', { className: 'card' });
         noSPCard.appendChild($('div', { className: 'label' }, 'No Story Points'));
         noSPCard.appendChild($('div', { className: 'value' }, DATA.summary.noStoryPoints));
         cards.appendChild(noSPCard);
@@ -515,226 +800,256 @@
     function renderAlerts() {
       if (!DATA.expectations) return null;
 
-      const alerts = [];
+      var alerts = [];
 
-      if (DATA.expectations.overCommitment) {
-        const alert = $('div', { className: 'alert critical' });
+      // overCommitted: {flag, committed, avgVelocity, delta}
+      if (DATA.expectations.overCommitted && DATA.expectations.overCommitted.flag) {
+        var oc = DATA.expectations.overCommitted;
+        var alert = $('div', { className: 'alert critical' });
         alert.appendChild($('strong', {}, 'Over-Commitment'));
-        alert.appendChild($('span', {}, DATA.expectations.overCommitment));
+        alert.appendChild($('span', {}, 'Committed ' + (oc.committed || 0) + ' SP vs ' + (oc.avgVelocity || 0) + ' SP average velocity (delta: +' + (oc.delta || 0) + ' SP)'));
         alerts.push(alert);
       }
 
-      if (DATA.expectations.underCommitment) {
-        const alert = $('div', { className: 'alert positive' });
-        alert.appendChild($('strong', {}, 'Under-Commitment'));
-        alert.appendChild($('span', {}, DATA.expectations.underCommitment));
-        alerts.push(alert);
+      // underCommitted: {flag, ...}
+      if (DATA.expectations.underCommitted && DATA.expectations.underCommitted.flag) {
+        var uc = DATA.expectations.underCommitted;
+        var alert2 = $('div', { className: 'alert positive' });
+        alert2.appendChild($('strong', {}, 'Under-Commitment'));
+        var ucMsg = 'Sprint is under-committed';
+        if (uc.committed !== undefined && uc.avgVelocity !== undefined) {
+          ucMsg = 'Committed ' + uc.committed + ' SP vs ' + uc.avgVelocity + ' SP average velocity';
+        }
+        alert2.appendChild($('span', {}, ucMsg));
+        alerts.push(alert2);
       }
 
-      if (DATA.expectations.codeReviewBottleneck) {
-        const alert = $('div', { className: 'alert' });
-        alert.appendChild($('strong', {}, 'Code Review Bottleneck'));
-        alert.appendChild($('span', {}, DATA.expectations.codeReviewBottleneck));
-        alerts.push(alert);
+      // codeReviewBottleneck: {flag, percent}
+      if (DATA.expectations.codeReviewBottleneck && DATA.expectations.codeReviewBottleneck.flag) {
+        var crb = DATA.expectations.codeReviewBottleneck;
+        var alert3 = $('div', { className: 'alert' });
+        alert3.appendChild($('strong', {}, 'Code Review Bottleneck'));
+        alert3.appendChild($('span', {}, (crb.percent || 0) + '% of issues are stuck in code review'));
+        alerts.push(alert3);
       }
 
-      if (DATA.expectations.carryForwardRateIncreasing) {
-        const alert = $('div', { className: 'alert' });
-        alert.appendChild($('strong', {}, 'Carry-Forward Rate Increasing'));
-        alert.appendChild($('span', {}, DATA.expectations.carryForwardRateIncreasing));
-        alerts.push(alert);
+      // carryForwardRate: array of percentages
+      if (DATA.expectations.carryForwardRate && Array.isArray(DATA.expectations.carryForwardRate)) {
+        var cfr = DATA.expectations.carryForwardRate;
+        if (cfr.length >= 2 && cfr[cfr.length - 1] > cfr[cfr.length - 2]) {
+          var alert4 = $('div', { className: 'alert' });
+          alert4.appendChild($('strong', {}, 'Carry-Forward Rate Increasing'));
+          alert4.appendChild($('span', {}, 'Recent rates: ' + cfr.join('%, ') + '%'));
+          alerts.push(alert4);
+        }
       }
 
       if (alerts.length === 0) return null;
 
-      const container = $('div', { className: 'section' });
+      var container = $('div', { className: 'section' });
       container.appendChild($('h2', {}, 'Alerts'));
-      alerts.forEach(alert => container.appendChild(alert));
+      for (var i = 0; i < alerts.length; i++) {
+        container.appendChild(alerts[i]);
+      }
 
       return container;
     }
 
-    function renderRoadmap() {
-      if (!DATA.roadmap) return null;
+    function renderBlocked() {
+      // DATA.blocked is an array directly
+      var items = Array.isArray(DATA.blocked) ? DATA.blocked : [];
 
-      const container = $('div', { className: 'section' });
-      container.appendChild($('h2', {}, 'Roadmap Alignment'));
+      var container = $('div', { className: 'section' });
+      var count = items.length;
+      container.appendChild($('h2', {}, 'Blocked Issues (' + count + ')'));
 
-      // Stacked bar
-      const total = (DATA.roadmap.plannedSP || 0) + (DATA.roadmap.unplannedSP || 0) + (DATA.roadmap.cveSP || 0);
-
-      if (total > 0) {
-        const bar = $('div', { className: 'roadmap-bar' });
-
-        const plannedPct = ((DATA.roadmap.plannedSP || 0) / total * 100).toFixed(1);
-        const unplannedPct = ((DATA.roadmap.unplannedSP || 0) / total * 100).toFixed(1);
-        const cvePct = ((DATA.roadmap.cveSP || 0) / total * 100).toFixed(1);
-
-        if (DATA.roadmap.plannedSP > 0) {
-          bar.appendChild($('div', { className: 'planned', style: `width: ${plannedPct}%` }));
-        }
-        if (DATA.roadmap.unplannedSP > 0) {
-          bar.appendChild($('div', { className: 'unplanned', style: `width: ${unplannedPct}%` }));
-        }
-        if (DATA.roadmap.cveSP > 0) {
-          bar.appendChild($('div', { className: 'cve', style: `width: ${cvePct}%` }));
-        }
-
-        container.appendChild(bar);
-
-        // Legend
-        const legend = $('div', { className: 'legend' });
-        legend.appendChild($('span', { className: 'planned' }, `Planned: ${DATA.roadmap.plannedSP || 0} SP (${plannedPct}%)`));
-        legend.appendChild($('span', { className: 'unplanned' }, `Unplanned: ${DATA.roadmap.unplannedSP || 0} SP (${unplannedPct}%)`));
-        legend.appendChild($('span', { className: 'cve' }, `CVE: ${DATA.roadmap.cveSP || 0} SP (${cvePct}%)`));
-        container.appendChild(legend);
-      }
-
-      // Epic progress table
-      if (DATA.roadmap.epics && DATA.roadmap.epics.length > 0) {
-        container.appendChild($('h3', {}, 'Epic Progress'));
-
-        const table = $('table', {});
-        const thead = $('thead', {});
-        const headerRow = $('tr', {});
-        headerRow.appendChild($('th', {}, 'Epic'));
-        headerRow.appendChild($('th', {}, 'Summary'));
-        headerRow.appendChild($('th', {}, 'Progress'));
-        headerRow.appendChild($('th', {}, 'Story Points'));
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
-
-        const tbody = $('tbody', {});
-        DATA.roadmap.epics.forEach(epic => {
-          const row = $('tr', {});
-          row.appendChild($('td', {}, link(epic.key)));
-          row.appendChild($('td', {}, epic.summary || ''));
-          row.appendChild($('td', {}, `${epic.progress || 0}%`));
-          row.appendChild($('td', {}, epic.storyPoints || 0));
-          tbody.appendChild(row);
-        });
-        table.appendChild(tbody);
-
-        container.appendChild(table);
-      }
-
-      // Untracked warning
-      if (DATA.roadmap.untrackedIssues > 0) {
-        const alert = $('div', { className: 'alert' });
-        alert.appendChild($('strong', {}, 'Untracked Issues'));
-        alert.appendChild($('span', {}, `${DATA.roadmap.untrackedIssues} issues are not linked to any epic`));
+      if (count === 0) {
+        var alert = $('div', { className: 'alert positive' });
+        alert.appendChild($('span', {}, 'No blocked issues'));
         container.appendChild(alert);
-      }
-
-      return container;
-    }
-
-    function renderVelocity() {
-      if (!DATA.velocity || !DATA.velocity.history || DATA.velocity.history.length === 0) {
-        const container = $('div', { className: 'section' });
-        container.appendChild($('h2', {}, 'Velocity Trend'));
-        container.appendChild($('div', { className: 'empty-state' }, 'No velocity history available'));
         return container;
       }
 
-      const container = $('div', { className: 'section' });
-      container.appendChild($('h2', {}, 'Velocity Trend'));
+      var table = $('table', {});
+      var thead = $('thead', {});
+      var headerRow = $('tr', {});
+      headerRow.appendChild($('th', {}, 'Key'));
+      headerRow.appendChild($('th', {}, 'Summary'));
+      headerRow.appendChild($('th', {}, 'Priority'));
+      headerRow.appendChild($('th', {}, 'Reason'));
+      headerRow.appendChild($('th', {}, 'Assignee'));
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
 
-      // Find max for scaling
-      const maxSP = Math.max(...DATA.velocity.history.map(s => (s.completed || 0) + (s.carried || 0)));
-
-      DATA.velocity.history.forEach(sprint => {
-        const row = $('div', { className: 'bar-row' });
-
-        const label = $('div', { className: 'bar-label' }, sprint.name || 'Sprint');
-        row.appendChild(label);
-
-        const track = $('div', { className: 'bar-track' });
-
-        const completedPct = ((sprint.completed || 0) / maxSP * 100).toFixed(1);
-        const carriedPct = ((sprint.carried || 0) / maxSP * 100).toFixed(1);
-
-        if (sprint.completed > 0) {
-          track.appendChild($('div', { className: 'bar-fill-done', style: `width: ${completedPct}%` }));
-        }
-        if (sprint.carried > 0) {
-          track.appendChild($('div', { className: 'bar-fill-carried', style: `width: ${carriedPct}%` }));
-        }
-
-        row.appendChild(track);
-
-        const value = $('div', { className: 'bar-value' }, `${sprint.completed || 0} / ${(sprint.completed || 0) + (sprint.carried || 0)} SP`);
-        row.appendChild(value);
-
-        if (sprint.isCurrent) {
-          row.appendChild($('span', { className: 'bar-marker' }, '\u2190 now'));
-        }
-
-        container.appendChild(row);
-      });
-
-      // Stats
-      if (DATA.velocity.stats) {
-        const statsRow = $('div', { style: 'margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);' });
-        const stats = [];
-        if (DATA.velocity.stats.avg3Sprint !== undefined) {
-          stats.push(`3-sprint avg: ${DATA.velocity.stats.avg3Sprint} SP`);
-        }
-        if (DATA.velocity.stats.avg5Sprint !== undefined) {
-          stats.push(`5-sprint avg: ${DATA.velocity.stats.avg5Sprint} SP`);
-        }
-        if (DATA.velocity.stats.trend) {
-          stats.push(`Trend: ${DATA.velocity.stats.trend}`);
-        }
-        statsRow.textContent = stats.join(' | ');
-        container.appendChild(statsRow);
+      var tbody = $('tbody', {});
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        var filterText = [item.key, item.summary, item.assignee, item.priority, item.reason].join(' ');
+        var row = $('tr', { 'data-filter': filterText });
+        row.appendChild($('td', {}, link(item.key)));
+        row.appendChild($('td', {}, item.summary || ''));
+        row.appendChild($('td', {}, item.priority || ''));
+        row.appendChild($('td', {}, item.reason || ''));
+        row.appendChild($('td', {}, item.assignee || 'Unassigned'));
+        tbody.appendChild(row);
       }
+      table.appendChild(tbody);
 
+      container.appendChild(table);
       return container;
     }
 
-    function renderDoD() {
-      if (!DATA.dod) return null;
+    function renderBugs() {
+      // DATA.highPriorityBugs is an array directly
+      var items = Array.isArray(DATA.highPriorityBugs) ? DATA.highPriorityBugs : [];
+      if (items.length === 0) return null;
 
-      const container = $('div', { className: 'section' });
-      container.appendChild($('h2', {}, 'DoD Compliance'));
+      var container = $('div', { className: 'section' });
+      container.appendChild($('h2', {}, 'High Priority Bugs \u2014 Closure Proximity'));
 
-      // Summary bar
-      const total = (DATA.dod.complete || 0) + (DATA.dod.atRisk || 0) + (DATA.dod.incomplete || 0);
+      var proximityMap = { done: 5, near: 4, mid: 2, far: 0 };
+
+      var table = $('table', {});
+      var thead = $('thead', {});
+      var headerRow = $('tr', {});
+      headerRow.appendChild($('th', {}, 'Key'));
+      headerRow.appendChild($('th', {}, 'Summary'));
+      headerRow.appendChild($('th', {}, 'Priority'));
+      headerRow.appendChild($('th', {}, 'Status'));
+      headerRow.appendChild($('th', {}, 'Proximity'));
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      var tbody = $('tbody', {});
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        var filterText = [item.key, item.summary, item.priority, item.status].join(' ');
+        var row = $('tr', { 'data-filter': filterText });
+        row.appendChild($('td', {}, link(item.key)));
+        row.appendChild($('td', {}, item.summary || ''));
+        row.appendChild($('td', {}, item.priority || ''));
+        row.appendChild($('td', {}, item.status || ''));
+
+        var proximityCell = $('td', {});
+        var proximityContainer = $('div', { className: 'proximity' });
+        var filled = proximityMap[item.proximity] || 0;
+
+        for (var j = 0; j < 5; j++) {
+          proximityContainer.appendChild($('div', { className: j < filled ? 'dot filled' : 'dot empty' }));
+        }
+
+        proximityCell.appendChild(proximityContainer);
+        row.appendChild(proximityCell);
+
+        tbody.appendChild(row);
+      }
+      table.appendChild(tbody);
+
+      container.appendChild(table);
+      return container;
+    }
+
+    function renderCarryForward() {
+      // DATA.carryForward is an array directly
+      var items = Array.isArray(DATA.carryForward) ? DATA.carryForward : [];
+
+      if (items.length === 0) {
+        var container = $('div', { className: 'section' });
+        container.appendChild($('h2', {}, 'Carry-Forward Worst Offenders'));
+        container.appendChild($('div', { className: 'empty-state' }, 'No carry-forward issues'));
+        return container;
+      }
+
+      var container2 = $('div', { className: 'section' });
+      container2.appendChild($('h2', {}, 'Carry-Forward Worst Offenders'));
+
+      var table = $('table', {});
+      var thead = $('thead', {});
+      var headerRow = $('tr', {});
+      headerRow.appendChild($('th', {}, 'Key'));
+      headerRow.appendChild($('th', {}, 'Sprint Count'));
+      headerRow.appendChild($('th', {}, 'Status'));
+      headerRow.appendChild($('th', {}, 'Severity'));
+      headerRow.appendChild($('th', {}, 'Summary'));
+      headerRow.appendChild($('th', {}, 'Latest Comment'));
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      var tbody = $('tbody', {});
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        var filterText = [item.key, item.summary, item.status, item.severity].join(' ');
+        var row = $('tr', { 'data-filter': filterText });
+        row.appendChild($('td', {}, link(item.key)));
+
+        var countCell = $('td', {});
+        var count = item.sprintCount || 0;
+        var countClass = count >= 5 ? 'carry-critical' : count >= 3 ? 'carry-warning' : '';
+        countCell.appendChild($('span', { className: countClass }, String(count)));
+        row.appendChild(countCell);
+
+        row.appendChild($('td', {}, item.status || ''));
+        row.appendChild($('td', {}, item.severity || ''));
+        row.appendChild($('td', {}, item.summary || ''));
+        row.appendChild($('td', {}, item.latestComment || ''));
+        tbody.appendChild(row);
+      }
+      table.appendChild(tbody);
+
+      container2.appendChild(table);
+      return container2;
+    }
+
+    function renderDoDContent() {
+      if (!DATA.dod) return $('div', { className: 'empty-state' }, 'No DoD data available');
+
+      var container = $('div', {});
+
+      // Summary bar using .complete.count, .atRisk.count, .incomplete.count, .na.count
+      var completeCount = DATA.dod.complete ? DATA.dod.complete.count : 0;
+      var atRiskCount = DATA.dod.atRisk ? DATA.dod.atRisk.count : 0;
+      var incompleteCount = DATA.dod.incomplete ? DATA.dod.incomplete.count : 0;
+      var naCount = DATA.dod.na ? DATA.dod.na.count : 0;
+      var total = completeCount + atRiskCount + incompleteCount + naCount;
 
       if (total > 0) {
-        const bar = $('div', { className: 'dod-bar' });
+        var bar = $('div', { className: 'dod-bar' });
 
-        const completePct = ((DATA.dod.complete || 0) / total * 100).toFixed(1);
-        const atRiskPct = ((DATA.dod.atRisk || 0) / total * 100).toFixed(1);
-        const incompletePct = ((DATA.dod.incomplete || 0) / total * 100).toFixed(1);
+        var completePct = (completeCount / total * 100).toFixed(1);
+        var atRiskPct = (atRiskCount / total * 100).toFixed(1);
+        var incompletePct = (incompleteCount / total * 100).toFixed(1);
 
-        if (DATA.dod.complete > 0) {
-          bar.appendChild($('div', { className: 'complete', style: `width: ${completePct}%` }));
+        if (completeCount > 0) {
+          bar.appendChild($('div', { className: 'complete', style: 'width: ' + completePct + '%' }));
         }
-        if (DATA.dod.atRisk > 0) {
-          bar.appendChild($('div', { className: 'at-risk', style: `width: ${atRiskPct}%` }));
+        if (atRiskCount > 0) {
+          bar.appendChild($('div', { className: 'at-risk', style: 'width: ' + atRiskPct + '%' }));
         }
-        if (DATA.dod.incomplete > 0) {
-          bar.appendChild($('div', { className: 'incomplete', style: `width: ${incompletePct}%` }));
+        if (incompleteCount > 0) {
+          bar.appendChild($('div', { className: 'incomplete', style: 'width: ' + incompletePct + '%' }));
         }
 
         container.appendChild(bar);
 
-        const legend = $('div', { className: 'legend' });
-        legend.appendChild($('span', { className: 'planned' }, `Complete: ${DATA.dod.complete || 0} (${completePct}%)`));
-        legend.appendChild($('span', { className: 'unplanned' }, `At Risk: ${DATA.dod.atRisk || 0} (${atRiskPct}%)`));
-        legend.appendChild($('span', { className: 'cve' }, `Incomplete: ${DATA.dod.incomplete || 0} (${incompletePct}%)`));
+        var legend = $('div', { className: 'legend' });
+        var completePctDisp = DATA.dod.complete && DATA.dod.complete.percent !== undefined ? DATA.dod.complete.percent : completePct;
+        var atRiskPctDisp = DATA.dod.atRisk && DATA.dod.atRisk.percent !== undefined ? DATA.dod.atRisk.percent : atRiskPct;
+        var incompletePctDisp = DATA.dod.incomplete && DATA.dod.incomplete.percent !== undefined ? DATA.dod.incomplete.percent : incompletePct;
+
+        legend.appendChild($('span', { className: 'planned' }, 'Complete: ' + completeCount + ' (' + completePctDisp + '%)'));
+        legend.appendChild($('span', { className: 'unplanned' }, 'At Risk: ' + atRiskCount + ' (' + atRiskPctDisp + '%)'));
+        legend.appendChild($('span', { className: 'cve' }, 'Incomplete: ' + incompleteCount + ' (' + incompletePctDisp + '%)'));
         container.appendChild(legend);
       }
 
-      // Non-compliant table
-      if (DATA.dod.nonCompliant && DATA.dod.nonCompliant.length > 0) {
-        container.appendChild($('h3', {}, 'Non-Compliant Issues'));
+      // Issues table (DATA.dod.issues, not .nonCompliant)
+      var issues = DATA.dod.issues;
+      if (issues && issues.length > 0) {
+        container.appendChild($('h3', {}, 'DoD Issues'));
 
-        const table = $('table', {});
-        const thead = $('thead', {});
-        const headerRow = $('tr', {});
+        var table = $('table', {});
+        var thead = $('thead', {});
+        var headerRow = $('tr', {});
         headerRow.appendChild($('th', {}, 'Key'));
         headerRow.appendChild($('th', {}, 'Summary'));
         headerRow.appendChild($('th', {}, 'Status'));
@@ -743,22 +1058,32 @@
         thead.appendChild(headerRow);
         table.appendChild(thead);
 
-        const tbody = $('tbody', {});
-        DATA.dod.nonCompliant.forEach(issue => {
-          const row = $('tr', {});
+        var tbody = $('tbody', {});
+        for (var i = 0; i < issues.length; i++) {
+          var issue = issues[i];
+          var filterText = [issue.key, issue.summary, issue.status, issue.score].join(' ');
+          var row = $('tr', { 'data-filter': filterText });
           row.appendChild($('td', {}, link(issue.key)));
           row.appendChild($('td', {}, issue.summary || ''));
           row.appendChild($('td', {}, issue.status || ''));
 
-          const scoreCell = $('td', {});
-          const score = issue.score || 0;
-          const scoreClass = score >= 0.8 ? 'score-high' : score >= 0.5 ? 'score-medium' : 'score-low';
-          scoreCell.appendChild($('span', { className: scoreClass }, `${(score * 100).toFixed(0)}%`));
+          // score is a string: "complete", "atRisk", "incomplete" — render as colored tag
+          var scoreCell = $('td', {});
+          var scoreVal = issue.score || '';
+          var tagClass = 'tag';
+          if (scoreVal === 'complete') {
+            tagClass = 'tag complete';
+          } else if (scoreVal === 'atRisk') {
+            tagClass = 'tag atRisk';
+          } else if (scoreVal === 'incomplete') {
+            tagClass = 'tag incomplete';
+          }
+          scoreCell.appendChild($('span', { className: tagClass }, scoreVal));
           row.appendChild(scoreCell);
 
           row.appendChild($('td', {}, (issue.missing || []).join(', ')));
           tbody.appendChild(row);
-        });
+        }
         table.appendChild(tbody);
 
         container.appendChild(table);
@@ -767,58 +1092,62 @@
       return container;
     }
 
-    function renderCodeReview() {
-      if (!DATA.codeReview || !DATA.codeReview.items || DATA.codeReview.items.length === 0) {
-        const container = $('div', { className: 'section' });
-        container.appendChild($('h2', {}, 'Code Review — SP Redo Recommendations'));
-        container.appendChild($('div', { className: 'empty-state' }, 'No SP redo recommendations'));
-        return container;
+    function renderCodeReviewContent() {
+      // DATA.codeReview is the array directly
+      var items = Array.isArray(DATA.codeReview) ? DATA.codeReview : [];
+
+      if (items.length === 0) {
+        return $('div', { className: 'empty-state' }, 'No SP redo recommendations');
       }
 
-      const container = $('div', { className: 'section' });
-      container.appendChild($('h2', {}, 'Code Review — SP Redo Recommendations'));
+      var container = $('div', {});
 
-      const table = $('table', {});
-      const thead = $('thead', {});
-      const headerRow = $('tr', {});
+      var table = $('table', {});
+      var thead = $('thead', {});
+      var headerRow = $('tr', {});
       headerRow.appendChild($('th', {}, 'Key'));
       headerRow.appendChild($('th', {}, 'Summary'));
       headerRow.appendChild($('th', {}, 'Current SP'));
       headerRow.appendChild($('th', {}, 'Original SP'));
       headerRow.appendChild($('th', {}, 'Suggested SP'));
       headerRow.appendChild($('th', {}, 'Assignee'));
+      headerRow.appendChild($('th', {}, 'Re-estimated'));
       thead.appendChild(headerRow);
       table.appendChild(thead);
 
-      const tbody = $('tbody', {});
-      let totalCurrent = 0;
-      let totalSuggested = 0;
+      var tbody = $('tbody', {});
+      var totalCurrent = 0;
+      var totalSuggested = 0;
 
-      DATA.codeReview.items.forEach(item => {
-        const row = $('tr', {});
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        var filterText = [item.key, item.summary, item.assignee].join(' ');
+        var row = $('tr', { 'data-filter': filterText });
         row.appendChild($('td', {}, link(item.key)));
 
-        const summaryCell = $('td', {});
-        const summary = item.summary || '';
-        summaryCell.appendChild($('div', { className: 'truncate', title: summary }, summary.substring(0, 60) + (summary.length > 60 ? '...' : '')));
+        var summaryCell = $('td', {});
+        var summary = item.summary || '';
+        summaryCell.appendChild($('div', { className: 'truncate', title: summary }, summary.length > 60 ? summary.substring(0, 60) + '...' : summary));
         row.appendChild(summaryCell);
 
-        row.appendChild($('td', {}, item.currentSP || 0));
-        row.appendChild($('td', {}, item.originalSP || 0));
-        row.appendChild($('td', {}, item.suggestedSP || 0));
+        row.appendChild($('td', {}, String(item.currentSP || 0)));
+        row.appendChild($('td', {}, String(item.originalSP || 0)));
+        row.appendChild($('td', {}, String(item.suggestedSP || 0)));
         row.appendChild($('td', {}, item.assignee || 'Unassigned'));
+        row.appendChild($('td', {}, item.alreadyReestimated ? 'Yes' : 'No'));
         tbody.appendChild(row);
 
         totalCurrent += item.currentSP || 0;
         totalSuggested += item.suggestedSP || 0;
-      });
+      }
 
       // Total row
-      const totalRow = $('tr', { className: 'total-row' });
+      var totalRow = $('tr', { className: 'total-row' });
       totalRow.appendChild($('td', { colspan: '2' }, 'Total'));
-      totalRow.appendChild($('td', {}, totalCurrent));
+      totalRow.appendChild($('td', {}, String(totalCurrent)));
       totalRow.appendChild($('td', {}, ''));
-      totalRow.appendChild($('td', {}, totalSuggested));
+      totalRow.appendChild($('td', {}, String(totalSuggested)));
+      totalRow.appendChild($('td', {}, ''));
       totalRow.appendChild($('td', {}, ''));
       tbody.appendChild(totalRow);
 
@@ -828,149 +1157,182 @@
       return container;
     }
 
-    function renderBlocked() {
-      if (!DATA.blocked) return null;
-
-      const container = $('div', { className: 'section' });
-      const count = DATA.blocked.items ? DATA.blocked.items.length : 0;
-      container.appendChild($('h2', {}, `Blocked Issues (${count})`));
-
-      if (count === 0) {
-        const alert = $('div', { className: 'alert positive' });
-        alert.appendChild($('span', {}, 'No blocked issues'));
-        container.appendChild(alert);
-        return container;
+    function renderVelocityContent() {
+      if (!DATA.velocity || !DATA.velocity.history || DATA.velocity.history.length === 0) {
+        return $('div', { className: 'empty-state' }, 'No velocity history available');
       }
 
-      const table = $('table', {});
-      const thead = $('thead', {});
-      const headerRow = $('tr', {});
-      headerRow.appendChild($('th', {}, 'Key'));
-      headerRow.appendChild($('th', {}, 'Summary'));
-      headerRow.appendChild($('th', {}, 'Priority'));
-      headerRow.appendChild($('th', {}, 'Reason'));
-      headerRow.appendChild($('th', {}, 'Assignee'));
-      thead.appendChild(headerRow);
-      table.appendChild(thead);
+      var container = $('div', {});
 
-      const tbody = $('tbody', {});
-      DATA.blocked.items.forEach(item => {
-        const row = $('tr', {});
-        row.appendChild($('td', {}, link(item.key)));
-        row.appendChild($('td', {}, item.summary || ''));
-        row.appendChild($('td', {}, item.priority || ''));
-        row.appendChild($('td', {}, item.reason || ''));
-        row.appendChild($('td', {}, item.assignee || 'Unassigned'));
-        tbody.appendChild(row);
-      });
-      table.appendChild(tbody);
+      // Find max for scaling
+      var maxSP = 0;
+      for (var i = 0; i < DATA.velocity.history.length; i++) {
+        var s = DATA.velocity.history[i];
+        var total = (s.completed || 0) + (s.carried || 0);
+        if (total > maxSP) maxSP = total;
+      }
+      if (maxSP === 0) maxSP = 1;
 
-      container.appendChild(table);
-      return container;
-    }
+      for (var i = 0; i < DATA.velocity.history.length; i++) {
+        var sprint = DATA.velocity.history[i];
+        var row = $('div', { className: 'bar-row' });
 
-    function renderBugs() {
-      if (!DATA.bugs || !DATA.bugs.items || DATA.bugs.items.length === 0) return null;
+        // Use .sprint field, not .name
+        var label = $('div', { className: 'bar-label' }, sprint.sprint || 'Sprint');
+        row.appendChild(label);
 
-      const container = $('div', { className: 'section' });
-      container.appendChild($('h2', {}, 'High Priority Bugs — Closure Proximity'));
+        var track = $('div', { className: 'bar-track' });
 
-      const proximityMap = { done: 5, near: 4, mid: 2, far: 0 };
+        var completedPct = ((sprint.completed || 0) / maxSP * 100).toFixed(1);
+        var carriedPct = ((sprint.carried || 0) / maxSP * 100).toFixed(1);
 
-      const table = $('table', {});
-      const thead = $('thead', {});
-      const headerRow = $('tr', {});
-      headerRow.appendChild($('th', {}, 'Key'));
-      headerRow.appendChild($('th', {}, 'Summary'));
-      headerRow.appendChild($('th', {}, 'Priority'));
-      headerRow.appendChild($('th', {}, 'Status'));
-      headerRow.appendChild($('th', {}, 'Proximity'));
-      thead.appendChild(headerRow);
-      table.appendChild(thead);
-
-      const tbody = $('tbody', {});
-      DATA.bugs.items.forEach(item => {
-        const row = $('tr', {});
-        row.appendChild($('td', {}, link(item.key)));
-        row.appendChild($('td', {}, item.summary || ''));
-        row.appendChild($('td', {}, item.priority || ''));
-        row.appendChild($('td', {}, item.status || ''));
-
-        const proximityCell = $('td', {});
-        const proximityContainer = $('div', { className: 'proximity' });
-        const filled = proximityMap[item.proximity] || 0;
-
-        for (let i = 0; i < 5; i++) {
-          proximityContainer.appendChild($('div', { className: i < filled ? 'dot filled' : 'dot empty' }));
+        if (sprint.completed > 0) {
+          track.appendChild($('div', { className: 'bar-fill-done', style: 'width: ' + completedPct + '%' }));
+        }
+        if (sprint.carried > 0) {
+          track.appendChild($('div', { className: 'bar-fill-carried', style: 'width: ' + carriedPct + '%' }));
         }
 
-        proximityCell.appendChild(proximityContainer);
-        row.appendChild(proximityCell);
+        row.appendChild(track);
 
-        tbody.appendChild(row);
-      });
-      table.appendChild(tbody);
+        var value = $('div', { className: 'bar-value' }, (sprint.completed || 0) + ' / ' + ((sprint.completed || 0) + (sprint.carried || 0)) + ' SP');
+        row.appendChild(value);
 
-      container.appendChild(table);
+        container.appendChild(row);
+      }
+
+      // Current sprint marker
+      if (DATA.velocity.current) {
+        var currentRow = $('div', { style: 'margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-secondary);' });
+        currentRow.textContent = 'Current: committed ' + (DATA.velocity.current.committed || 0) + ' SP, completed ' + (DATA.velocity.current.completed || 0) + ' SP';
+        container.appendChild(currentRow);
+      }
+
+      // Stats: avg3, avg5, trend are top-level on DATA.velocity
+      var stats = [];
+      if (DATA.velocity.avg3 !== undefined) {
+        stats.push('3-sprint avg: ' + DATA.velocity.avg3 + ' SP');
+      }
+      if (DATA.velocity.avg5 !== undefined) {
+        stats.push('5-sprint avg: ' + DATA.velocity.avg5 + ' SP');
+      }
+      if (DATA.velocity.trend) {
+        stats.push('Trend: ' + DATA.velocity.trend);
+      }
+      if (stats.length > 0) {
+        var statsRow = $('div', { style: 'margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);' });
+        statsRow.textContent = stats.join(' | ');
+        container.appendChild(statsRow);
+      }
+
+      // Commitment accuracy
+      if (DATA.velocity.commitmentAccuracy && DATA.velocity.commitmentAccuracy.length > 0) {
+        var caRow = $('div', { style: 'margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);' });
+        caRow.textContent = 'Commitment accuracy (recent): ' + DATA.velocity.commitmentAccuracy.join('%, ') + '%';
+        container.appendChild(caRow);
+      }
+
       return container;
     }
 
-    function renderCarryForward() {
-      if (!DATA.carryForward || !DATA.carryForward.items || DATA.carryForward.items.length === 0) {
-        const container = $('div', { className: 'section' });
-        container.appendChild($('h2', {}, 'Carry-Forward Worst Offenders'));
-        container.appendChild($('div', { className: 'empty-state' }, 'No carry-forward issues'));
-        return container;
+    function renderRoadmapContent() {
+      if (!DATA.roadmap) return $('div', { className: 'empty-state' }, 'No roadmap data available');
+
+      var container = $('div', {});
+
+      // Stacked bar: use .planned.sp, .unplanned.sp, .cve.sp
+      var plannedSP = DATA.roadmap.planned ? DATA.roadmap.planned.sp : 0;
+      var unplannedSP = DATA.roadmap.unplanned ? DATA.roadmap.unplanned.sp : 0;
+      var cveSP = DATA.roadmap.cve ? DATA.roadmap.cve.sp : 0;
+      var total = plannedSP + unplannedSP + cveSP;
+
+      if (total > 0) {
+        var bar = $('div', { className: 'roadmap-bar' });
+
+        var plannedPct = (plannedSP / total * 100).toFixed(1);
+        var unplannedPct = (unplannedSP / total * 100).toFixed(1);
+        var cvePct = (cveSP / total * 100).toFixed(1);
+
+        // Use percent from data if available
+        var plannedPctDisp = DATA.roadmap.planned && DATA.roadmap.planned.percent !== undefined ? DATA.roadmap.planned.percent : plannedPct;
+        var unplannedPctDisp = DATA.roadmap.unplanned && DATA.roadmap.unplanned.percent !== undefined ? DATA.roadmap.unplanned.percent : unplannedPct;
+        var cvePctDisp = DATA.roadmap.cve && DATA.roadmap.cve.percent !== undefined ? DATA.roadmap.cve.percent : cvePct;
+
+        if (plannedSP > 0) {
+          bar.appendChild($('div', { className: 'planned', style: 'width: ' + plannedPct + '%' }));
+        }
+        if (unplannedSP > 0) {
+          bar.appendChild($('div', { className: 'unplanned', style: 'width: ' + unplannedPct + '%' }));
+        }
+        if (cveSP > 0) {
+          bar.appendChild($('div', { className: 'cve', style: 'width: ' + cvePct + '%' }));
+        }
+
+        container.appendChild(bar);
+
+        // Legend
+        var legend = $('div', { className: 'legend' });
+        legend.appendChild($('span', { className: 'planned' }, 'Planned: ' + plannedSP + ' SP (' + plannedPctDisp + '%)'));
+        legend.appendChild($('span', { className: 'unplanned' }, 'Unplanned: ' + unplannedSP + ' SP (' + unplannedPctDisp + '%)'));
+        legend.appendChild($('span', { className: 'cve' }, 'CVE: ' + cveSP + ' SP (' + cvePctDisp + '%)'));
+        container.appendChild(legend);
       }
 
-      const container = $('div', { className: 'section' });
-      container.appendChild($('h2', {}, 'Carry-Forward Worst Offenders'));
+      // Epic progress table
+      if (DATA.roadmap.epics && DATA.roadmap.epics.length > 0) {
+        container.appendChild($('h3', {}, 'Epic Progress'));
 
-      const table = $('table', {});
-      const thead = $('thead', {});
-      const headerRow = $('tr', {});
-      headerRow.appendChild($('th', {}, 'Key'));
-      headerRow.appendChild($('th', {}, 'Sprint Count'));
-      headerRow.appendChild($('th', {}, 'Status'));
-      headerRow.appendChild($('th', {}, 'Summary'));
-      headerRow.appendChild($('th', {}, 'Latest Comment'));
-      thead.appendChild(headerRow);
-      table.appendChild(thead);
+        var table = $('table', {});
+        var thead = $('thead', {});
+        var headerRow = $('tr', {});
+        headerRow.appendChild($('th', {}, 'Epic'));
+        headerRow.appendChild($('th', {}, 'Summary'));
+        headerRow.appendChild($('th', {}, 'Progress'));
+        headerRow.appendChild($('th', {}, 'Story Points'));
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
 
-      const tbody = $('tbody', {});
-      DATA.carryForward.items.forEach(item => {
-        const row = $('tr', {});
-        row.appendChild($('td', {}, link(item.key)));
+        var tbody = $('tbody', {});
+        for (var i = 0; i < DATA.roadmap.epics.length; i++) {
+          var epic = DATA.roadmap.epics[i];
+          var filterText = [epic.key, epic.summary].join(' ');
+          var row = $('tr', { 'data-filter': filterText });
+          row.appendChild($('td', {}, link(epic.key)));
+          row.appendChild($('td', {}, epic.summary || ''));
+          // progress: completedSP / totalSP
+          var progressText = (epic.completedSP || 0) + ' / ' + (epic.totalSP || 0) + ' SP';
+          row.appendChild($('td', {}, progressText));
+          row.appendChild($('td', {}, String(epic.totalSP || 0)));
+          tbody.appendChild(row);
+        }
+        table.appendChild(tbody);
 
-        const countCell = $('td', {});
-        const count = item.sprintCount || 0;
-        const countClass = count >= 5 ? 'carry-critical' : count >= 3 ? 'carry-warning' : '';
-        countCell.appendChild($('span', { className: countClass }, count));
-        row.appendChild(countCell);
+        container.appendChild(table);
+      }
 
-        row.appendChild($('td', {}, item.status || ''));
-        row.appendChild($('td', {}, item.summary || ''));
-        row.appendChild($('td', {}, item.latestComment || ''));
-        tbody.appendChild(row);
-      });
-      table.appendChild(tbody);
+      // Untracked warning (use .untrackedCount, not .untrackedIssues)
+      if (DATA.roadmap.untrackedCount > 0) {
+        var alert = $('div', { className: 'alert' });
+        alert.appendChild($('strong', {}, 'Untracked Issues'));
+        alert.appendChild($('span', {}, DATA.roadmap.untrackedCount + ' issues are not linked to any epic'));
+        container.appendChild(alert);
+      }
 
-      container.appendChild(table);
       return container;
     }
 
-    function renderFutureSprint() {
-      if (!DATA.futureSprint || !DATA.futureSprint.items || DATA.futureSprint.items.length === 0) {
-        return null;
+    function renderFutureSprintContent() {
+      // DATA.futureSprint.issues, not .items
+      var issues = DATA.futureSprint && DATA.futureSprint.issues ? DATA.futureSprint.issues : [];
+      if (issues.length === 0) {
+        return $('div', { className: 'empty-state' }, 'No future sprint issues');
       }
 
-      const container = $('div', { className: 'section' });
-      const sprintName = DATA.futureSprint.name || 'Future Sprint';
-      container.appendChild($('h2', {}, `Future Sprint — Recommended Priority (${sprintName})`));
+      var container = $('div', {});
 
-      const table = $('table', {});
-      const thead = $('thead', {});
-      const headerRow = $('tr', {});
+      var table = $('table', {});
+      var thead = $('thead', {});
+      var headerRow = $('tr', {});
       headerRow.appendChild($('th', {}, 'Rank'));
       headerRow.appendChild($('th', {}, 'Key'));
       headerRow.appendChild($('th', {}, 'Summary'));
@@ -979,171 +1341,217 @@
       thead.appendChild(headerRow);
       table.appendChild(thead);
 
-      const tbody = $('tbody', {});
-      DATA.futureSprint.items.forEach((item, index) => {
-        const row = $('tr', {});
-        row.appendChild($('td', {}, index + 1));
+      var tbody = $('tbody', {});
+      for (var i = 0; i < issues.length; i++) {
+        var item = issues[i];
+        var filterText = [item.key, item.summary, item.type, item.priority].join(' ');
+        var row = $('tr', { 'data-filter': filterText });
+        row.appendChild($('td', {}, String(item.rank || (i + 1))));
         row.appendChild($('td', {}, link(item.key)));
         row.appendChild($('td', {}, item.summary || ''));
 
-        const typeCell = $('td', {});
-        const type = item.type || '';
-        let tagClass = 'story';
-        if (type.toLowerCase().includes('vulnerability')) {
+        var typeCell = $('td', {});
+        var type = item.type || '';
+        var tagClass = 'story';
+        if (type.toLowerCase().indexOf('vulnerability') !== -1) {
           tagClass = 'vuln';
-        } else if (type.toLowerCase().includes('bug')) {
+        } else if (type.toLowerCase().indexOf('bug') !== -1) {
           tagClass = 'bug';
         }
-        typeCell.appendChild($('span', { className: `tag ${tagClass}` }, type));
+        typeCell.appendChild($('span', { className: 'tag ' + tagClass }, type));
         row.appendChild(typeCell);
 
         row.appendChild($('td', {}, item.priority || ''));
         tbody.appendChild(row);
-      });
+      }
       table.appendChild(tbody);
 
       container.appendChild(table);
       return container;
     }
 
-    function renderCollapsible(title, contentFn) {
-      const header = $('h2', { className: 'collapsible' }, title);
-      const content = $('div', { className: 'collapsible-content' });
-
-      header.addEventListener('click', () => {
-        header.classList.toggle('open');
-        content.classList.toggle('open');
-      });
-
-      content.appendChild(contentFn());
-      return $('div', {}, header, content);
-    }
-
-    function renderAssignees() {
-      if (!DATA.assignees || !DATA.assignees.items || DATA.assignees.items.length === 0) {
-        return null;
+    function renderAssigneesContent() {
+      // DATA.assignees is an OBJECT keyed by name, not an array
+      if (!DATA.assignees || typeof DATA.assignees !== 'object') {
+        return $('div', { className: 'empty-state' }, 'No assignee data');
       }
 
-      const sorted = [...DATA.assignees.items].sort((a, b) => (b.storyPoints || 0) - (a.storyPoints || 0));
-
-      return renderCollapsible(`Per-Assignee Breakdown (${sorted.length})`, () => {
-        const wrapper = $('div', {});
-
-        sorted.forEach(assignee => {
-          const section = $('div', { className: 'nested-section' });
-
-          const header = $('h3', { className: 'collapsible' }, `${assignee.name || 'Unassigned'} (${assignee.storyPoints || 0} SP)`);
-          const content = $('div', { className: 'collapsible-content' });
-
-          header.addEventListener('click', () => {
-            header.classList.toggle('open');
-            content.classList.toggle('open');
-          });
-
-          // Alerts
-          if (assignee.blocked > 0) {
-            const alert = $('div', { className: 'alert' });
-            alert.appendChild($('strong', {}, 'Blocked'));
-            alert.appendChild($('span', {}, `${assignee.blocked} issue(s) blocked`));
-            content.appendChild(alert);
-          }
-
-          if (assignee.carryForward > 0) {
-            const alert = $('div', { className: 'alert' });
-            alert.appendChild($('strong', {}, 'Carry-Forward'));
-            alert.appendChild($('span', {}, `${assignee.carryForward} issue(s) carried forward`));
-            content.appendChild(alert);
-          }
-
-          // Issues table
-          if (assignee.issues && assignee.issues.length > 0) {
-            const table = $('table', {});
-            const thead = $('thead', {});
-            const headerRow = $('tr', {});
-            headerRow.appendChild($('th', {}, 'Key'));
-            headerRow.appendChild($('th', {}, 'Summary'));
-            headerRow.appendChild($('th', {}, 'Status'));
-            headerRow.appendChild($('th', {}, 'SP'));
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
-
-            const tbody = $('tbody', {});
-            assignee.issues.forEach(issue => {
-              const row = $('tr', {});
-              row.appendChild($('td', {}, link(issue.key)));
-              row.appendChild($('td', {}, issue.summary || ''));
-              row.appendChild($('td', {}, issue.status || ''));
-              row.appendChild($('td', {}, issue.storyPoints || 0));
-              tbody.appendChild(row);
-            });
-            table.appendChild(tbody);
-
-            content.appendChild(table);
-          }
-
-          section.appendChild(header);
-          section.appendChild(content);
-          wrapper.appendChild(section);
-        });
-
-        return wrapper;
-      });
-    }
-
-    function renderComponents() {
-      if (!DATA.components || !DATA.components.items || DATA.components.items.length === 0) {
-        return null;
+      var names = Object.keys(DATA.assignees);
+      if (names.length === 0) {
+        return $('div', { className: 'empty-state' }, 'No assignee data');
       }
 
-      const sorted = [...DATA.components.items].sort((a, b) => (b.storyPoints || 0) - (a.storyPoints || 0));
-
-      return renderCollapsible(`Per-Component Breakdown (${sorted.length})`, () => {
-        const wrapper = $('div', {});
-
-        sorted.forEach(component => {
-          const section = $('div', { className: 'nested-section' });
-
-          const header = $('h3', { className: 'collapsible' }, `${component.name || 'No Component'} (${component.storyPoints || 0} SP)`);
-          const content = $('div', { className: 'collapsible-content' });
-
-          header.addEventListener('click', () => {
-            header.classList.toggle('open');
-            content.classList.toggle('open');
-          });
-
-          // Status summary
-          if (component.completed !== undefined || component.inProgress !== undefined || component.todo !== undefined) {
-            const summary = $('div', { style: 'margin: 0.5rem 0; font-size: 0.85rem; color: var(--text-secondary);' });
-            summary.textContent = `Completed: ${component.completed || 0} | In Progress: ${component.inProgress || 0} | To Do: ${component.todo || 0}`;
-            content.appendChild(summary);
-          }
-
-          // Alerts
-          if (component.blocked > 0) {
-            const alert = $('div', { className: 'alert' });
-            alert.appendChild($('strong', {}, 'Blocked'));
-            alert.appendChild($('span', {}, `${component.blocked} issue(s) blocked`));
-            content.appendChild(alert);
-          }
-
-          if (component.carryForward > 0) {
-            const alert = $('div', { className: 'alert' });
-            alert.appendChild($('strong', {}, 'Carry-Forward'));
-            alert.appendChild($('span', {}, `${component.carryForward} issue(s) carried forward`));
-            content.appendChild(alert);
-          }
-
-          section.appendChild(header);
-          section.appendChild(content);
-          wrapper.appendChild(section);
-        });
-
-        return wrapper;
+      // Sort by totalSP descending
+      names.sort(function(a, b) {
+        return (DATA.assignees[b].totalSP || 0) - (DATA.assignees[a].totalSP || 0);
       });
+
+      var wrapper = $('div', {});
+
+      for (var n = 0; n < names.length; n++) {
+        var name = names[n];
+        var assignee = DATA.assignees[name];
+        var section = $('div', { className: 'nested-section' });
+
+        var header = $('h3', { className: 'collapsible' }, name + ' (' + (assignee.totalSP || 0) + ' SP, ' + (assignee.totalIssues || 0) + ' issues)');
+        var content = $('div', { className: 'collapsible-content' });
+
+        header.addEventListener('click', (function(h, c) {
+          return function() {
+            h.classList.toggle('open');
+            c.classList.toggle('open');
+          };
+        })(header, content));
+
+        // Status breakdown
+        if (assignee.byStatus) {
+          var statusKeys = Object.keys(assignee.byStatus);
+          if (statusKeys.length > 0) {
+            var parts = [];
+            for (var si = 0; si < statusKeys.length; si++) {
+              var sk = statusKeys[si];
+              var sv = assignee.byStatus[sk];
+              parts.push(sk + ': ' + (sv.count || 0));
+            }
+            var statusSummary = $('div', { style: 'margin: 0.5rem 0; font-size: 0.85rem; color: var(--text-secondary);' });
+            statusSummary.textContent = parts.join(' | ');
+            content.appendChild(statusSummary);
+          }
+        }
+
+        // Blocked alert
+        if (assignee.blocked > 0) {
+          var alert = $('div', { className: 'alert' });
+          alert.appendChild($('strong', {}, 'Blocked'));
+          alert.appendChild($('span', {}, assignee.blocked + ' issue(s) blocked'));
+          content.appendChild(alert);
+        }
+
+        // Carry-forward alert
+        if (assignee.carryForwardCount > 0) {
+          var alert2 = $('div', { className: 'alert' });
+          alert2.appendChild($('strong', {}, 'Carry-Forward'));
+          alert2.appendChild($('span', {}, assignee.carryForwardCount + ' issue(s) carried forward'));
+          content.appendChild(alert2);
+        }
+
+        // Issues table
+        if (assignee.issues && assignee.issues.length > 0) {
+          var table = $('table', {});
+          var thead = $('thead', {});
+          var headerRow = $('tr', {});
+          headerRow.appendChild($('th', {}, 'Key'));
+          headerRow.appendChild($('th', {}, 'Summary'));
+          headerRow.appendChild($('th', {}, 'Status'));
+          headerRow.appendChild($('th', {}, 'SP'));
+          thead.appendChild(headerRow);
+          table.appendChild(thead);
+
+          var tbody = $('tbody', {});
+          for (var ii = 0; ii < assignee.issues.length; ii++) {
+            var issue = assignee.issues[ii];
+            var filterText = [issue.key, issue.summary, issue.status, name].join(' ');
+            var row = $('tr', { 'data-filter': filterText });
+            row.appendChild($('td', {}, link(issue.key)));
+            row.appendChild($('td', {}, issue.summary || ''));
+            row.appendChild($('td', {}, issue.status || ''));
+            row.appendChild($('td', {}, String(issue.sp || 0)));
+            tbody.appendChild(row);
+          }
+          table.appendChild(tbody);
+
+          content.appendChild(table);
+        }
+
+        section.appendChild(header);
+        section.appendChild(content);
+        wrapper.appendChild(section);
+      }
+
+      return wrapper;
+    }
+
+    function renderComponentsContent() {
+      // DATA.components is an OBJECT keyed by name, not an array
+      if (!DATA.components || typeof DATA.components !== 'object') {
+        return $('div', { className: 'empty-state' }, 'No component data');
+      }
+
+      var names = Object.keys(DATA.components);
+      if (names.length === 0) {
+        return $('div', { className: 'empty-state' }, 'No component data');
+      }
+
+      // Sort by totalSP descending
+      names.sort(function(a, b) {
+        return (DATA.components[b].totalSP || 0) - (DATA.components[a].totalSP || 0);
+      });
+
+      var wrapper = $('div', {});
+
+      for (var n = 0; n < names.length; n++) {
+        var name = names[n];
+        var component = DATA.components[name];
+        var section = $('div', { className: 'nested-section' });
+
+        var header = $('h3', { className: 'collapsible' }, name + ' (' + (component.totalSP || 0) + ' SP, ' + (component.totalIssues || 0) + ' issues)');
+        var content = $('div', { className: 'collapsible-content' });
+
+        header.addEventListener('click', (function(h, c) {
+          return function() {
+            h.classList.toggle('open');
+            c.classList.toggle('open');
+          };
+        })(header, content));
+
+        // Status breakdown
+        if (component.byStatus) {
+          var statusKeys = Object.keys(component.byStatus);
+          if (statusKeys.length > 0) {
+            var parts = [];
+            for (var si = 0; si < statusKeys.length; si++) {
+              var sk = statusKeys[si];
+              var sv = component.byStatus[sk];
+              parts.push(sk + ': ' + (sv.count || 0));
+            }
+            var statusSummary = $('div', { style: 'margin: 0.5rem 0; font-size: 0.85rem; color: var(--text-secondary);' });
+            statusSummary.textContent = parts.join(' | ');
+            content.appendChild(statusSummary);
+          }
+        }
+
+        // Alerts
+        if (component.blocked > 0) {
+          var alert = $('div', { className: 'alert' });
+          alert.appendChild($('strong', {}, 'Blocked'));
+          alert.appendChild($('span', {}, component.blocked + ' issue(s) blocked'));
+          content.appendChild(alert);
+        }
+
+        if (component.carryForward > 0) {
+          var alert2 = $('div', { className: 'alert' });
+          alert2.appendChild($('strong', {}, 'Carry-Forward'));
+          alert2.appendChild($('span', {}, component.carryForward + ' issue(s) carried forward'));
+          content.appendChild(alert2);
+        }
+
+        if (component.highPriorityBugs > 0) {
+          var alert3 = $('div', { className: 'alert critical' });
+          alert3.appendChild($('strong', {}, 'High Priority Bugs'));
+          alert3.appendChild($('span', {}, component.highPriorityBugs + ' high priority bug(s)'));
+          content.appendChild(alert3);
+        }
+
+        section.appendChild(header);
+        section.appendChild(content);
+        wrapper.appendChild(section);
+      }
+
+      return wrapper;
     }
 
     function render() {
-      const app = document.getElementById('app');
+      var app = document.getElementById('app');
 
       // Clear app
       while (app.firstChild) {
@@ -1156,29 +1564,65 @@
         return;
       }
 
-      // Render all sections
-      const sections = [
-        renderHeader,
-        renderSummaryCards,
-        renderAlerts,
-        renderRoadmap,
-        renderVelocity,
-        renderDoD,
-        renderCodeReview,
-        renderBlocked,
-        renderBugs,
-        renderCarryForward,
-        renderFutureSprint,
-        renderAssignees,
-        renderComponents
-      ];
+      // Section order for actionability:
+      // 1. Header + Health Score + Days Remaining
+      var headerEl = renderHeader();
+      if (headerEl) app.appendChild(headerEl);
 
-      sections.forEach(fn => {
-        const section = fn();
-        if (section) {
-          app.appendChild(section);
-        }
-      });
+      app.appendChild(renderHealthScore());
+
+      var daysEl = renderDaysRemaining();
+      if (daysEl) app.appendChild(daysEl);
+
+      // 2. Filter Bar
+      app.appendChild(renderFilterBar());
+
+      // 3. Alerts (expectations) — expanded
+      var alertsEl = renderAlerts();
+      if (alertsEl) app.appendChild(alertsEl);
+
+      // 4. Summary Cards — expanded
+      var summaryEl = renderSummaryCards();
+      if (summaryEl) app.appendChild(summaryEl);
+
+      // 5. Blocked Issues — expanded (PO needs to act)
+      var blockedEl = renderBlocked();
+      if (blockedEl) app.appendChild(blockedEl);
+
+      // 6. High Priority Bugs — expanded
+      var bugsEl = renderBugs();
+      if (bugsEl) app.appendChild(bugsEl);
+
+      // 7. Carry-Forward — expanded
+      var carryEl = renderCarryForward();
+      if (carryEl) app.appendChild(carryEl);
+
+      // 8. DoD Compliance — collapsed by default
+      app.appendChild(renderCollapsible('DoD Compliance', renderDoDContent, false));
+
+      // 9. Code Review SP Redo — collapsed by default
+      app.appendChild(renderCollapsible('Code Review \u2014 SP Redo Recommendations', renderCodeReviewContent, false));
+
+      // 10. Velocity Trend — collapsed by default
+      app.appendChild(renderCollapsible('Velocity Trend', renderVelocityContent, false));
+
+      // 11. Roadmap Alignment — collapsed by default
+      app.appendChild(renderCollapsible('Roadmap Alignment', renderRoadmapContent, false));
+
+      // 12. Future Sprint — collapsed by default
+      var futureTitle = 'Future Sprint';
+      if (DATA.futureSprint && DATA.futureSprint.name) {
+        futureTitle = 'Future Sprint \u2014 ' + DATA.futureSprint.name;
+      }
+      app.appendChild(renderCollapsible(futureTitle, renderFutureSprintContent, false));
+
+      // 13. Per-Assignee — collapsed by default
+      var assigneeCount = DATA.assignees ? Object.keys(DATA.assignees).length : 0;
+      app.appendChild(renderCollapsible('Per-Assignee Breakdown (' + assigneeCount + ')', renderAssigneesContent, false));
+
+      // 14. Per-Component — collapsed by default
+      var componentCount = DATA.components ? Object.keys(DATA.components).length : 0;
+      app.appendChild(renderCollapsible('Per-Component Breakdown (' + componentCount + ')', renderComponentsContent, false));
     }
 
     // Initialize

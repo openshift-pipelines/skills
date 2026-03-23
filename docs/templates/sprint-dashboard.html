@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sprint Dashboard</title>
+  <style>
+    :root {
+      --bg-primary: #f8f9fa;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-table: #f0f4f8;
+      --text-primary: #1a1a2e;
+      --text-secondary: #6c757d;
+      --text-dim: #adb5bd;
+      --border-color: #dee2e6;
+      --green: #06d6a0;
+      --yellow: #ffd166;
+      --red: #ef476f;
+      --orange: #ff8c42;
+      --accent: #00b4d8;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #1a1a2e;
+        --bg-secondary: #16213e;
+        --bg-card: #0f3460;
+        --bg-table: #16213e;
+        --text-primary: #f8f9fa;
+        --text-secondary: #adb5bd;
+        --text-dim: #6c757d;
+        --border-color: #495057;
+      }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    #app {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin: 2rem 0 1rem;
+      color: var(--text-primary);
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      margin: 1.5rem 0 0.75rem;
+      color: var(--text-primary);
+    }
+
+    .meta {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin: 1.5rem 0;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .card .label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .card .value {
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+
+    .card.green .value {
+      color: var(--green);
+    }
+
+    .card.yellow .value {
+      color: var(--yellow);
+    }
+
+    .card.red .value {
+      color: var(--red);
+    }
+
+    .alert {
+      background: var(--bg-card);
+      border-left: 4px solid var(--yellow);
+      padding: 10px;
+      margin: 0.75rem 0;
+      border-radius: 4px;
+    }
+
+    .alert.critical {
+      border-left-color: var(--red);
+    }
+
+    .alert.positive {
+      border-left-color: var(--green);
+    }
+
+    .alert strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin: 1rem 0;
+      background: var(--bg-secondary);
+    }
+
+    th {
+      background: var(--bg-table);
+      padding: 10px;
+      text-align: left;
+      font-weight: bold;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    tr:hover {
+      background: var(--bg-card);
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+    }
+
+    .bar-label {
+      width: 140px;
+      text-align: right;
+      padding-right: 12px;
+      font-size: 0.85rem;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 22px;
+      background: var(--bg-card);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .bar-fill-done {
+      background: var(--green);
+      height: 100%;
+    }
+
+    .bar-fill-carried {
+      background: var(--yellow);
+      height: 100%;
+    }
+
+    .bar-value {
+      width: 100px;
+      padding-left: 12px;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .bar-marker {
+      font-size: 0.9rem;
+      color: var(--accent);
+      margin-left: 8px;
+    }
+
+    .proximity {
+      display: inline-flex;
+      gap: 2px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot.filled {
+      background: var(--green);
+    }
+
+    .dot.empty {
+      border: 1px solid var(--border-color);
+      background: transparent;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    .tag.vuln {
+      background: var(--red);
+      color: white;
+    }
+
+    .tag.bug {
+      background: var(--orange);
+      color: white;
+    }
+
+    .tag.story {
+      background: var(--accent);
+      color: white;
+    }
+
+    .roadmap-bar {
+      display: flex;
+      height: 28px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .roadmap-bar .planned {
+      background: var(--green);
+    }
+
+    .roadmap-bar .unplanned {
+      background: var(--yellow);
+    }
+
+    .roadmap-bar .cve {
+      background: var(--red);
+    }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      font-size: 0.8rem;
+      margin: 1rem 0;
+    }
+
+    .legend span::before {
+      content: '';
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      margin-right: 6px;
+      vertical-align: middle;
+      border-radius: 2px;
+    }
+
+    .legend .planned::before {
+      background: var(--green);
+    }
+
+    .legend .unplanned::before {
+      background: var(--yellow);
+    }
+
+    .legend .cve::before {
+      background: var(--red);
+    }
+
+    .carry-warning {
+      color: var(--yellow);
+      font-weight: bold;
+    }
+
+    .carry-critical {
+      color: var(--red);
+      font-weight: bolder;
+    }
+
+    .empty-state {
+      color: var(--text-dim);
+      font-style: italic;
+      text-align: center;
+      padding: 12px;
+    }
+
+    .dod-bar {
+      display: flex;
+      height: 28px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .dod-bar .complete {
+      background: var(--green);
+    }
+
+    .dod-bar .at-risk {
+      background: var(--yellow);
+    }
+
+    .dod-bar .incomplete {
+      background: var(--red);
+    }
+
+    .collapsible {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .collapsible::before {
+      content: '\25B8 ';
+    }
+
+    .collapsible.open::before {
+      content: '\25BE ';
+    }
+
+    .collapsible-content {
+      display: none;
+    }
+
+    .collapsible-content.open {
+      display: block;
+    }
+
+    .score-high {
+      color: var(--green);
+      font-weight: bold;
+    }
+
+    .score-medium {
+      color: var(--yellow);
+      font-weight: bold;
+    }
+
+    .score-low {
+      color: var(--red);
+      font-weight: bold;
+    }
+
+    .truncate {
+      max-width: 400px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .total-row {
+      font-weight: bold;
+      background: var(--bg-table);
+    }
+
+    .nested-section {
+      margin: 1rem 0;
+      padding-left: 1rem;
+      border-left: 2px solid var(--border-color);
+    }
+
+    .section {
+      margin-bottom: 3rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    const DATA = {};
+
+    // Safe DOM helper
+    function $(tag, attrs = {}, ...children) {
+      const el = document.createElement(tag);
+
+      for (const [key, value] of Object.entries(attrs)) {
+        if (key === 'className') {
+          el.className = value;
+        } else if (key.startsWith('on') && typeof value === 'function') {
+          const event = key.substring(2).toLowerCase();
+          el.addEventListener(event, value);
+        } else {
+          el.setAttribute(key, value);
+        }
+      }
+
+      for (const child of children) {
+        if (typeof child === 'string' || typeof child === 'number') {
+          el.appendChild(document.createTextNode(String(child)));
+        } else if (child && child.nodeType) {
+          el.appendChild(child);
+        }
+      }
+
+      return el;
+    }
+
+    // Create Jira link
+    function link(key) {
+      if (!DATA.meta || !DATA.meta.jiraBaseUrl) {
+        return $(
+          'a',
+          { href: '#', target: '_blank' },
+          key
+        );
+      }
+      return $(
+        'a',
+        { href: `${DATA.meta.jiraBaseUrl}/browse/${key}`, target: '_blank' },
+        key
+      );
+    }
+
+    // Render functions
+    function renderHeader() {
+      if (!DATA.meta) return null;
+
+      const container = $('div', { className: 'section' });
+      container.appendChild($('h1', {}, DATA.meta.sprintName || 'Sprint Dashboard'));
+
+      const metaText = [];
+      if (DATA.meta.team) metaText.push(`Team: ${DATA.meta.team}`);
+      if (DATA.meta.endDate) metaText.push(`End Date: ${DATA.meta.endDate}`);
+
+      if (metaText.length > 0) {
+        container.appendChild($('div', { className: 'meta' }, metaText.join(' | ')));
+      }
+
+      return container;
+    }
+
+    function renderSummaryCards() {
+      if (!DATA.summary) return null;
+
+      const container = $('div', { className: 'section' });
+      container.appendChild($('h2', {}, 'Summary'));
+
+      const cards = $('div', { className: 'cards' });
+
+      // Total
+      const totalCard = $('div', { className: 'card' });
+      totalCard.appendChild($('div', { className: 'label' }, 'Total'));
+      totalCard.appendChild($('div', { className: 'value' }, `${DATA.summary.totalIssues || 0} (${DATA.summary.totalStoryPoints || 0} SP)`));
+      cards.appendChild(totalCard);
+
+      // Completed
+      const completedCard = $('div', { className: 'card green' });
+      completedCard.appendChild($('div', { className: 'label' }, 'Completed'));
+      completedCard.appendChild($('div', { className: 'value' }, `${DATA.summary.completed || 0} (${DATA.summary.completedStoryPoints || 0} SP)`));
+      cards.appendChild(completedCard);
+
+      // Code Review
+      const codeReviewCard = $('div', { className: 'card yellow' });
+      codeReviewCard.appendChild($('div', { className: 'label' }, 'Code Review'));
+      codeReviewCard.appendChild($('div', { className: 'value' }, `${DATA.summary.codeReview || 0} (${DATA.summary.codeReviewStoryPoints || 0} SP)`));
+      cards.appendChild(codeReviewCard);
+
+      // Blocked
+      const blockedCard = $('div', { className: 'card red' });
+      blockedCard.appendChild($('div', { className: 'label' }, 'Blocked'));
+      blockedCard.appendChild($('div', { className: 'value' }, `${DATA.summary.blocked || 0} (${DATA.summary.blockedStoryPoints || 0} SP)`));
+      cards.appendChild(blockedCard);
+
+      // No Story Points (conditional)
+      if (DATA.summary.noStoryPoints > 0) {
+        const noSPCard = $('div', { className: 'card' });
+        noSPCard.appendChild($('div', { className: 'label' }, 'No Story Points'));
+        noSPCard.appendChild($('div', { className: 'value' }, DATA.summary.noStoryPoints));
+        cards.appendChild(noSPCard);
+      }
+
+      container.appendChild(cards);
+      return container;
+    }
+
+    function renderAlerts() {
+      if (!DATA.expectations) return null;
+
+      const alerts = [];
+
+      if (DATA.expectations.overCommitment) {
+        const alert = $('div', { className: 'alert critical' });
+        alert.appendChild($('strong', {}, 'Over-Commitment'));
+        alert.appendChild($('span', {}, DATA.expectations.overCommitment));
+        alerts.push(alert);
+      }
+
+      if (DATA.expectations.underCommitment) {
+        const alert = $('div', { className: 'alert positive' });
+        alert.appendChild($('strong', {}, 'Under-Commitment'));
+        alert.appendChild($('span', {}, DATA.expectations.underCommitment));
+        alerts.push(alert);
+      }
+
+      if (DATA.expectations.codeReviewBottleneck) {
+        const alert = $('div', { className: 'alert' });
+        alert.appendChild($('strong', {}, 'Code Review Bottleneck'));
+        alert.appendChild($('span', {}, DATA.expectations.codeReviewBottleneck));
+        alerts.push(alert);
+      }
+
+      if (DATA.expectations.carryForwardRateIncreasing) {
+        const alert = $('div', { className: 'alert' });
+        alert.appendChild($('strong', {}, 'Carry-Forward Rate Increasing'));
+        alert.appendChild($('span', {}, DATA.expectations.carryForwardRateIncreasing));
+        alerts.push(alert);
+      }
+
+      if (alerts.length === 0) return null;
+
+      const container = $('div', { className: 'section' });
+      container.appendChild($('h2', {}, 'Alerts'));
+      alerts.forEach(alert => container.appendChild(alert));
+
+      return container;
+    }
+
+    function renderRoadmap() {
+      if (!DATA.roadmap) return null;
+
+      const container = $('div', { className: 'section' });
+      container.appendChild($('h2', {}, 'Roadmap Alignment'));
+
+      // Stacked bar
+      const total = (DATA.roadmap.plannedSP || 0) + (DATA.roadmap.unplannedSP || 0) + (DATA.roadmap.cveSP || 0);
+
+      if (total > 0) {
+        const bar = $('div', { className: 'roadmap-bar' });
+
+        const plannedPct = ((DATA.roadmap.plannedSP || 0) / total * 100).toFixed(1);
+        const unplannedPct = ((DATA.roadmap.unplannedSP || 0) / total * 100).toFixed(1);
+        const cvePct = ((DATA.roadmap.cveSP || 0) / total * 100).toFixed(1);
+
+        if (DATA.roadmap.plannedSP > 0) {
+          bar.appendChild($('div', { className: 'planned', style: `width: ${plannedPct}%` }));
+        }
+        if (DATA.roadmap.unplannedSP > 0) {
+          bar.appendChild($('div', { className: 'unplanned', style: `width: ${unplannedPct}%` }));
+        }
+        if (DATA.roadmap.cveSP > 0) {
+          bar.appendChild($('div', { className: 'cve', style: `width: ${cvePct}%` }));
+        }
+
+        container.appendChild(bar);
+
+        // Legend
+        const legend = $('div', { className: 'legend' });
+        legend.appendChild($('span', { className: 'planned' }, `Planned: ${DATA.roadmap.plannedSP || 0} SP (${plannedPct}%)`));
+        legend.appendChild($('span', { className: 'unplanned' }, `Unplanned: ${DATA.roadmap.unplannedSP || 0} SP (${unplannedPct}%)`));
+        legend.appendChild($('span', { className: 'cve' }, `CVE: ${DATA.roadmap.cveSP || 0} SP (${cvePct}%)`));
+        container.appendChild(legend);
+      }
+
+      // Epic progress table
+      if (DATA.roadmap.epics && DATA.roadmap.epics.length > 0) {
+        container.appendChild($('h3', {}, 'Epic Progress'));
+
+        const table = $('table', {});
+        const thead = $('thead', {});
+        const headerRow = $('tr', {});
+        headerRow.appendChild($('th', {}, 'Epic'));
+        headerRow.appendChild($('th', {}, 'Summary'));
+        headerRow.appendChild($('th', {}, 'Progress'));
+        headerRow.appendChild($('th', {}, 'Story Points'));
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = $('tbody', {});
+        DATA.roadmap.epics.forEach(epic => {
+          const row = $('tr', {});
+          row.appendChild($('td', {}, link(epic.key)));
+          row.appendChild($('td', {}, epic.summary || ''));
+          row.appendChild($('td', {}, `${epic.progress || 0}%`));
+          row.appendChild($('td', {}, epic.storyPoints || 0));
+          tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+
+        container.appendChild(table);
+      }
+
+      // Untracked warning
+      if (DATA.roadmap.untrackedIssues > 0) {
+        const alert = $('div', { className: 'alert' });
+        alert.appendChild($('strong', {}, 'Untracked Issues'));
+        alert.appendChild($('span', {}, `${DATA.roadmap.untrackedIssues} issues are not linked to any epic`));
+        container.appendChild(alert);
+      }
+
+      return container;
+    }
+
+    function renderVelocity() {
+      if (!DATA.velocity || !DATA.velocity.history || DATA.velocity.history.length === 0) {
+        const container = $('div', { className: 'section' });
+        container.appendChild($('h2', {}, 'Velocity Trend'));
+        container.appendChild($('div', { className: 'empty-state' }, 'No velocity history available'));
+        return container;
+      }
+
+      const container = $('div', { className: 'section' });
+      container.appendChild($('h2', {}, 'Velocity Trend'));
+
+      // Find max for scaling
+      const maxSP = Math.max(...DATA.velocity.history.map(s => (s.completed || 0) + (s.carried || 0)));
+
+      DATA.velocity.history.forEach(sprint => {
+        const row = $('div', { className: 'bar-row' });
+
+        const label = $('div', { className: 'bar-label' }, sprint.name || 'Sprint');
+        row.appendChild(label);
+
+        const track = $('div', { className: 'bar-track' });
+
+        const completedPct = ((sprint.completed || 0) / maxSP * 100).toFixed(1);
+        const carriedPct = ((sprint.carried || 0) / maxSP * 100).toFixed(1);
+
+        if (sprint.completed > 0) {
+          track.appendChild($('div', { className: 'bar-fill-done', style: `width: ${completedPct}%` }));
+        }
+        if (sprint.carried > 0) {
+          track.appendChild($('div', { className: 'bar-fill-carried', style: `width: ${carriedPct}%` }));
+        }
+
+        row.appendChild(track);
+
+        const value = $('div', { className: 'bar-value' }, `${sprint.completed || 0} / ${(sprint.completed || 0) + (sprint.carried || 0)} SP`);
+        row.appendChild(value);
+
+        if (sprint.isCurrent) {
+          row.appendChild($('span', { className: 'bar-marker' }, '\u2190 now'));
+        }
+
+        container.appendChild(row);
+      });
+
+      // Stats
+      if (DATA.velocity.stats) {
+        const statsRow = $('div', { style: 'margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);' });
+        const stats = [];
+        if (DATA.velocity.stats.avg3Sprint !== undefined) {
+          stats.push(`3-sprint avg: ${DATA.velocity.stats.avg3Sprint} SP`);
+        }
+        if (DATA.velocity.stats.avg5Sprint !== undefined) {
+          stats.push(`5-sprint avg: ${DATA.velocity.stats.avg5Sprint} SP`);
+        }
+        if (DATA.velocity.stats.trend) {
+          stats.push(`Trend: ${DATA.velocity.stats.trend}`);
+        }
+        statsRow.textContent = stats.join(' | ');
+        container.appendChild(statsRow);
+      }
+
+      return container;
+    }
+
+    function renderDoD() {
+      if (!DATA.dod) return null;
+
+      const container = $('div', { className: 'section' });
+      container.appendChild($('h2', {}, 'DoD Compliance'));
+
+      // Summary bar
+      const total = (DATA.dod.complete || 0) + (DATA.dod.atRisk || 0) + (DATA.dod.incomplete || 0);
+
+      if (total > 0) {
+        const bar = $('div', { className: 'dod-bar' });
+
+        const completePct = ((DATA.dod.complete || 0) / total * 100).toFixed(1);
+        const atRiskPct = ((DATA.dod.atRisk || 0) / total * 100).toFixed(1);
+        const incompletePct = ((DATA.dod.incomplete || 0) / total * 100).toFixed(1);
+
+        if (DATA.dod.complete > 0) {
+          bar.appendChild($('div', { className: 'complete', style: `width: ${completePct}%` }));
+        }
+        if (DATA.dod.atRisk > 0) {
+          bar.appendChild($('div', { className: 'at-risk', style: `width: ${atRiskPct}%` }));
+        }
+        if (DATA.dod.incomplete > 0) {
+          bar.appendChild($('div', { className: 'incomplete', style: `width: ${incompletePct}%` }));
+        }
+
+        container.appendChild(bar);
+
+        const legend = $('div', { className: 'legend' });
+        legend.appendChild($('span', { className: 'planned' }, `Complete: ${DATA.dod.complete || 0} (${completePct}%)`));
+        legend.appendChild($('span', { className: 'unplanned' }, `At Risk: ${DATA.dod.atRisk || 0} (${atRiskPct}%)`));
+        legend.appendChild($('span', { className: 'cve' }, `Incomplete: ${DATA.dod.incomplete || 0} (${incompletePct}%)`));
+        container.appendChild(legend);
+      }
+
+      // Non-compliant table
+      if (DATA.dod.nonCompliant && DATA.dod.nonCompliant.length > 0) {
+        container.appendChild($('h3', {}, 'Non-Compliant Issues'));
+
+        const table = $('table', {});
+        const thead = $('thead', {});
+        const headerRow = $('tr', {});
+        headerRow.appendChild($('th', {}, 'Key'));
+        headerRow.appendChild($('th', {}, 'Summary'));
+        headerRow.appendChild($('th', {}, 'Status'));
+        headerRow.appendChild($('th', {}, 'Score'));
+        headerRow.appendChild($('th', {}, 'Missing'));
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = $('tbody', {});
+        DATA.dod.nonCompliant.forEach(issue => {
+          const row = $('tr', {});
+          row.appendChild($('td', {}, link(issue.key)));
+          row.appendChild($('td', {}, issue.summary || ''));
+          row.appendChild($('td', {}, issue.status || ''));
+
+          const scoreCell = $('td', {});
+          const score = issue.score || 0;
+          const scoreClass = score >= 0.8 ? 'score-high' : score >= 0.5 ? 'score-medium' : 'score-low';
+          scoreCell.appendChild($('span', { className: scoreClass }, `${(score * 100).toFixed(0)}%`));
+          row.appendChild(scoreCell);
+
+          row.appendChild($('td', {}, (issue.missing || []).join(', ')));
+          tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+
+        container.appendChild(table);
+      }
+
+      return container;
+    }
+
+    function renderCodeReview() {
+      if (!DATA.codeReview || !DATA.codeReview.items || DATA.codeReview.items.length === 0) {
+        const container = $('div', { className: 'section' });
+        container.appendChild($('h2', {}, 'Code Review — SP Redo Recommendations'));
+        container.appendChild($('div', { className: 'empty-state' }, 'No SP redo recommendations'));
+        return container;
+      }
+
+      const container = $('div', { className: 'section' });
+      container.appendChild($('h2', {}, 'Code Review — SP Redo Recommendations'));
+
+      const table = $('table', {});
+      const thead = $('thead', {});
+      const headerRow = $('tr', {});
+      headerRow.appendChild($('th', {}, 'Key'));
+      headerRow.appendChild($('th', {}, 'Summary'));
+      headerRow.appendChild($('th', {}, 'Current SP'));
+      headerRow.appendChild($('th', {}, 'Original SP'));
+      headerRow.appendChild($('th', {}, 'Suggested SP'));
+      headerRow.appendChild($('th', {}, 'Assignee'));
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = $('tbody', {});
+      let totalCurrent = 0;
+      let totalSuggested = 0;
+
+      DATA.codeReview.items.forEach(item => {
+        const row = $('tr', {});
+        row.appendChild($('td', {}, link(item.key)));
+
+        const summaryCell = $('td', {});
+        const summary = item.summary || '';
+        summaryCell.appendChild($('div', { className: 'truncate', title: summary }, summary.substring(0, 60) + (summary.length > 60 ? '...' : '')));
+        row.appendChild(summaryCell);
+
+        row.appendChild($('td', {}, item.currentSP || 0));
+        row.appendChild($('td', {}, item.originalSP || 0));
+        row.appendChild($('td', {}, item.suggestedSP || 0));
+        row.appendChild($('td', {}, item.assignee || 'Unassigned'));
+        tbody.appendChild(row);
+
+        totalCurrent += item.currentSP || 0;
+        totalSuggested += item.suggestedSP || 0;
+      });
+
+      // Total row
+      const totalRow = $('tr', { className: 'total-row' });
+      totalRow.appendChild($('td', { colspan: '2' }, 'Total'));
+      totalRow.appendChild($('td', {}, totalCurrent));
+      totalRow.appendChild($('td', {}, ''));
+      totalRow.appendChild($('td', {}, totalSuggested));
+      totalRow.appendChild($('td', {}, ''));
+      tbody.appendChild(totalRow);
+
+      table.appendChild(tbody);
+      container.appendChild(table);
+
+      return container;
+    }
+
+    function renderBlocked() {
+      if (!DATA.blocked) return null;
+
+      const container = $('div', { className: 'section' });
+      const count = DATA.blocked.items ? DATA.blocked.items.length : 0;
+      container.appendChild($('h2', {}, `Blocked Issues (${count})`));
+
+      if (count === 0) {
+        const alert = $('div', { className: 'alert positive' });
+        alert.appendChild($('span', {}, 'No blocked issues'));
+        container.appendChild(alert);
+        return container;
+      }
+
+      const table = $('table', {});
+      const thead = $('thead', {});
+      const headerRow = $('tr', {});
+      headerRow.appendChild($('th', {}, 'Key'));
+      headerRow.appendChild($('th', {}, 'Summary'));
+      headerRow.appendChild($('th', {}, 'Priority'));
+      headerRow.appendChild($('th', {}, 'Reason'));
+      headerRow.appendChild($('th', {}, 'Assignee'));
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = $('tbody', {});
+      DATA.blocked.items.forEach(item => {
+        const row = $('tr', {});
+        row.appendChild($('td', {}, link(item.key)));
+        row.appendChild($('td', {}, item.summary || ''));
+        row.appendChild($('td', {}, item.priority || ''));
+        row.appendChild($('td', {}, item.reason || ''));
+        row.appendChild($('td', {}, item.assignee || 'Unassigned'));
+        tbody.appendChild(row);
+      });
+      table.appendChild(tbody);
+
+      container.appendChild(table);
+      return container;
+    }
+
+    function renderBugs() {
+      if (!DATA.bugs || !DATA.bugs.items || DATA.bugs.items.length === 0) return null;
+
+      const container = $('div', { className: 'section' });
+      container.appendChild($('h2', {}, 'High Priority Bugs — Closure Proximity'));
+
+      const proximityMap = { done: 5, near: 4, mid: 2, far: 0 };
+
+      const table = $('table', {});
+      const thead = $('thead', {});
+      const headerRow = $('tr', {});
+      headerRow.appendChild($('th', {}, 'Key'));
+      headerRow.appendChild($('th', {}, 'Summary'));
+      headerRow.appendChild($('th', {}, 'Priority'));
+      headerRow.appendChild($('th', {}, 'Status'));
+      headerRow.appendChild($('th', {}, 'Proximity'));
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = $('tbody', {});
+      DATA.bugs.items.forEach(item => {
+        const row = $('tr', {});
+        row.appendChild($('td', {}, link(item.key)));
+        row.appendChild($('td', {}, item.summary || ''));
+        row.appendChild($('td', {}, item.priority || ''));
+        row.appendChild($('td', {}, item.status || ''));
+
+        const proximityCell = $('td', {});
+        const proximityContainer = $('div', { className: 'proximity' });
+        const filled = proximityMap[item.proximity] || 0;
+
+        for (let i = 0; i < 5; i++) {
+          proximityContainer.appendChild($('div', { className: i < filled ? 'dot filled' : 'dot empty' }));
+        }
+
+        proximityCell.appendChild(proximityContainer);
+        row.appendChild(proximityCell);
+
+        tbody.appendChild(row);
+      });
+      table.appendChild(tbody);
+
+      container.appendChild(table);
+      return container;
+    }
+
+    function renderCarryForward() {
+      if (!DATA.carryForward || !DATA.carryForward.items || DATA.carryForward.items.length === 0) {
+        const container = $('div', { className: 'section' });
+        container.appendChild($('h2', {}, 'Carry-Forward Worst Offenders'));
+        container.appendChild($('div', { className: 'empty-state' }, 'No carry-forward issues'));
+        return container;
+      }
+
+      const container = $('div', { className: 'section' });
+      container.appendChild($('h2', {}, 'Carry-Forward Worst Offenders'));
+
+      const table = $('table', {});
+      const thead = $('thead', {});
+      const headerRow = $('tr', {});
+      headerRow.appendChild($('th', {}, 'Key'));
+      headerRow.appendChild($('th', {}, 'Sprint Count'));
+      headerRow.appendChild($('th', {}, 'Status'));
+      headerRow.appendChild($('th', {}, 'Summary'));
+      headerRow.appendChild($('th', {}, 'Latest Comment'));
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = $('tbody', {});
+      DATA.carryForward.items.forEach(item => {
+        const row = $('tr', {});
+        row.appendChild($('td', {}, link(item.key)));
+
+        const countCell = $('td', {});
+        const count = item.sprintCount || 0;
+        const countClass = count >= 5 ? 'carry-critical' : count >= 3 ? 'carry-warning' : '';
+        countCell.appendChild($('span', { className: countClass }, count));
+        row.appendChild(countCell);
+
+        row.appendChild($('td', {}, item.status || ''));
+        row.appendChild($('td', {}, item.summary || ''));
+        row.appendChild($('td', {}, item.latestComment || ''));
+        tbody.appendChild(row);
+      });
+      table.appendChild(tbody);
+
+      container.appendChild(table);
+      return container;
+    }
+
+    function renderFutureSprint() {
+      if (!DATA.futureSprint || !DATA.futureSprint.items || DATA.futureSprint.items.length === 0) {
+        return null;
+      }
+
+      const container = $('div', { className: 'section' });
+      const sprintName = DATA.futureSprint.name || 'Future Sprint';
+      container.appendChild($('h2', {}, `Future Sprint — Recommended Priority (${sprintName})`));
+
+      const table = $('table', {});
+      const thead = $('thead', {});
+      const headerRow = $('tr', {});
+      headerRow.appendChild($('th', {}, 'Rank'));
+      headerRow.appendChild($('th', {}, 'Key'));
+      headerRow.appendChild($('th', {}, 'Summary'));
+      headerRow.appendChild($('th', {}, 'Type'));
+      headerRow.appendChild($('th', {}, 'Priority'));
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = $('tbody', {});
+      DATA.futureSprint.items.forEach((item, index) => {
+        const row = $('tr', {});
+        row.appendChild($('td', {}, index + 1));
+        row.appendChild($('td', {}, link(item.key)));
+        row.appendChild($('td', {}, item.summary || ''));
+
+        const typeCell = $('td', {});
+        const type = item.type || '';
+        let tagClass = 'story';
+        if (type.toLowerCase().includes('vulnerability')) {
+          tagClass = 'vuln';
+        } else if (type.toLowerCase().includes('bug')) {
+          tagClass = 'bug';
+        }
+        typeCell.appendChild($('span', { className: `tag ${tagClass}` }, type));
+        row.appendChild(typeCell);
+
+        row.appendChild($('td', {}, item.priority || ''));
+        tbody.appendChild(row);
+      });
+      table.appendChild(tbody);
+
+      container.appendChild(table);
+      return container;
+    }
+
+    function renderCollapsible(title, contentFn) {
+      const header = $('h2', { className: 'collapsible' }, title);
+      const content = $('div', { className: 'collapsible-content' });
+
+      header.addEventListener('click', () => {
+        header.classList.toggle('open');
+        content.classList.toggle('open');
+      });
+
+      content.appendChild(contentFn());
+      return $('div', {}, header, content);
+    }
+
+    function renderAssignees() {
+      if (!DATA.assignees || !DATA.assignees.items || DATA.assignees.items.length === 0) {
+        return null;
+      }
+
+      const sorted = [...DATA.assignees.items].sort((a, b) => (b.storyPoints || 0) - (a.storyPoints || 0));
+
+      return renderCollapsible(`Per-Assignee Breakdown (${sorted.length})`, () => {
+        const wrapper = $('div', {});
+
+        sorted.forEach(assignee => {
+          const section = $('div', { className: 'nested-section' });
+
+          const header = $('h3', { className: 'collapsible' }, `${assignee.name || 'Unassigned'} (${assignee.storyPoints || 0} SP)`);
+          const content = $('div', { className: 'collapsible-content' });
+
+          header.addEventListener('click', () => {
+            header.classList.toggle('open');
+            content.classList.toggle('open');
+          });
+
+          // Alerts
+          if (assignee.blocked > 0) {
+            const alert = $('div', { className: 'alert' });
+            alert.appendChild($('strong', {}, 'Blocked'));
+            alert.appendChild($('span', {}, `${assignee.blocked} issue(s) blocked`));
+            content.appendChild(alert);
+          }
+
+          if (assignee.carryForward > 0) {
+            const alert = $('div', { className: 'alert' });
+            alert.appendChild($('strong', {}, 'Carry-Forward'));
+            alert.appendChild($('span', {}, `${assignee.carryForward} issue(s) carried forward`));
+            content.appendChild(alert);
+          }
+
+          // Issues table
+          if (assignee.issues && assignee.issues.length > 0) {
+            const table = $('table', {});
+            const thead = $('thead', {});
+            const headerRow = $('tr', {});
+            headerRow.appendChild($('th', {}, 'Key'));
+            headerRow.appendChild($('th', {}, 'Summary'));
+            headerRow.appendChild($('th', {}, 'Status'));
+            headerRow.appendChild($('th', {}, 'SP'));
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = $('tbody', {});
+            assignee.issues.forEach(issue => {
+              const row = $('tr', {});
+              row.appendChild($('td', {}, link(issue.key)));
+              row.appendChild($('td', {}, issue.summary || ''));
+              row.appendChild($('td', {}, issue.status || ''));
+              row.appendChild($('td', {}, issue.storyPoints || 0));
+              tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+
+            content.appendChild(table);
+          }
+
+          section.appendChild(header);
+          section.appendChild(content);
+          wrapper.appendChild(section);
+        });
+
+        return wrapper;
+      });
+    }
+
+    function renderComponents() {
+      if (!DATA.components || !DATA.components.items || DATA.components.items.length === 0) {
+        return null;
+      }
+
+      const sorted = [...DATA.components.items].sort((a, b) => (b.storyPoints || 0) - (a.storyPoints || 0));
+
+      return renderCollapsible(`Per-Component Breakdown (${sorted.length})`, () => {
+        const wrapper = $('div', {});
+
+        sorted.forEach(component => {
+          const section = $('div', { className: 'nested-section' });
+
+          const header = $('h3', { className: 'collapsible' }, `${component.name || 'No Component'} (${component.storyPoints || 0} SP)`);
+          const content = $('div', { className: 'collapsible-content' });
+
+          header.addEventListener('click', () => {
+            header.classList.toggle('open');
+            content.classList.toggle('open');
+          });
+
+          // Status summary
+          if (component.completed !== undefined || component.inProgress !== undefined || component.todo !== undefined) {
+            const summary = $('div', { style: 'margin: 0.5rem 0; font-size: 0.85rem; color: var(--text-secondary);' });
+            summary.textContent = `Completed: ${component.completed || 0} | In Progress: ${component.inProgress || 0} | To Do: ${component.todo || 0}`;
+            content.appendChild(summary);
+          }
+
+          // Alerts
+          if (component.blocked > 0) {
+            const alert = $('div', { className: 'alert' });
+            alert.appendChild($('strong', {}, 'Blocked'));
+            alert.appendChild($('span', {}, `${component.blocked} issue(s) blocked`));
+            content.appendChild(alert);
+          }
+
+          if (component.carryForward > 0) {
+            const alert = $('div', { className: 'alert' });
+            alert.appendChild($('strong', {}, 'Carry-Forward'));
+            alert.appendChild($('span', {}, `${component.carryForward} issue(s) carried forward`));
+            content.appendChild(alert);
+          }
+
+          section.appendChild(header);
+          section.appendChild(content);
+          wrapper.appendChild(section);
+        });
+
+        return wrapper;
+      });
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+
+      // Clear app
+      while (app.firstChild) {
+        app.removeChild(app.firstChild);
+      }
+
+      // Check if data is loaded
+      if (!DATA || !DATA.meta) {
+        app.appendChild($('div', { className: 'empty-state', style: 'margin-top: 3rem;' }, 'No data loaded.'));
+        return;
+      }
+
+      // Render all sections
+      const sections = [
+        renderHeader,
+        renderSummaryCards,
+        renderAlerts,
+        renderRoadmap,
+        renderVelocity,
+        renderDoD,
+        renderCodeReview,
+        renderBlocked,
+        renderBugs,
+        renderCarryForward,
+        renderFutureSprint,
+        renderAssignees,
+        renderComponents
+      ];
+
+      sections.forEach(fn => {
+        const section = fn();
+        if (section) {
+          app.appendChild(section);
+        }
+      });
+    }
+
+    // Initialize
+    render();
+  </script>
+</body>
+</html>

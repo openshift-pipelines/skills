@@ -714,6 +714,11 @@ function computeMetrics(issues, historicalSprints, futureSprint, epicProgress, t
 function renderDashboard(data, teamName) {
   // Locate template
   const templatePaths = [
+    // React build (preferred)
+    path.join(__dirname, '..', 'docs', 'templates', 'built', 'index.html'),
+    path.join(process.cwd(), 'docs', 'templates', 'built', 'index.html'),
+    path.join(os.homedir(), '.claude', 'templates', 'osp', 'built', 'index.html'),
+    // Fallback to old template
     path.join(os.homedir(), '.claude', 'templates', 'osp', 'sprint-dashboard.html'),
     path.join(process.cwd(), 'docs', 'templates', 'sprint-dashboard.html'),
     path.join(__dirname, '..', 'docs', 'templates', 'sprint-dashboard.html')
@@ -735,7 +740,13 @@ function renderDashboard(data, teamName) {
   const template = fs.readFileSync(templatePath, 'utf8');
 
   // Inject data
-  const output = template.replace('const DATA = {};', `const DATA = ${JSON.stringify(data, null, 2)};`);
+  // Try React template injection first, fall back to old template
+  let output;
+  if (template.includes('window.__DASHBOARD_DATA__')) {
+    output = template.replace('window.__DASHBOARD_DATA__ = {};', `window.__DASHBOARD_DATA__ = ${JSON.stringify(data)};`);
+  } else {
+    output = template.replace('const DATA = {};', `const DATA = ${JSON.stringify(data)};`);
+  }
 
   // Write to temp file
   const tempFile = path.join(os.tmpdir(), `sprint-dashboard-${teamName}-${Date.now()}.html`);

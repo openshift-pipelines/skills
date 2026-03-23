@@ -1,0 +1,2840 @@
+{
+  "meta": {
+    "team": "Pioneers",
+    "sprint": {
+      "id": 47963,
+      "name": "Pipelines Sprint Pioneers 51",
+      "startDate": "2026-03-17T12:34:40.412Z",
+      "endDate": "2026-03-31T16:00:00.000Z",
+      "boardId": 4602
+    },
+    "generatedAt": "2026-03-23T14:25:45.279Z",
+    "jiraBaseUrl": "https://redhat.atlassian.net"
+  },
+  "daysRemaining": 8,
+  "sprintDuration": 14,
+  "sprintDay": 6,
+  "completionPercent": 18,
+  "healthScore": "red",
+  "summary": {
+    "totalIssues": 28,
+    "totalSPs": 71,
+    "byStatus": {
+      "Closed": {
+        "count": 8,
+        "sp": 13
+      },
+      "To Do": {
+        "count": 6,
+        "sp": 16
+      },
+      "Code Review": {
+        "count": 9,
+        "sp": 29
+      },
+      "In Progress": {
+        "count": 4,
+        "sp": 13
+      },
+      "New": {
+        "count": 1,
+        "sp": 0
+      }
+    },
+    "blocked": {
+      "count": 6,
+      "sp": 11
+    },
+    "noStoryPoints": 3
+  },
+  "velocity": {
+    "current": {
+      "committed": 71,
+      "completed": 13
+    },
+    "history": [],
+    "avg3": null,
+    "avg5": null,
+    "trend": "insufficient_data",
+    "commitmentAccuracy": []
+  },
+  "expectations": {
+    "overCommitted": {
+      "flag": false,
+      "committed": 71,
+      "avgVelocity": null,
+      "delta": 0
+    },
+    "underCommitted": {
+      "flag": false
+    },
+    "carryForwardRate": [],
+    "codeReviewBottleneck": {
+      "flag": true,
+      "percent": 41
+    }
+  },
+  "roadmap": {
+    "planned": {
+      "count": 20,
+      "sp": 51,
+      "percent": 71
+    },
+    "unplanned": {
+      "count": 8,
+      "sp": 20,
+      "percent": 29
+    },
+    "cve": {
+      "count": 0,
+      "sp": 0,
+      "percent": 0
+    },
+    "epics": [],
+    "alignmentTrend": [],
+    "untrackedCount": 8
+  },
+  "dod": {
+    "complete": {
+      "count": 4,
+      "percent": 14
+    },
+    "atRisk": {
+      "count": 3,
+      "percent": 11
+    },
+    "incomplete": {
+      "count": 18,
+      "percent": 64
+    },
+    "na": {
+      "count": 3,
+      "percent": 11
+    },
+    "issues": [
+      {
+        "key": "SRVKP-11025",
+        "summary": "[Multi cluster] PipelineRuns with pvc are not running with multicluster setup",
+        "status": "Closed",
+        "labels": [
+          "doc-req",
+          "multi-cluster",
+          "release-notes-req",
+          "release-testing-bug"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-11099",
+        "summary": "Cancelled PipelineRun not reflected in Tekton metrics",
+        "status": "To Do",
+        "labels": [
+          "doc-req",
+          "release-notes-req"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-10871",
+        "summary": "Fix alignment in pipeline metrics ( prometheus ) ",
+        "status": "Code Review",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-9996",
+        "summary": "OCP Upgrade Flow | Red Hat OpenShift Pipelines Operator is not displayed in Installed Operators page",
+        "status": "To Do",
+        "labels": [
+          "candidate-next"
+        ],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-6982",
+        "summary": "Tasks getting skipped when there is uninitialised task results used in param",
+        "status": "Code Review",
+        "labels": [
+          "docs-pending",
+          "release-notes-pending",
+          "test-req",
+          "tests-pending"
+        ],
+        "score": "atRisk",
+        "missing": [
+          "docs-pending",
+          "release-notes-pending",
+          "test-req",
+          "tests-pending"
+        ]
+      },
+      {
+        "key": "SRVKP-1801",
+        "summary": "Pipelines don't work with resource quota",
+        "status": "Code Review",
+        "labels": [
+          "candidate-next",
+          "docs-pending",
+          "release-notes-pending",
+          "tests-pending"
+        ],
+        "score": "atRisk",
+        "missing": [
+          "docs-pending",
+          "release-notes-pending",
+          "tests-pending"
+        ]
+      },
+      {
+        "key": "SRVKP-2552",
+        "summary": "Pods evicted with ContainerStatusUnknown status when the ephemeral local storage limit is exceeded",
+        "status": "To Do",
+        "labels": [
+          "bugbash-226",
+          "docs-pending",
+          "groom-wait",
+          "release-notes-pending",
+          "tests-pending"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "docs-pending",
+          "release-notes-pending",
+          "tests-pending"
+        ]
+      },
+      {
+        "key": "SRVKP-10736",
+        "summary": "Reproduce this number of PipelineRuns count mismatch using Kind",
+        "status": "To Do",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-7857",
+        "summary": "No event emitted when a PipelineRun task fails due to referencing uninitialized result",
+        "status": "Code Review",
+        "labels": [
+          "docs-pending",
+          "release-notes-pending",
+          "test-req",
+          "tests-pending"
+        ],
+        "score": "atRisk",
+        "missing": [
+          "docs-pending",
+          "release-notes-pending",
+          "test-req",
+          "tests-pending"
+        ]
+      },
+      {
+        "key": "SRVKP-9710",
+        "summary": "Migrate Task and TaskRun List Views to DataView (React 18)",
+        "status": "In Progress",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-10037",
+        "summary": "Pipeline builder topology not showing correct status when PLR is Rerun from the Action dropdown",
+        "status": "To Do",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-10073",
+        "summary": "Fix alignment in pipeline metrics ( using tekton result  ) ",
+        "status": "Code Review",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-10983",
+        "summary": "Upgrade operator types to v1beta1",
+        "status": "In Progress",
+        "labels": [
+          "doc-req",
+          "release-notes-req"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-10986",
+        "summary": "1.22 Release captain work",
+        "status": "In Progress",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-11047",
+        "summary": "MultiCluster Controller should schedule the pipelineruns on Hub Cluster as well",
+        "status": "New",
+        "labels": [
+          "doc-req",
+          "release-notes-req"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-11107",
+        "summary": "[Multi Cluster] Getting Restricted access You don't have access to this section due to cluster policy error when opening TaskRuns section of pipelineRuns on Hub cluster",
+        "status": "Code Review",
+        "labels": [
+          "multi-cluster",
+          "release-testing-bug"
+        ],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-11122",
+        "summary": "Implementation of the moving operator types to v1beta1",
+        "status": "To Do",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-11151",
+        "summary": "Optimize resolvePipelineState by hoisting VerificationPolicy list call outside per-task loop",
+        "status": "Closed",
+        "labels": [
+          "doc-req",
+          "release-notes-req"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-11152",
+        "summary": "Extract memberOf lookup from createChildResourceLabels to reduce nested loops",
+        "status": "Code Review",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-11155",
+        "summary": "Cleanup/remove deprecate chains cmd",
+        "status": "Closed",
+        "labels": [
+          "doc-req",
+          "release-notes-req"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-11167",
+        "summary": "Create a custom filter component as the console sdk has not added @patternfly/react-data-view to shared modules in the pre-release version 4.22.0-prerelease.1",
+        "status": "Code Review",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      }
+    ]
+  },
+  "codeReview": [
+    {
+      "key": "SRVKP-11098",
+      "summary": "R&D: Schedule PipelineRuns on Hub and Spoke clusters based on availability using MultiKueue",
+      "currentSP": 3,
+      "originalSP": 3,
+      "suggestedSP": 2,
+      "assignee": "Khurram Baig",
+      "alreadyReestimated": false
+    },
+    {
+      "key": "SRVKP-10871",
+      "summary": "Fix alignment in pipeline metrics ( prometheus ) ",
+      "currentSP": 5,
+      "originalSP": 3,
+      "suggestedSP": 3,
+      "assignee": "Aditya Shinde",
+      "alreadyReestimated": true
+    },
+    {
+      "key": "SRVKP-6982",
+      "summary": "Tasks getting skipped when there is uninitialised task results used in param",
+      "currentSP": 3,
+      "originalSP": 3,
+      "suggestedSP": 2,
+      "assignee": "Vibhav Bobade",
+      "alreadyReestimated": false
+    },
+    {
+      "key": "SRVKP-1801",
+      "summary": "Pipelines don't work with resource quota",
+      "currentSP": 3,
+      "originalSP": 3,
+      "suggestedSP": 2,
+      "assignee": "Vibhav Bobade",
+      "alreadyReestimated": false
+    },
+    {
+      "key": "SRVKP-7857",
+      "summary": "No event emitted when a PipelineRun task fails due to referencing uninitialized result",
+      "currentSP": 3,
+      "originalSP": 3,
+      "suggestedSP": 2,
+      "assignee": "Vibhav Bobade",
+      "alreadyReestimated": false
+    },
+    {
+      "key": "SRVKP-10073",
+      "summary": "Fix alignment in pipeline metrics ( using tekton result  ) ",
+      "currentSP": 5,
+      "originalSP": 5,
+      "suggestedSP": 3,
+      "assignee": "Ankur Sinha",
+      "alreadyReestimated": false
+    },
+    {
+      "key": "SRVKP-11107",
+      "summary": "[Multi Cluster] Getting Restricted access You don't have access to this section due to cluster policy error when opening TaskRuns section of pipelineRuns on Hub cluster",
+      "currentSP": 3,
+      "originalSP": 3,
+      "suggestedSP": 2,
+      "assignee": "Khurram Baig",
+      "alreadyReestimated": false
+    },
+    {
+      "key": "SRVKP-11152",
+      "summary": "Extract memberOf lookup from createChildResourceLabels to reduce nested loops",
+      "currentSP": 2,
+      "originalSP": 2,
+      "suggestedSP": 1,
+      "assignee": "Aditya Shinde",
+      "alreadyReestimated": false
+    },
+    {
+      "key": "SRVKP-11167",
+      "summary": "Create a custom filter component as the console sdk has not added @patternfly/react-data-view to shared modules in the pre-release version 4.22.0-prerelease.1",
+      "currentSP": 2,
+      "originalSP": 2,
+      "suggestedSP": 1,
+      "assignee": "Anwesha Palit",
+      "alreadyReestimated": false
+    }
+  ],
+  "blocked": [
+    {
+      "key": "SRVKP-11099",
+      "summary": "Cancelled PipelineRun not reflected in Tekton metrics",
+      "priority": "Major",
+      "reason": "No activity for 6 days",
+      "assignee": "Khurram Baig",
+      "blockedType": "stale"
+    },
+    {
+      "key": "SRVKP-10983",
+      "summary": "Upgrade operator types to v1beta1",
+      "priority": "Normal",
+      "reason": "No activity for 6 days",
+      "assignee": "Pavan Mandayam Bheeman",
+      "blockedType": "stale"
+    },
+    {
+      "key": "SRVKP-11047",
+      "summary": "MultiCluster Controller should schedule the pipelineruns on Hub Cluster as well",
+      "priority": "Critical",
+      "reason": "No activity for 5 days",
+      "assignee": "Khurram Baig",
+      "blockedType": "stale"
+    },
+    {
+      "key": "SRVKP-11122",
+      "summary": "Implementation of the moving operator types to v1beta1",
+      "priority": "Major",
+      "reason": "No activity for 6 days",
+      "assignee": "Pavan Mandayam Bheeman",
+      "blockedType": "stale"
+    },
+    {
+      "key": "SRVKP-11152",
+      "summary": "Extract memberOf lookup from createChildResourceLabels to reduce nested loops",
+      "priority": "Undefined",
+      "reason": "No activity for 4 days",
+      "assignee": "Aditya Shinde",
+      "blockedType": "stale"
+    },
+    {
+      "key": "SRVKP-11167",
+      "summary": "Create a custom filter component as the console sdk has not added @patternfly/react-data-view to shared modules in the pre-release version 4.22.0-prerelease.1",
+      "priority": "Blocker",
+      "reason": "No activity for 3 days",
+      "assignee": "Anwesha Palit",
+      "blockedType": "stale"
+    }
+  ],
+  "highPriorityBugs": [
+    {
+      "key": "SRVKP-11050",
+      "summary": "[Multi cluster] Pipelineruns not starting when localqueue is created in a non-default namespace",
+      "priority": "Critical",
+      "status": "Closed",
+      "proximity": "done"
+    },
+    {
+      "key": "SRVKP-11025",
+      "summary": "[Multi cluster] PipelineRuns with pvc are not running with multicluster setup",
+      "priority": "Critical",
+      "status": "Closed",
+      "proximity": "done"
+    },
+    {
+      "key": "SRVKP-11099",
+      "summary": "Cancelled PipelineRun not reflected in Tekton metrics",
+      "priority": "Major",
+      "status": "To Do",
+      "proximity": "far"
+    },
+    {
+      "key": "SRVKP-6982",
+      "summary": "Tasks getting skipped when there is uninitialised task results used in param",
+      "priority": "Major",
+      "status": "Code Review",
+      "proximity": "near"
+    },
+    {
+      "key": "SRVKP-1801",
+      "summary": "Pipelines don't work with resource quota",
+      "priority": "Critical",
+      "status": "Code Review",
+      "proximity": "near"
+    },
+    {
+      "key": "SRVKP-10736",
+      "summary": "Reproduce this number of PipelineRuns count mismatch using Kind",
+      "priority": "Critical",
+      "status": "To Do",
+      "proximity": "far"
+    },
+    {
+      "key": "SRVKP-7857",
+      "summary": "No event emitted when a PipelineRun task fails due to referencing uninitialized result",
+      "priority": "Major",
+      "status": "Code Review",
+      "proximity": "near"
+    },
+    {
+      "key": "SRVKP-11107",
+      "summary": "[Multi Cluster] Getting Restricted access You don't have access to this section due to cluster policy error when opening TaskRuns section of pipelineRuns on Hub cluster",
+      "priority": "Major",
+      "status": "Code Review",
+      "proximity": "near"
+    }
+  ],
+  "carryForward": [
+    {
+      "key": "SRVKP-1801",
+      "summary": "Pipelines don't work with resource quota",
+      "sprintCount": 6,
+      "status": "Code Review",
+      "severity": "critical",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-6982",
+      "summary": "Tasks getting skipped when there is uninitialised task results used in param",
+      "sprintCount": 4,
+      "status": "Code Review",
+      "severity": "warning",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-9996",
+      "summary": "OCP Upgrade Flow | Red Hat OpenShift Pipelines Operator is not displayed in Installed Operators page",
+      "sprintCount": 2,
+      "status": "To Do",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-9710",
+      "summary": "Migrate Task and TaskRun List Views to DataView (React 18)",
+      "sprintCount": 2,
+      "status": "In Progress",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10037",
+      "summary": "Pipeline builder topology not showing correct status when PLR is Rerun from the Action dropdown",
+      "sprintCount": 2,
+      "status": "To Do",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10983",
+      "summary": "Upgrade operator types to v1beta1",
+      "sprintCount": 2,
+      "status": "In Progress",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10986",
+      "summary": "1.22 Release captain work",
+      "sprintCount": 2,
+      "status": "In Progress",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11099",
+      "summary": "Cancelled PipelineRun not reflected in Tekton metrics",
+      "sprintCount": 1,
+      "status": "To Do",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11098",
+      "summary": "R&D: Schedule PipelineRuns on Hub and Spoke clusters based on availability using MultiKueue",
+      "sprintCount": 1,
+      "status": "Code Review",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10871",
+      "summary": "Fix alignment in pipeline metrics ( prometheus ) ",
+      "sprintCount": 1,
+      "status": "Code Review",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-2552",
+      "summary": "Pods evicted with ContainerStatusUnknown status when the ephemeral local storage limit is exceeded",
+      "sprintCount": 1,
+      "status": "To Do",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10736",
+      "summary": "Reproduce this number of PipelineRuns count mismatch using Kind",
+      "sprintCount": 1,
+      "status": "To Do",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-7857",
+      "summary": "No event emitted when a PipelineRun task fails due to referencing uninitialized result",
+      "sprintCount": 1,
+      "status": "Code Review",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10073",
+      "summary": "Fix alignment in pipeline metrics ( using tekton result  ) ",
+      "sprintCount": 1,
+      "status": "Code Review",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11047",
+      "summary": "MultiCluster Controller should schedule the pipelineruns on Hub Cluster as well",
+      "sprintCount": 1,
+      "status": "New",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11107",
+      "summary": "[Multi Cluster] Getting Restricted access You don't have access to this section due to cluster policy error when opening TaskRuns section of pipelineRuns on Hub cluster",
+      "sprintCount": 1,
+      "status": "Code Review",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11122",
+      "summary": "Implementation of the moving operator types to v1beta1",
+      "sprintCount": 1,
+      "status": "To Do",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11152",
+      "summary": "Extract memberOf lookup from createChildResourceLabels to reduce nested loops",
+      "sprintCount": 1,
+      "status": "Code Review",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11167",
+      "summary": "Create a custom filter component as the console sdk has not added @patternfly/react-data-view to shared modules in the pre-release version 4.22.0-prerelease.1",
+      "sprintCount": 1,
+      "status": "Code Review",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11200",
+      "summary": "Investigation on things needed for the PAC migration",
+      "sprintCount": 1,
+      "status": "In Progress",
+      "severity": "normal",
+      "latestComment": ""
+    }
+  ],
+  "futureSprint": {
+    "name": "Pipelines Sprint Pioneers 52",
+    "issues": [
+      {
+        "rank": 1,
+        "key": "SRVKP-10841",
+        "summary": "CVE-2025-69873 openshift-pipelines/pipelines-console-plugin-rhel8: ReDoS via $data reference [pipelines-1.15]",
+        "type": "Vulnerability",
+        "priority": "Undefined"
+      },
+      {
+        "rank": 3,
+        "key": "SRVKP-11158",
+        "summary": "[Multi Cluster] MultiCluster PipelineRuns are using default ServiceAccount instead of pipeline ServiceAccount",
+        "type": "Bug",
+        "priority": "Critical"
+      },
+      {
+        "rank": 3,
+        "key": "SRVKP-11169",
+        "summary": "[Multi cluster] PAC-triggered PipelineRun stays Pending due to kueue label length exceeding 63-character Kubernetes limit",
+        "type": "Bug",
+        "priority": "Critical"
+      },
+      {
+        "rank": 5,
+        "key": "SRVKP-10899",
+        "summary": "Pipelines view missing from web console",
+        "type": "Bug",
+        "priority": "Normal"
+      }
+    ]
+  },
+  "assignees": {
+    "Khurram Baig": {
+      "totalIssues": 6,
+      "totalSP": 11,
+      "byStatus": {
+        "Closed": {
+          "count": 1,
+          "sp": 1
+        },
+        "To Do": {
+          "count": 2,
+          "sp": 4
+        },
+        "Code Review": {
+          "count": 2,
+          "sp": 6
+        },
+        "New": {
+          "count": 1,
+          "sp": 0
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-11050",
+          "summary": "[Multi cluster] Pipelineruns not starting when localqueue is created in a non-default namespace",
+          "status": "Closed",
+          "sp": 1
+        },
+        {
+          "key": "SRVKP-11099",
+          "summary": "Cancelled PipelineRun not reflected in Tekton metrics",
+          "status": "To Do",
+          "sp": 2
+        },
+        {
+          "key": "SRVKP-11098",
+          "summary": "R&D: Schedule PipelineRuns on Hub and Spoke clusters based on availability using MultiKueue",
+          "status": "Code Review",
+          "sp": 3
+        },
+        {
+          "key": "SRVKP-10736",
+          "summary": "Reproduce this number of PipelineRuns count mismatch using Kind",
+          "status": "To Do",
+          "sp": 2
+        },
+        {
+          "key": "SRVKP-11047",
+          "summary": "MultiCluster Controller should schedule the pipelineruns on Hub Cluster as well",
+          "status": "New",
+          "sp": 0
+        },
+        {
+          "key": "SRVKP-11107",
+          "summary": "[Multi Cluster] Getting Restricted access You don't have access to this section due to cluster policy error when opening TaskRuns section of pipelineRuns on Hub cluster",
+          "status": "Code Review",
+          "sp": 3
+        }
+      ]
+    },
+    "Sai Raju Manthina": {
+      "totalIssues": 1,
+      "totalSP": 0,
+      "byStatus": {
+        "Closed": {
+          "count": 1,
+          "sp": 0
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-11025",
+          "summary": "[Multi cluster] PipelineRuns with pvc are not running with multicluster setup",
+          "status": "Closed",
+          "sp": 0
+        }
+      ]
+    },
+    "Aditya Shinde": {
+      "totalIssues": 4,
+      "totalSP": 11,
+      "byStatus": {
+        "Code Review": {
+          "count": 2,
+          "sp": 7
+        },
+        "Closed": {
+          "count": 2,
+          "sp": 4
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-10871",
+          "summary": "Fix alignment in pipeline metrics ( prometheus ) ",
+          "status": "Code Review",
+          "sp": 5
+        },
+        {
+          "key": "SRVKP-11090",
+          "summary": "Update release manifest URLs which referring to GCP buckets instead of OCI",
+          "status": "Closed",
+          "sp": 2
+        },
+        {
+          "key": "SRVKP-11152",
+          "summary": "Extract memberOf lookup from createChildResourceLabels to reduce nested loops",
+          "status": "Code Review",
+          "sp": 2
+        },
+        {
+          "key": "SRVKP-11155",
+          "summary": "Cleanup/remove deprecate chains cmd",
+          "status": "Closed",
+          "sp": 2
+        }
+      ]
+    },
+    "Ankur Sinha": {
+      "totalIssues": 3,
+      "totalSP": 9,
+      "byStatus": {
+        "Closed": {
+          "count": 2,
+          "sp": 4
+        },
+        "Code Review": {
+          "count": 1,
+          "sp": 5
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-11096",
+          "summary": "Update release manifest URLs which referring to GCP buckets instead of OCI",
+          "status": "Closed",
+          "sp": 2
+        },
+        {
+          "key": "SRVKP-10073",
+          "summary": "Fix alignment in pipeline metrics ( using tekton result  ) ",
+          "status": "Code Review",
+          "sp": 5
+        },
+        {
+          "key": "SRVKP-11151",
+          "summary": "Optimize resolvePipelineState by hoisting VerificationPolicy list call outside per-task loop",
+          "status": "Closed",
+          "sp": 2
+        }
+      ]
+    },
+    "Bharat Majjiga": {
+      "totalIssues": 1,
+      "totalSP": 1,
+      "byStatus": {
+        "To Do": {
+          "count": 1,
+          "sp": 1
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-9996",
+          "summary": "OCP Upgrade Flow | Red Hat OpenShift Pipelines Operator is not displayed in Installed Operators page",
+          "status": "To Do",
+          "sp": 1
+        }
+      ]
+    },
+    "Vibhav Bobade": {
+      "totalIssues": 4,
+      "totalSP": 12,
+      "byStatus": {
+        "Code Review": {
+          "count": 3,
+          "sp": 9
+        },
+        "To Do": {
+          "count": 1,
+          "sp": 3
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-6982",
+          "summary": "Tasks getting skipped when there is uninitialised task results used in param",
+          "status": "Code Review",
+          "sp": 3
+        },
+        {
+          "key": "SRVKP-1801",
+          "summary": "Pipelines don't work with resource quota",
+          "status": "Code Review",
+          "sp": 3
+        },
+        {
+          "key": "SRVKP-2552",
+          "summary": "Pods evicted with ContainerStatusUnknown status when the ephemeral local storage limit is exceeded",
+          "status": "To Do",
+          "sp": 3
+        },
+        {
+          "key": "SRVKP-7857",
+          "summary": "No event emitted when a PipelineRun task fails due to referencing uninitialized result",
+          "status": "Code Review",
+          "sp": 3
+        }
+      ]
+    },
+    "Anwesha Palit": {
+      "totalIssues": 4,
+      "totalSP": 12,
+      "byStatus": {
+        "In Progress": {
+          "count": 1,
+          "sp": 5
+        },
+        "To Do": {
+          "count": 1,
+          "sp": 3
+        },
+        "Closed": {
+          "count": 1,
+          "sp": 2
+        },
+        "Code Review": {
+          "count": 1,
+          "sp": 2
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-9710",
+          "summary": "Migrate Task and TaskRun List Views to DataView (React 18)",
+          "status": "In Progress",
+          "sp": 5
+        },
+        {
+          "key": "SRVKP-10037",
+          "summary": "Pipeline builder topology not showing correct status when PLR is Rerun from the Action dropdown",
+          "status": "To Do",
+          "sp": 3
+        },
+        {
+          "key": "SRVKP-11123",
+          "summary": "CI Failure in React 18 Branch Build and updating dependencies in package.json",
+          "status": "Closed",
+          "sp": 2
+        },
+        {
+          "key": "SRVKP-11167",
+          "summary": "Create a custom filter component as the console sdk has not added @patternfly/react-data-view to shared modules in the pre-release version 4.22.0-prerelease.1",
+          "status": "Code Review",
+          "sp": 2
+        }
+      ]
+    },
+    "Pavan Mandayam Bheeman": {
+      "totalIssues": 3,
+      "totalSP": 8,
+      "byStatus": {
+        "In Progress": {
+          "count": 2,
+          "sp": 3
+        },
+        "To Do": {
+          "count": 1,
+          "sp": 5
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-10983",
+          "summary": "Upgrade operator types to v1beta1",
+          "status": "In Progress",
+          "sp": 0
+        },
+        {
+          "key": "SRVKP-11122",
+          "summary": "Implementation of the moving operator types to v1beta1",
+          "status": "To Do",
+          "sp": 5
+        },
+        {
+          "key": "SRVKP-11200",
+          "summary": "Investigation on things needed for the PAC migration",
+          "status": "In Progress",
+          "sp": 3
+        }
+      ]
+    },
+    "Pramod Bindal": {
+      "totalIssues": 2,
+      "totalSP": 7,
+      "byStatus": {
+        "In Progress": {
+          "count": 1,
+          "sp": 5
+        },
+        "Closed": {
+          "count": 1,
+          "sp": 2
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-10986",
+          "summary": "1.22 Release captain work",
+          "status": "In Progress",
+          "sp": 5
+        },
+        {
+          "key": "SRVKP-11013",
+          "summary": "Add Release Tests configuration for Missing components",
+          "status": "Closed",
+          "sp": 2
+        }
+      ]
+    }
+  },
+  "components": {
+    "Unassigned": {
+      "totalIssues": 7,
+      "totalSP": 12,
+      "byStatus": {
+        "Closed": {
+          "count": 3,
+          "sp": 5
+        },
+        "Code Review": {
+          "count": 3,
+          "sp": 7
+        },
+        "In Progress": {
+          "count": 1,
+          "sp": 0
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 1,
+      "issues": [
+        {
+          "key": "SRVKP-11050",
+          "summary": "[Multi cluster] Pipelineruns not starting when localqueue is created in a non-default namespace",
+          "status": "Closed",
+          "sp": 1,
+          "priority": "Critical"
+        },
+        {
+          "key": "SRVKP-11098",
+          "summary": "R&D: Schedule PipelineRuns on Hub and Spoke clusters based on availability using MultiKueue",
+          "status": "Code Review",
+          "sp": 3,
+          "priority": "Critical"
+        },
+        {
+          "key": "SRVKP-10983",
+          "summary": "Upgrade operator types to v1beta1",
+          "status": "In Progress",
+          "sp": 0,
+          "priority": "Normal"
+        },
+        {
+          "key": "SRVKP-11123",
+          "summary": "CI Failure in React 18 Branch Build and updating dependencies in package.json",
+          "status": "Closed",
+          "sp": 2,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-11152",
+          "summary": "Extract memberOf lookup from createChildResourceLabels to reduce nested loops",
+          "status": "Code Review",
+          "sp": 2,
+          "priority": "Undefined"
+        },
+        {
+          "key": "SRVKP-11155",
+          "summary": "Cleanup/remove deprecate chains cmd",
+          "status": "Closed",
+          "sp": 2,
+          "priority": "Normal"
+        },
+        {
+          "key": "SRVKP-11167",
+          "summary": "Create a custom filter component as the console sdk has not added @patternfly/react-data-view to shared modules in the pre-release version 4.22.0-prerelease.1",
+          "status": "Code Review",
+          "sp": 2,
+          "priority": "Blocker"
+        }
+      ]
+    },
+    "Tekton Pipelines": {
+      "totalIssues": 11,
+      "totalSP": 23,
+      "byStatus": {
+        "Closed": {
+          "count": 3,
+          "sp": 4
+        },
+        "To Do": {
+          "count": 3,
+          "sp": 7
+        },
+        "Code Review": {
+          "count": 4,
+          "sp": 12
+        },
+        "New": {
+          "count": 1,
+          "sp": 0
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 7,
+      "issues": [
+        {
+          "key": "SRVKP-11025",
+          "summary": "[Multi cluster] PipelineRuns with pvc are not running with multicluster setup",
+          "status": "Closed",
+          "sp": 0,
+          "priority": "Critical"
+        },
+        {
+          "key": "SRVKP-11099",
+          "summary": "Cancelled PipelineRun not reflected in Tekton metrics",
+          "status": "To Do",
+          "sp": 2,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-11096",
+          "summary": "Update release manifest URLs which referring to GCP buckets instead of OCI",
+          "status": "Closed",
+          "sp": 2,
+          "priority": "Normal"
+        },
+        {
+          "key": "SRVKP-6982",
+          "summary": "Tasks getting skipped when there is uninitialised task results used in param",
+          "status": "Code Review",
+          "sp": 3,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-1801",
+          "summary": "Pipelines don't work with resource quota",
+          "status": "Code Review",
+          "sp": 3,
+          "priority": "Critical"
+        },
+        {
+          "key": "SRVKP-2552",
+          "summary": "Pods evicted with ContainerStatusUnknown status when the ephemeral local storage limit is exceeded",
+          "status": "To Do",
+          "sp": 3,
+          "priority": "Normal"
+        },
+        {
+          "key": "SRVKP-10736",
+          "summary": "Reproduce this number of PipelineRuns count mismatch using Kind",
+          "status": "To Do",
+          "sp": 2,
+          "priority": "Critical"
+        },
+        {
+          "key": "SRVKP-7857",
+          "summary": "No event emitted when a PipelineRun task fails due to referencing uninitialized result",
+          "status": "Code Review",
+          "sp": 3,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-11047",
+          "summary": "MultiCluster Controller should schedule the pipelineruns on Hub Cluster as well",
+          "status": "New",
+          "sp": 0,
+          "priority": "Critical"
+        },
+        {
+          "key": "SRVKP-11107",
+          "summary": "[Multi Cluster] Getting Restricted access You don't have access to this section due to cluster policy error when opening TaskRuns section of pipelineRuns on Hub cluster",
+          "status": "Code Review",
+          "sp": 3,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-11151",
+          "summary": "Optimize resolvePipelineState by hoisting VerificationPolicy list call outside per-task loop",
+          "status": "Closed",
+          "sp": 2,
+          "priority": "Undefined"
+        }
+      ]
+    },
+    "UI": {
+      "totalIssues": 5,
+      "totalSP": 21,
+      "byStatus": {
+        "Code Review": {
+          "count": 3,
+          "sp": 13
+        },
+        "In Progress": {
+          "count": 1,
+          "sp": 5
+        },
+        "To Do": {
+          "count": 1,
+          "sp": 3
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 1,
+      "issues": [
+        {
+          "key": "SRVKP-10871",
+          "summary": "Fix alignment in pipeline metrics ( prometheus ) ",
+          "status": "Code Review",
+          "sp": 5,
+          "priority": "Normal"
+        },
+        {
+          "key": "SRVKP-9710",
+          "summary": "Migrate Task and TaskRun List Views to DataView (React 18)",
+          "status": "In Progress",
+          "sp": 5,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-10037",
+          "summary": "Pipeline builder topology not showing correct status when PLR is Rerun from the Action dropdown",
+          "status": "To Do",
+          "sp": 3,
+          "priority": "Normal"
+        },
+        {
+          "key": "SRVKP-10073",
+          "summary": "Fix alignment in pipeline metrics ( using tekton result  ) ",
+          "status": "Code Review",
+          "sp": 5,
+          "priority": "Normal"
+        },
+        {
+          "key": "SRVKP-11107",
+          "summary": "[Multi Cluster] Getting Restricted access You don't have access to this section due to cluster policy error when opening TaskRuns section of pipelineRuns on Hub cluster",
+          "status": "Code Review",
+          "sp": 3,
+          "priority": "Major"
+        }
+      ]
+    },
+    "Tekton CLI": {
+      "totalIssues": 1,
+      "totalSP": 2,
+      "byStatus": {
+        "Closed": {
+          "count": 1,
+          "sp": 2
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 0,
+      "issues": [
+        {
+          "key": "SRVKP-11090",
+          "summary": "Update release manifest URLs which referring to GCP buckets instead of OCI",
+          "status": "Closed",
+          "sp": 2,
+          "priority": "Normal"
+        }
+      ]
+    },
+    "Tekton Results": {
+      "totalIssues": 1,
+      "totalSP": 2,
+      "byStatus": {
+        "Closed": {
+          "count": 1,
+          "sp": 2
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 0,
+      "issues": [
+        {
+          "key": "SRVKP-11090",
+          "summary": "Update release manifest URLs which referring to GCP buckets instead of OCI",
+          "status": "Closed",
+          "sp": 2,
+          "priority": "Normal"
+        }
+      ]
+    },
+    "Tekton Triggers": {
+      "totalIssues": 1,
+      "totalSP": 2,
+      "byStatus": {
+        "Closed": {
+          "count": 1,
+          "sp": 2
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 0,
+      "issues": [
+        {
+          "key": "SRVKP-11096",
+          "summary": "Update release manifest URLs which referring to GCP buckets instead of OCI",
+          "status": "Closed",
+          "sp": 2,
+          "priority": "Normal"
+        }
+      ]
+    },
+    "QA": {
+      "totalIssues": 1,
+      "totalSP": 1,
+      "byStatus": {
+        "To Do": {
+          "count": 1,
+          "sp": 1
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 0,
+      "issues": [
+        {
+          "key": "SRVKP-9996",
+          "summary": "OCP Upgrade Flow | Red Hat OpenShift Pipelines Operator is not displayed in Installed Operators page",
+          "status": "To Do",
+          "sp": 1,
+          "priority": "Normal"
+        }
+      ]
+    },
+    "p12n": {
+      "totalIssues": 2,
+      "totalSP": 7,
+      "byStatus": {
+        "In Progress": {
+          "count": 1,
+          "sp": 5
+        },
+        "Closed": {
+          "count": 1,
+          "sp": 2
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 0,
+      "issues": [
+        {
+          "key": "SRVKP-10986",
+          "summary": "1.22 Release captain work",
+          "status": "In Progress",
+          "sp": 5,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-11013",
+          "summary": "Add Release Tests configuration for Missing components",
+          "status": "Closed",
+          "sp": 2,
+          "priority": "Undefined"
+        }
+      ]
+    },
+    "Operator": {
+      "totalIssues": 2,
+      "totalSP": 8,
+      "byStatus": {
+        "To Do": {
+          "count": 1,
+          "sp": 5
+        },
+        "In Progress": {
+          "count": 1,
+          "sp": 3
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 0,
+      "issues": [
+        {
+          "key": "SRVKP-11122",
+          "summary": "Implementation of the moving operator types to v1beta1",
+          "status": "To Do",
+          "sp": 5,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-11200",
+          "summary": "Investigation on things needed for the PAC migration",
+          "status": "In Progress",
+          "sp": 3,
+          "priority": "Major"
+        }
+      ]
+    }
+  },
+  "trends": {
+    "sprintSnapshots": [
+      {
+        "id": "Pioneers-47880-1713286680",
+        "team": "Pioneers",
+        "sprintId": 47880,
+        "sprintName": "Pipelines Sprint Pioneers 1",
+        "snapshotDate": "2024-04-16T16:58:00.000Z",
+        "sprintStartDate": "2024-04-04T12:38:18.052Z",
+        "sprintEndDate": "2024-04-16T16:58:00.000Z",
+        "totalIssues": 17,
+        "totalSPs": 50,
+        "completedSPs": 50,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 2,
+        "carryForwardCriticalCount": 2,
+        "dodCompletePercent": 88,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 59,
+        "unplannedPercent": 41,
+        "cvePercent": 0,
+        "assigneeCount": 5,
+        "componentCount": 9
+      },
+      {
+        "id": "Pioneers-47876-1714480080",
+        "team": "Pioneers",
+        "sprintId": 47876,
+        "sprintName": "Pipelines Sprint Pioneers 2",
+        "snapshotDate": "2024-04-30T12:28:00.000Z",
+        "sprintStartDate": "2024-04-16T12:29:00.591Z",
+        "sprintEndDate": "2024-04-30T12:28:00.000Z",
+        "totalIssues": 33,
+        "totalSPs": 99,
+        "completedSPs": 85,
+        "completionPercent": 86,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 5,
+        "carryForwardCriticalCount": 3,
+        "dodCompletePercent": 85,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 58,
+        "unplannedPercent": 42,
+        "cvePercent": 0,
+        "assigneeCount": 8,
+        "componentCount": 9
+      },
+      {
+        "id": "Pioneers-47896-1715710500",
+        "team": "Pioneers",
+        "sprintId": 47896,
+        "sprintName": "Pipelines Sprint Pioneers 3",
+        "snapshotDate": "2024-05-14T18:15:00.000Z",
+        "sprintStartDate": "2024-04-30T12:48:19.441Z",
+        "sprintEndDate": "2024-05-14T18:15:00.000Z",
+        "totalIssues": 34,
+        "totalSPs": 106,
+        "completedSPs": 92,
+        "completionPercent": 87,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 5,
+        "carryForwardCriticalCount": 3,
+        "dodCompletePercent": 85,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 59,
+        "unplannedPercent": 41,
+        "cvePercent": 0,
+        "assigneeCount": 9,
+        "componentCount": 10
+      },
+      {
+        "id": "Pioneers-47884-1716918120",
+        "team": "Pioneers",
+        "sprintId": 47884,
+        "sprintName": "Pipelines Sprint Pioneers 4",
+        "snapshotDate": "2024-05-28T17:42:00.000Z",
+        "sprintStartDate": "2024-05-14T12:51:39.052Z",
+        "sprintEndDate": "2024-05-28T17:42:00.000Z",
+        "totalIssues": 33,
+        "totalSPs": 94,
+        "completedSPs": 86,
+        "completionPercent": 91,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 3,
+        "carryForwardCriticalCount": 3,
+        "dodCompletePercent": 91,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 64,
+        "unplannedPercent": 36,
+        "cvePercent": 0,
+        "assigneeCount": 8,
+        "componentCount": 10
+      },
+      {
+        "id": "Pioneers-47933-1718128140",
+        "team": "Pioneers",
+        "sprintId": 47933,
+        "sprintName": "Pipelines Sprint Pioneers 5",
+        "snapshotDate": "2024-06-11T17:49:00.000Z",
+        "sprintStartDate": "2024-05-28T12:38:56.284Z",
+        "sprintEndDate": "2024-06-11T17:49:00.000Z",
+        "totalIssues": 33,
+        "totalSPs": 95,
+        "completedSPs": 87,
+        "completionPercent": 92,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 3,
+        "carryForwardCriticalCount": 3,
+        "dodCompletePercent": 91,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 67,
+        "unplannedPercent": 33,
+        "cvePercent": 0,
+        "assigneeCount": 8,
+        "componentCount": 10
+      },
+      {
+        "id": "Pioneers-48062-1719350280",
+        "team": "Pioneers",
+        "sprintId": 48062,
+        "sprintName": "Pipelines Sprint Pioneers 6",
+        "snapshotDate": "2024-06-25T21:18:00.000Z",
+        "sprintStartDate": "2024-06-11T15:54:15.016Z",
+        "sprintEndDate": "2024-06-25T21:18:00.000Z",
+        "totalIssues": 31,
+        "totalSPs": 82,
+        "completedSPs": 74,
+        "completionPercent": 90,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 3,
+        "carryForwardCriticalCount": 3,
+        "dodCompletePercent": 90,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 68,
+        "unplannedPercent": 32,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 11
+      },
+      {
+        "id": "Pioneers-47908-1720544820",
+        "team": "Pioneers",
+        "sprintId": 47908,
+        "sprintName": "Pipelines Sprint Pioneers 7",
+        "snapshotDate": "2024-07-09T17:07:00.000Z",
+        "sprintStartDate": "2024-06-26T09:51:51.045Z",
+        "sprintEndDate": "2024-07-09T17:07:00.000Z",
+        "totalIssues": 14,
+        "totalSPs": 34,
+        "completedSPs": 34,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 36,
+        "unplannedPercent": 64,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 8
+      },
+      {
+        "id": "Pioneers-47940-1721754540",
+        "team": "Pioneers",
+        "sprintId": 47940,
+        "sprintName": "Pipelines Sprint Pioneers 8",
+        "snapshotDate": "2024-07-23T17:09:00.000Z",
+        "sprintStartDate": "2024-07-09T12:02:14.842Z",
+        "sprintEndDate": "2024-07-23T17:09:00.000Z",
+        "totalIssues": 13,
+        "totalSPs": 37,
+        "completedSPs": 37,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 54,
+        "unplannedPercent": 46,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 8
+      },
+      {
+        "id": "Pioneers-47887-1722962220",
+        "team": "Pioneers",
+        "sprintId": 47887,
+        "sprintName": "Pipelines Sprint Pioneers 9",
+        "snapshotDate": "2024-08-06T16:37:00.000Z",
+        "sprintStartDate": "2024-07-23T11:46:06.685Z",
+        "sprintEndDate": "2024-08-06T16:37:00.000Z",
+        "totalIssues": 12,
+        "totalSPs": 28,
+        "completedSPs": 28,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 50,
+        "unplannedPercent": 50,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 8
+      },
+      {
+        "id": "Pioneers-47990-1724171280",
+        "team": "Pioneers",
+        "sprintId": 47990,
+        "sprintName": "Pipelines Sprint Pioneers 10",
+        "snapshotDate": "2024-08-20T16:28:00.000Z",
+        "sprintStartDate": "2024-08-06T11:32:27.585Z",
+        "sprintEndDate": "2024-08-20T16:28:00.000Z",
+        "totalIssues": 22,
+        "totalSPs": 55,
+        "completedSPs": 53,
+        "completionPercent": 96,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 95,
+        "dodAtRiskPercent": 5,
+        "healthScore": "green",
+        "plannedPercent": 64,
+        "unplannedPercent": 36,
+        "cvePercent": 0,
+        "assigneeCount": 8,
+        "componentCount": 9
+      },
+      {
+        "id": "Pioneers-48030-1725383640",
+        "team": "Pioneers",
+        "sprintId": 48030,
+        "sprintName": "Pipelines Sprint Pioneers 11",
+        "snapshotDate": "2024-09-03T17:14:00.000Z",
+        "sprintStartDate": "2024-08-20T11:49:07.833Z",
+        "sprintEndDate": "2024-09-03T17:14:00.000Z",
+        "totalIssues": 16,
+        "totalSPs": 32,
+        "completedSPs": 30,
+        "completionPercent": 94,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 94,
+        "dodAtRiskPercent": 6,
+        "healthScore": "green",
+        "plannedPercent": 63,
+        "unplannedPercent": 38,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 7
+      },
+      {
+        "id": "Pioneers-47953-1726594860",
+        "team": "Pioneers",
+        "sprintId": 47953,
+        "sprintName": "Pipelines Sprint Pioneers 12",
+        "snapshotDate": "2024-09-17T17:41:00.000Z",
+        "sprintStartDate": "2024-09-03T17:19:22.281Z",
+        "sprintEndDate": "2024-09-17T17:41:00.000Z",
+        "totalIssues": 20,
+        "totalSPs": 25,
+        "completedSPs": 25,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 75,
+        "unplannedPercent": 25,
+        "cvePercent": 0,
+        "assigneeCount": 8,
+        "componentCount": 4
+      },
+      {
+        "id": "Pioneers-47911-1727803080",
+        "team": "Pioneers",
+        "sprintId": 47911,
+        "sprintName": "Pipelines Sprint Pioneers 13",
+        "snapshotDate": "2024-10-01T17:18:00.000Z",
+        "sprintStartDate": "2024-09-17T12:14:47.602Z",
+        "sprintEndDate": "2024-10-01T17:18:00.000Z",
+        "totalIssues": 22,
+        "totalSPs": 19,
+        "completedSPs": 16,
+        "completionPercent": 84,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 7,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 68,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 77,
+        "unplannedPercent": 23,
+        "cvePercent": 0,
+        "assigneeCount": 5,
+        "componentCount": 5
+      },
+      {
+        "id": "Pioneers-48103-1729012380",
+        "team": "Pioneers",
+        "sprintId": 48103,
+        "sprintName": "Pipelines Sprint Pioneers 14",
+        "snapshotDate": "2024-10-15T17:13:00.000Z",
+        "sprintStartDate": "2024-10-01T11:51:55.444Z",
+        "sprintEndDate": "2024-10-15T17:13:00.000Z",
+        "totalIssues": 13,
+        "totalSPs": 14,
+        "completedSPs": 14,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 92,
+        "unplannedPercent": 8,
+        "cvePercent": 0,
+        "assigneeCount": 3,
+        "componentCount": 4
+      },
+      {
+        "id": "Pioneers-47895-1730220840",
+        "team": "Pioneers",
+        "sprintId": 47895,
+        "sprintName": "Pipelines Sprint Pioneers 15",
+        "snapshotDate": "2024-10-29T16:54:00.000Z",
+        "sprintStartDate": "2024-10-15T11:58:48.118Z",
+        "sprintEndDate": "2024-10-29T16:54:00.000Z",
+        "totalIssues": 14,
+        "totalSPs": 12,
+        "completedSPs": 12,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 93,
+        "unplannedPercent": 7,
+        "cvePercent": 0,
+        "assigneeCount": 3,
+        "componentCount": 3
+      },
+      {
+        "id": "Pioneers-47958-1731431820",
+        "team": "Pioneers",
+        "sprintId": 47958,
+        "sprintName": "Pipelines Sprint Pioneers 16",
+        "snapshotDate": "2024-11-12T17:17:00.000Z",
+        "sprintStartDate": "2024-10-29T12:20:50.331Z",
+        "sprintEndDate": "2024-11-12T17:17:00.000Z",
+        "totalIssues": 7,
+        "totalSPs": 11,
+        "completedSPs": 11,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 86,
+        "unplannedPercent": 14,
+        "cvePercent": 0,
+        "assigneeCount": 3,
+        "componentCount": 2
+      },
+      {
+        "id": "Pioneers-47950-1732750140",
+        "team": "Pioneers",
+        "sprintId": 47950,
+        "sprintName": "Pipelines Sprint Pioneers 17",
+        "snapshotDate": "2024-11-27T23:29:00.000Z",
+        "sprintStartDate": "2024-11-13T18:03:00.582Z",
+        "sprintEndDate": "2024-11-27T23:29:00.000Z",
+        "totalIssues": 4,
+        "totalSPs": 4,
+        "completedSPs": 4,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 50,
+        "unplannedPercent": 50,
+        "cvePercent": 0,
+        "assigneeCount": 3,
+        "componentCount": 2
+      },
+      {
+        "id": "Pioneers-47969-1733851080",
+        "team": "Pioneers",
+        "sprintId": 47969,
+        "sprintName": "Pipelines Sprint Pioneers 18",
+        "snapshotDate": "2024-12-10T17:18:00.000Z",
+        "sprintStartDate": "2024-11-26T11:56:25.507Z",
+        "sprintEndDate": "2024-12-10T17:18:00.000Z",
+        "totalIssues": 7,
+        "totalSPs": 9,
+        "completedSPs": 9,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 71,
+        "unplannedPercent": 29,
+        "cvePercent": 0,
+        "assigneeCount": 3,
+        "componentCount": 1
+      },
+      {
+        "id": "Pioneers-47961-1737479580",
+        "team": "Pioneers",
+        "sprintId": 47961,
+        "sprintName": "Pipelines Sprint Pioneers 19",
+        "snapshotDate": "2025-01-21T17:13:00.000Z",
+        "sprintStartDate": "2025-01-07T12:21:52.273Z",
+        "sprintEndDate": "2025-01-21T17:13:00.000Z",
+        "totalIssues": 10,
+        "totalSPs": 20,
+        "completedSPs": 20,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 70,
+        "unplannedPercent": 30,
+        "cvePercent": 0,
+        "assigneeCount": 4,
+        "componentCount": 4
+      },
+      {
+        "id": "Pioneers-47981-1738691640",
+        "team": "Pioneers",
+        "sprintId": 47981,
+        "sprintName": "Pipelines Sprint Pioneers 21",
+        "snapshotDate": "2025-02-04T17:54:00.000Z",
+        "sprintStartDate": "2025-01-21T12:42:36.047Z",
+        "sprintEndDate": "2025-02-04T17:54:00.000Z",
+        "totalIssues": 22,
+        "totalSPs": 47,
+        "completedSPs": 44,
+        "completionPercent": 94,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 95,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 73,
+        "unplannedPercent": 27,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 5
+      },
+      {
+        "id": "Pioneers-47906-1739878320",
+        "team": "Pioneers",
+        "sprintId": 47906,
+        "sprintName": "Pipelines Sprint Pioneers 22",
+        "snapshotDate": "2025-02-18T11:32:00.000Z",
+        "sprintStartDate": "2025-02-04T12:06:54.876Z",
+        "sprintEndDate": "2025-02-18T11:32:00.000Z",
+        "totalIssues": 32,
+        "totalSPs": 59,
+        "completedSPs": 59,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 81,
+        "unplannedPercent": 19,
+        "cvePercent": 0,
+        "assigneeCount": 9,
+        "componentCount": 9
+      },
+      {
+        "id": "Pioneers-47974-1741106220",
+        "team": "Pioneers",
+        "sprintId": 47974,
+        "sprintName": "Pipelines Sprint Pioneers 23",
+        "snapshotDate": "2025-03-04T16:37:00.000Z",
+        "sprintStartDate": "2025-02-18T11:55:33.067Z",
+        "sprintEndDate": "2025-03-04T16:37:00.000Z",
+        "totalIssues": 36,
+        "totalSPs": 69,
+        "completedSPs": 69,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 94,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 86,
+        "unplannedPercent": 14,
+        "cvePercent": 0,
+        "assigneeCount": 10,
+        "componentCount": 8
+      },
+      {
+        "id": "Pioneers-47991-1742299980",
+        "team": "Pioneers",
+        "sprintId": 47991,
+        "sprintName": "Pipelines Sprint Pioneers 24",
+        "snapshotDate": "2025-03-18T12:13:00.000Z",
+        "sprintStartDate": "2025-03-04T12:39:21.728Z",
+        "sprintEndDate": "2025-03-18T12:13:00.000Z",
+        "totalIssues": 36,
+        "totalSPs": 62,
+        "completedSPs": 62,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 94,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 81,
+        "unplannedPercent": 19,
+        "cvePercent": 0,
+        "assigneeCount": 10,
+        "componentCount": 6
+      },
+      {
+        "id": "Pioneers-48027-1743524940",
+        "team": "Pioneers",
+        "sprintId": 48027,
+        "sprintName": "Pipelines Sprint Pioneers 25",
+        "snapshotDate": "2025-04-01T16:29:00.000Z",
+        "sprintStartDate": "2025-03-18T12:25:52.979Z",
+        "sprintEndDate": "2025-04-01T16:29:00.000Z",
+        "totalIssues": 38,
+        "totalSPs": 67,
+        "completedSPs": 67,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 92,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 61,
+        "unplannedPercent": 39,
+        "cvePercent": 0,
+        "assigneeCount": 9,
+        "componentCount": 9
+      },
+      {
+        "id": "Pioneers-18944-1744735680",
+        "team": "Pioneers",
+        "sprintId": 18944,
+        "sprintName": "Pipelines Sprint Pioneers 26",
+        "snapshotDate": "2025-04-15T16:48:00.000Z",
+        "sprintStartDate": "2025-04-01T12:24:53.870Z",
+        "sprintEndDate": "2025-04-15T16:48:00.000Z",
+        "totalIssues": 18,
+        "totalSPs": 30,
+        "completedSPs": 30,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 89,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 39,
+        "unplannedPercent": 61,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 7
+      },
+      {
+        "id": "Pioneers-18997-1745926200",
+        "team": "Pioneers",
+        "sprintId": 18997,
+        "sprintName": "Pipelines Sprint Pioneers 27",
+        "snapshotDate": "2025-04-29T11:30:00.000Z",
+        "sprintStartDate": "2025-04-15T12:23:31.941Z",
+        "sprintEndDate": "2025-04-29T11:30:00.000Z",
+        "totalIssues": 19,
+        "totalSPs": 34,
+        "completedSPs": 34,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 84,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 42,
+        "unplannedPercent": 58,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 8
+      },
+      {
+        "id": "Pioneers-18960-1747135380",
+        "team": "Pioneers",
+        "sprintId": 18960,
+        "sprintName": "Pipelines Sprint Pioneers 28",
+        "snapshotDate": "2025-05-13T11:23:00.000Z",
+        "sprintStartDate": "2025-04-29T12:00:04.334Z",
+        "sprintEndDate": "2025-05-13T11:23:00.000Z",
+        "totalIssues": 20,
+        "totalSPs": 42,
+        "completedSPs": 34,
+        "completionPercent": 81,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 2,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 80,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 50,
+        "unplannedPercent": 50,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 8
+      },
+      {
+        "id": "Pioneers-18998-1747735920",
+        "team": "Pioneers",
+        "sprintId": 18998,
+        "sprintName": "Pipelines Sprint Pioneers 29",
+        "snapshotDate": "2025-05-20T10:12:00.000Z",
+        "sprintStartDate": "2025-05-20T11:02:29.236Z",
+        "sprintEndDate": "2025-05-20T10:12:00.000Z",
+        "totalIssues": 22,
+        "totalSPs": 54,
+        "completedSPs": 45,
+        "completionPercent": 83,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 3,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 77,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 64,
+        "unplannedPercent": 36,
+        "cvePercent": 0,
+        "assigneeCount": 8,
+        "componentCount": 14
+      },
+      {
+        "id": "Pioneers-18947-1749555840",
+        "team": "Pioneers",
+        "sprintId": 18947,
+        "sprintName": "Pipelines Sprint Pioneers 30",
+        "snapshotDate": "2025-06-10T11:44:00.000Z",
+        "sprintStartDate": "2025-05-27T12:01:22.655Z",
+        "sprintEndDate": "2025-06-10T11:44:00.000Z",
+        "totalIssues": 14,
+        "totalSPs": 46,
+        "completedSPs": 38,
+        "completionPercent": 83,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 3,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 64,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 43,
+        "unplannedPercent": 57,
+        "cvePercent": 0,
+        "assigneeCount": 5,
+        "componentCount": 13
+      },
+      {
+        "id": "Pioneers-19019-1750764780",
+        "team": "Pioneers",
+        "sprintId": 19019,
+        "sprintName": "Pipelines Sprint pioneers 31",
+        "snapshotDate": "2025-06-24T11:33:00.000Z",
+        "sprintStartDate": "2025-06-10T12:27:35.816Z",
+        "sprintEndDate": "2025-06-24T11:33:00.000Z",
+        "totalIssues": 23,
+        "totalSPs": 69,
+        "completedSPs": 60,
+        "completionPercent": 87,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 2,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 70,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 43,
+        "unplannedPercent": 57,
+        "cvePercent": 0,
+        "assigneeCount": 11,
+        "componentCount": 16
+      },
+      {
+        "id": "Pioneers-19003-1751974140",
+        "team": "Pioneers",
+        "sprintId": 19003,
+        "sprintName": "Pipelines Sprint pioneers 32",
+        "snapshotDate": "2025-07-08T11:29:00.000Z",
+        "sprintStartDate": "2025-06-24T11:57:32.690Z",
+        "sprintEndDate": "2025-07-08T11:29:00.000Z",
+        "totalIssues": 19,
+        "totalSPs": 44,
+        "completedSPs": 44,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 2,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 74,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 47,
+        "unplannedPercent": 53,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 14
+      },
+      {
+        "id": "Pioneers-18974-1753180260",
+        "team": "Pioneers",
+        "sprintId": 18974,
+        "sprintName": "Pipelines Sprint pioneers 33",
+        "snapshotDate": "2025-07-22T10:31:00.000Z",
+        "sprintStartDate": "2025-07-08T12:26:57.357Z",
+        "sprintEndDate": "2025-07-22T10:31:00.000Z",
+        "totalIssues": 18,
+        "totalSPs": 47,
+        "completedSPs": 47,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 89,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 50,
+        "unplannedPercent": 50,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 7
+      },
+      {
+        "id": "Pioneers-18955-1754389140",
+        "team": "Pioneers",
+        "sprintId": 18955,
+        "sprintName": "Pipelines Sprint Pioneers 34",
+        "snapshotDate": "2025-08-05T10:19:00.000Z",
+        "sprintStartDate": "2025-07-22T11:49:37.164Z",
+        "sprintEndDate": "2025-08-05T10:19:00.000Z",
+        "totalIssues": 17,
+        "totalSPs": 40,
+        "completedSPs": 40,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 59,
+        "unplannedPercent": 41,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 10
+      },
+      {
+        "id": "Pioneers-19017-1755618120",
+        "team": "Pioneers",
+        "sprintId": 19017,
+        "sprintName": "Pipelines Sprint Pioneers 35",
+        "snapshotDate": "2025-08-19T15:42:00.000Z",
+        "sprintStartDate": "2025-08-05T12:27:30.770Z",
+        "sprintEndDate": "2025-08-19T15:42:00.000Z",
+        "totalIssues": 16,
+        "totalSPs": 46,
+        "completedSPs": 46,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 56,
+        "unplannedPercent": 44,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 6
+      },
+      {
+        "id": "Pioneers-47996-1756812720",
+        "team": "Pioneers",
+        "sprintId": 47996,
+        "sprintName": "Pipelines Sprint Pioneers 36",
+        "snapshotDate": "2025-09-02T11:32:00.000Z",
+        "sprintStartDate": "2025-08-19T12:28:04.722Z",
+        "sprintEndDate": "2025-09-02T11:32:00.000Z",
+        "totalIssues": 16,
+        "totalSPs": 40,
+        "completedSPs": 40,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 94,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 69,
+        "unplannedPercent": 31,
+        "cvePercent": 0,
+        "assigneeCount": 5,
+        "componentCount": 6
+      },
+      {
+        "id": "Pioneers-47914-1758022500",
+        "team": "Pioneers",
+        "sprintId": 47914,
+        "sprintName": "Pipelines Sprint Pioneers 37",
+        "snapshotDate": "2025-09-16T11:35:00.000Z",
+        "sprintStartDate": "2025-09-02T16:27:12.410Z",
+        "sprintEndDate": "2025-09-16T11:35:00.000Z",
+        "totalIssues": 18,
+        "totalSPs": 43,
+        "completedSPs": 43,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 94,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 72,
+        "unplannedPercent": 28,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 9
+      },
+      {
+        "id": "Pioneers-48099-1759248060",
+        "team": "Pioneers",
+        "sprintId": 48099,
+        "sprintName": "Pipelines Sprint Pioneers 38",
+        "snapshotDate": "2025-09-30T16:01:00.000Z",
+        "sprintStartDate": "2025-09-16T12:30:43.493Z",
+        "sprintEndDate": "2025-09-30T16:01:00.000Z",
+        "totalIssues": 16,
+        "totalSPs": 58,
+        "completedSPs": 58,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 63,
+        "unplannedPercent": 38,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 9
+      },
+      {
+        "id": "Pioneers-47946-1760443440",
+        "team": "Pioneers",
+        "sprintId": 47946,
+        "sprintName": "Pipelines Sprint Pioneers 39",
+        "snapshotDate": "2025-10-14T12:04:00.000Z",
+        "sprintStartDate": "2025-09-30T12:59:09.714Z",
+        "sprintEndDate": "2025-10-14T12:04:00.000Z",
+        "totalIssues": 16,
+        "totalSPs": 38,
+        "completedSPs": 38,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 56,
+        "unplannedPercent": 44,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 8
+      },
+      {
+        "id": "Pioneers-47959-1761664140",
+        "team": "Pioneers",
+        "sprintId": 47959,
+        "sprintName": "Pipelines Sprint Pioneers 40",
+        "snapshotDate": "2025-10-28T15:09:00.000Z",
+        "sprintStartDate": "2025-10-14T13:02:03.961Z",
+        "sprintEndDate": "2025-10-28T15:09:00.000Z",
+        "totalIssues": 14,
+        "totalSPs": 37,
+        "completedSPs": 37,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 57,
+        "unplannedPercent": 43,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 7
+      },
+      {
+        "id": "Pioneers-47954-1762860600",
+        "team": "Pioneers",
+        "sprintId": 47954,
+        "sprintName": "Pipelines Sprint Pioneers 41",
+        "snapshotDate": "2025-11-11T11:30:00.000Z",
+        "sprintStartDate": "2025-10-28T12:57:46.408Z",
+        "sprintEndDate": "2025-11-11T11:30:00.000Z",
+        "totalIssues": 23,
+        "totalSPs": 63,
+        "completedSPs": 55,
+        "completionPercent": 87,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 91,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 65,
+        "unplannedPercent": 35,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 8
+      },
+      {
+        "id": "Pioneers-47921-1764098220",
+        "team": "Pioneers",
+        "sprintId": 47921,
+        "sprintName": "Pipelines Sprint Pioneers 42",
+        "snapshotDate": "2025-11-25T19:17:00.000Z",
+        "sprintStartDate": "2025-11-11T15:32:31.730Z",
+        "sprintEndDate": "2025-11-25T19:17:00.000Z",
+        "totalIssues": 17,
+        "totalSPs": 43,
+        "completedSPs": 43,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 94,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 53,
+        "unplannedPercent": 47,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 6
+      },
+      {
+        "id": "Pioneers-47941-1765289100",
+        "team": "Pioneers",
+        "sprintId": 47941,
+        "sprintName": "Pipelines Sprint Pioneers 43",
+        "snapshotDate": "2025-12-09T14:05:00.000Z",
+        "sprintStartDate": "2025-11-25T12:37:57.244Z",
+        "sprintEndDate": "2025-12-09T14:05:00.000Z",
+        "totalIssues": 23,
+        "totalSPs": 63,
+        "completedSPs": 63,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 57,
+        "unplannedPercent": 43,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 7
+      },
+      {
+        "id": "Pioneers-48142-1766488620",
+        "team": "Pioneers",
+        "sprintId": 48142,
+        "sprintName": "Pipelines Sprint Pioneers 44",
+        "snapshotDate": "2025-12-23T11:17:00.000Z",
+        "sprintStartDate": "2025-12-09T12:44:22.490Z",
+        "sprintEndDate": "2025-12-23T11:17:00.000Z",
+        "totalIssues": 26,
+        "totalSPs": 59,
+        "completedSPs": 54,
+        "completionPercent": 92,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 1,
+        "codeReviewSPs": 2,
+        "carryForwardCount": 2,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 92,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 81,
+        "unplannedPercent": 19,
+        "cvePercent": 0,
+        "assigneeCount": 8,
+        "componentCount": 6
+      },
+      {
+        "id": "Pioneers-47951-1767695760",
+        "team": "Pioneers",
+        "sprintId": 47951,
+        "sprintName": "Pipelines Sprint Pioneers 45",
+        "snapshotDate": "2026-01-06T10:36:00.000Z",
+        "sprintStartDate": "2026-01-05T10:37:37.849Z",
+        "sprintEndDate": "2026-01-06T10:36:00.000Z",
+        "totalIssues": 11,
+        "totalSPs": 28,
+        "completedSPs": 21,
+        "completionPercent": 75,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 2,
+        "codeReviewSPs": 4,
+        "carryForwardCount": 3,
+        "carryForwardCriticalCount": 2,
+        "dodCompletePercent": 73,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 82,
+        "unplannedPercent": 18,
+        "cvePercent": 0,
+        "assigneeCount": 5,
+        "componentCount": 5
+      },
+      {
+        "id": "Pioneers-47932-1768915680",
+        "team": "Pioneers",
+        "sprintId": 47932,
+        "sprintName": "Pipelines Sprint Pioneers 46",
+        "snapshotDate": "2026-01-20T13:28:00.000Z",
+        "sprintStartDate": "2026-01-06T13:28:50.119Z",
+        "sprintEndDate": "2026-01-20T13:28:00.000Z",
+        "totalIssues": 19,
+        "totalSPs": 47,
+        "completedSPs": 34,
+        "completionPercent": 72,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 3,
+        "codeReviewSPs": 7,
+        "carryForwardCount": 5,
+        "carryForwardCriticalCount": 3,
+        "dodCompletePercent": 74,
+        "dodAtRiskPercent": 5,
+        "healthScore": "green",
+        "plannedPercent": 68,
+        "unplannedPercent": 26,
+        "cvePercent": 5,
+        "assigneeCount": 9,
+        "componentCount": 9
+      },
+      {
+        "id": "Pioneers-47973-1770115020",
+        "team": "Pioneers",
+        "sprintId": 47973,
+        "sprintName": "Pipelines Sprint Pioneers 47",
+        "snapshotDate": "2026-02-03T10:37:00.000Z",
+        "sprintStartDate": "2026-01-21T10:37:44.242Z",
+        "sprintEndDate": "2026-02-03T10:37:00.000Z",
+        "totalIssues": 18,
+        "totalSPs": 46,
+        "completedSPs": 39,
+        "completionPercent": 85,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 3,
+        "codeReviewSPs": 7,
+        "carryForwardCount": 3,
+        "carryForwardCriticalCount": 3,
+        "dodCompletePercent": 83,
+        "dodAtRiskPercent": 6,
+        "healthScore": "green",
+        "plannedPercent": 78,
+        "unplannedPercent": 11,
+        "cvePercent": 11,
+        "assigneeCount": 7,
+        "componentCount": 3
+      },
+      {
+        "id": "Pioneers-48015-1771331340",
+        "team": "Pioneers",
+        "sprintId": 48015,
+        "sprintName": "Pipelines Sprint Pioneers 48",
+        "snapshotDate": "2026-02-17T12:29:00.000Z",
+        "sprintStartDate": "2026-02-03T12:36:36.947Z",
+        "sprintEndDate": "2026-02-17T12:29:00.000Z",
+        "totalIssues": 17,
+        "totalSPs": 57,
+        "completedSPs": 47,
+        "completionPercent": 82,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 4,
+        "codeReviewSPs": 10,
+        "carryForwardCount": 4,
+        "carryForwardCriticalCount": 3,
+        "dodCompletePercent": 71,
+        "dodAtRiskPercent": 12,
+        "healthScore": "green",
+        "plannedPercent": 71,
+        "unplannedPercent": 29,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 9
+      },
+      {
+        "id": "Pioneers-47965-1772540460",
+        "team": "Pioneers",
+        "sprintId": 47965,
+        "sprintName": "Pipelines Sprint Pioneers 49",
+        "snapshotDate": "2026-03-03T12:21:00.000Z",
+        "sprintStartDate": "2026-02-17T12:22:14.069Z",
+        "sprintEndDate": "2026-03-03T12:21:00.000Z",
+        "totalIssues": 24,
+        "totalSPs": 49,
+        "completedSPs": 39,
+        "completionPercent": 80,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 4,
+        "codeReviewSPs": 10,
+        "carryForwardCount": 4,
+        "carryForwardCriticalCount": 3,
+        "dodCompletePercent": 79,
+        "dodAtRiskPercent": 8,
+        "healthScore": "green",
+        "plannedPercent": 42,
+        "unplannedPercent": 29,
+        "cvePercent": 29,
+        "assigneeCount": 7,
+        "componentCount": 11
+      },
+      {
+        "id": "Pioneers-48154-1773837960",
+        "team": "Pioneers",
+        "sprintId": 48154,
+        "sprintName": "Pipelines Sprint Pioneers 50",
+        "snapshotDate": "2026-03-18T12:46:00.000Z",
+        "sprintStartDate": "2026-03-04T12:46:51.203Z",
+        "sprintEndDate": "2026-03-18T12:46:00.000Z",
+        "totalIssues": 30,
+        "totalSPs": 68,
+        "completedSPs": 42,
+        "completionPercent": 62,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 4,
+        "codeReviewSPs": 10,
+        "carryForwardCount": 10,
+        "carryForwardCriticalCount": 3,
+        "dodCompletePercent": 60,
+        "dodAtRiskPercent": 7,
+        "healthScore": "yellow",
+        "plannedPercent": 60,
+        "unplannedPercent": 40,
+        "cvePercent": 0,
+        "assigneeCount": 9,
+        "componentCount": 6
+      },
+      {
+        "id": "Pioneers-47963-1774267171441",
+        "team": "Pioneers",
+        "sprintId": 47963,
+        "sprintName": "Pipelines Sprint Pioneers 51",
+        "snapshotDate": "2026-03-23T11:59:15.040Z",
+        "sprintStartDate": "2026-03-17T12:34:40.412Z",
+        "sprintEndDate": "2026-03-31T16:00:00.000Z",
+        "totalIssues": 28,
+        "totalSPs": 71,
+        "completedSPs": 13,
+        "completionPercent": 18,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 9,
+        "codeReviewSPs": 29,
+        "carryForwardCount": 20,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 14,
+        "dodAtRiskPercent": 11,
+        "healthScore": "yellow",
+        "plannedPercent": 71,
+        "unplannedPercent": 29,
+        "cvePercent": 0,
+        "velocityAvg3": null,
+        "velocityAvg5": null,
+        "assigneeCount": 9,
+        "componentCount": 9
+      }
+    ],
+    "issueSnapshots": []
+  }
+}

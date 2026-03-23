@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const readline = require('readline');
+const { execSync } = require('child_process');
 
 // ANSI color codes
 const colors = {
@@ -166,17 +167,62 @@ async function install(targetDir) {
     copyDirectory(templatesSource, templatesDest);
   }
 
+  // Copy standalone scripts
+  const scriptsSource = path.join(__dirname, '..');
+  const scriptsDest = path.join(targetDir, 'bin', NAMESPACE);
+
+  if (!fs.existsSync(scriptsDest)) {
+    fs.mkdirSync(scriptsDest, { recursive: true });
+  }
+
+  const scripts = ['sprint-status.js', 'sprint-history.js'];
+  for (const script of scripts) {
+    const src = path.join(scriptsSource, 'bin', script);
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, path.join(scriptsDest, script));
+      console.log(`${colors.dim}Installed script: ${script}${colors.reset}`);
+    }
+  }
+
+  // Build React dashboard if dashboard/ exists
+  const dashboardDir = path.join(scriptsSource, 'dashboard');
+  if (fs.existsSync(dashboardDir)) {
+    const builtIndex = path.join(scriptsSource, 'docs', 'templates', 'built', 'index.html');
+
+    if (!fs.existsSync(builtIndex)) {
+      console.log(`\n${colors.cyan}Building React dashboard...${colors.reset}`);
+      try {
+        const dashboardNodeModules = path.join(dashboardDir, 'node_modules');
+        if (!fs.existsSync(dashboardNodeModules)) {
+          console.log(`${colors.dim}Installing dashboard dependencies...${colors.reset}`);
+          execSync('npm install', { cwd: dashboardDir, stdio: 'pipe' });
+        }
+        execSync('npm run build', { cwd: dashboardDir, stdio: 'pipe' });
+        console.log(`${colors.green}Dashboard built successfully${colors.reset}`);
+      } catch (e) {
+        console.log(`${colors.yellow}Dashboard build skipped: ${e.message}${colors.reset}`);
+        console.log(`${colors.dim}You can build manually: cd dashboard && npm install && npm run build${colors.reset}`);
+      }
+    } else {
+      console.log(`${colors.dim}Dashboard already built${colors.reset}`);
+    }
+  }
+
   // List installed commands
   const commands = fs.readdirSync(commandsDest)
     .filter(f => f.endsWith('.md'))
     .map(f => f.replace('.md', ''));
 
-  console.log(`${colors.green}${colors.bright}Installation complete!${colors.reset}\n`);
+  console.log(`\n${colors.green}${colors.bright}Installation complete!${colors.reset}\n`);
   console.log(`${colors.bright}Installed ${commands.length} command(s):${colors.reset}`);
 
   for (const cmd of commands) {
     console.log(`  ${colors.cyan}/${NAMESPACE}:${cmd}${colors.reset}`);
   }
+
+  console.log(`\n${colors.bright}Standalone scripts (no LLM tokens):${colors.reset}`);
+  console.log(`  ${colors.cyan}node ${path.join(scriptsDest, 'sprint-status.js')} <team>${colors.reset}`);
+  console.log(`  ${colors.cyan}node ${path.join(scriptsDest, 'sprint-history.js')} <team> <subcommand>${colors.reset}`);
 
   console.log(`\n${colors.dim}Run /${NAMESPACE}:help in Claude Code to get started.${colors.reset}\n`);
 }

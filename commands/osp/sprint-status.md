@@ -820,6 +820,258 @@ echo "========================================="
 
 Terminal summary displays key numbers, alerts, DoD compliance, top 3 action items, and dashboard file path.
 </step>
+
+<step name="index_to_meilisearch">
+Index sprint snapshot and issue snapshots into Meilisearch for historical analysis.
+
+```bash
+# Check Docker availability
+if ! command -v docker &>/dev/null; then
+  echo "Meilisearch indexing skipped — Docker not available"
+  exit 0
+fi
+
+# Ensure config directory exists
+mkdir -p ~/.config/osp
+chmod 700 ~/.config/osp
+
+# Read or create Meilisearch key
+CONFIG_FILE="$HOME/.config/osp/config.json"
+if [ -f "$CONFIG_FILE" ]; then
+  MEILI_KEY=$(jq -r '.meilisearch.key // empty' "$CONFIG_FILE")
+else
+  echo '{}' > "$CONFIG_FILE"
+  chmod 600 "$CONFIG_FILE"
+fi
+
+if [ -z "$MEILI_KEY" ]; then
+  # Generate UUID for master key
+  MEILI_KEY=$(python3 -c "import uuid; print(uuid.uuid4())")
+
+  # Save to config
+  jq --arg key "$MEILI_KEY" \
+    '. + {meilisearch: {url: "http://localhost:7700", key: $key, container: "osp-meilisearch"}}' \
+    "$CONFIG_FILE" > "${CONFIG_FILE}.tmp" && mv "${CONFIG_FILE}.tmp" "$CONFIG_FILE"
+
+  echo "Generated Meilisearch master key"
+fi
+
+# Check if container exists and its status
+CONTAINER_STATUS=$(docker ps -a --filter name=osp-meilisearch --format '{{.Status}}' 2>/dev/null)
+
+if [ -z "$CONTAINER_STATUS" ]; then
+  # Container doesn't exist - create and start
+  echo "Starting Meilisearch container..."
+  docker run -d --name osp-meilisearch -p 7700:7700 \
+    -v osp-meili-data:/meili_data \
+    -e MEILI_MASTER_KEY="${MEILI_KEY}" \
+    getmeili/meilisearch:latest >/dev/null
+elif echo "$CONTAINER_STATUS" | grep -q "Exited"; then
+  # Container exists but stopped - start it
+  echo "Restarting Meilisearch container..."
+  docker start osp-meilisearch >/dev/null
+fi
+
+# Wait for health check (max 10 seconds)
+MEILI_URL="http://localhost:7700"
+for i in $(seq 1 10); do
+  if curl -s "${MEILI_URL}/health" 2>/dev/null | grep -q "available"; then
+    break
+  fi
+  sleep 1
+done
+
+# Create indexes if they don't exist (these are idempotent)
+curl -s -X POST "${MEILI_URL}/indexes" \
+  -H "Authorization: Bearer ${MEILI_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{"uid": "sprint-snapshots", "primaryKey": "id"}' >/dev/null 2>&1
+
+curl -s -X POST "${MEILI_URL}/indexes" \
+  -H "Authorization: Bearer ${MEILI_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{"uid": "issue-snapshots", "primaryKey": "id"}' >/dev/null 2>&1
+
+# Configure filterable/sortable attributes
+curl -s -X PUT "${MEILI_URL}/indexes/sprint-snapshots/settings" \
+  -H "Authorization: Bearer ${MEILI_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filterableAttributes": ["team", "sprintId", "sprintName", "healthScore", "snapshotDate"],
+    "sortableAttributes": ["snapshotDate", "completionPercent", "totalSPs"]
+  }' >/dev/null 2>&1
+
+curl -s -X PUT "${MEILI_URL}/indexes/issue-snapshots/settings" \
+  -H "Authorization: Bearer ${MEILI_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filterableAttributes": ["team", "key", "status", "priority", "type", "assignee", "components", "blocked", "dodScore", "sprintId", "sprintName", "snapshotDate"],
+    "sortableAttributes": ["snapshotDate", "sprintCount", "storyPoints"],
+    "searchableAttributes": ["key", "summary", "assignee", "components", "labels"]
+  }' >/dev/null 2>&1
+
+# Build sprint snapshot document from DASHBOARD_DATA
+SNAPSHOT_ID="${TEAM_NAME}-${SPRINT_ID}-$(date +%s)"
+SPRINT_SNAPSHOT=$(echo "$DASHBOARD_DATA" | jq --arg id "$SNAPSHOT_ID" '{
+  id: $id,
+  team: .meta.team,
+  sprintId: .meta.sprint.id,
+  sprintName: .meta.sprint.name,
+  snapshotDate: .meta.generatedAt,
+  sprintStartDate: .meta.sprint.startDate,
+  sprintEndDate: .meta.sprint.endDate,
+  totalIssues: .summary.totalIssues,
+  totalSPs: .summary.totalSPs,
+  completedSPs: .velocity.current.completed,
+  completionPercent: .meta.completionPercent,
+  blockedCount: .summary.blocked.count,
+  blockedSPs: .summary.blocked.sp,
+  codeReviewCount: (.summary.byStatus["Code Review"].count // 0),
+  codeReviewSPs: (.summary.byStatus["Code Review"].sp // 0),
+  carryForwardCount: (.carryForward | length),
+  carryForwardCriticalCount: ([.carryForward[] | select(.severity == "critical")] | length),
+  dodCompletePercent: .dod.complete.percent,
+  dodAtRiskPercent: .dod.atRisk.percent,
+  healthScore: .meta.healthScore,
+  plannedPercent: .roadmap.planned.percent,
+  unplannedPercent: .roadmap.unplanned.percent,
+  cvePercent: .roadmap.cve.percent,
+  velocityAvg3: .velocity.avg3,
+  velocityAvg5: .velocity.avg5,
+  assigneeCount: (.assignees | keys | length),
+  componentCount: (.components | keys | length)
+}')
+
+# Index sprint snapshot
+curl -s -X POST "${MEILI_URL}/indexes/sprint-snapshots/documents" \
+  -H "Authorization: Bearer ${MEILI_KEY}" \
+  -H "Content-Type: application/json" \
+  -d "[$SPRINT_SNAPSHOT]" >/dev/null
+
+# Build issue snapshots from assignee breakdown (most complete source)
+TIMESTAMP=$(date +%s)
+ISSUE_SNAPSHOTS=$(echo "$DASHBOARD_DATA" | jq --arg ts "$TIMESTAMP" --arg team "$TEAM_NAME" --argjson sprintId "$SPRINT_ID" --arg sprintName "$SPRINT_NAME" '
+  # Extract all issues from assignees breakdown
+  [.assignees | to_entries[] | .value.issues[] | . + {assigneeName: .key}] |
+  unique_by(.key) |
+  map({
+    id: (.key + "-" + ($sprintId | tostring) + "-" + $ts),
+    key: .key,
+    summary: .summary,
+    status: .status,
+    priority: "Normal",
+    type: "Story",
+    assignee: (.assigneeName // "Unassigned"),
+    components: [],
+    storyPoints: (.sp // 0),
+    originalStoryPoints: null,
+    sprintCount: 1,
+    blocked: false,
+    blockedReason: null,
+    dodScore: "unknown",
+    dodMissing: [],
+    labels: [],
+    team: $team,
+    sprintId: $sprintId,
+    sprintName: $sprintName,
+    snapshotDate: (now | todate),
+    epicKey: null,
+    epicSummary: null
+  })
+')
+
+# Enrich with data from other sections
+# Merge blocked data
+ISSUE_SNAPSHOTS=$(echo "$DASHBOARD_DATA" "$ISSUE_SNAPSHOTS" | jq -s '
+  .[1] as $snapshots |
+  .[0].blocked as $blocked |
+  $snapshots | map(
+    . as $snap |
+    ($blocked[] | select(.key == $snap.key)) as $b |
+    if $b then
+      . + {
+        blocked: true,
+        blockedReason: $b.reason,
+        priority: $b.priority
+      }
+    else . end
+  )
+')
+
+# Merge carry-forward data
+ISSUE_SNAPSHOTS=$(echo "$DASHBOARD_DATA" "$ISSUE_SNAPSHOTS" | jq -s '
+  .[1] as $snapshots |
+  .[0].carryForward as $cf |
+  $snapshots | map(
+    . as $snap |
+    ($cf[] | select(.key == $snap.key)) as $c |
+    if $c then
+      . + {sprintCount: $c.sprintCount}
+    else . end
+  )
+')
+
+# Merge DoD data
+ISSUE_SNAPSHOTS=$(echo "$DASHBOARD_DATA" "$ISSUE_SNAPSHOTS" | jq -s '
+  .[1] as $snapshots |
+  .[0].dod.issues as $dod |
+  $snapshots | map(
+    . as $snap |
+    ($dod[] | select(.key == $snap.key)) as $d |
+    if $d then
+      . + {
+        dodScore: $d.score,
+        dodMissing: $d.missing,
+        labels: $d.labels
+      }
+    else . end
+  )
+')
+
+# Merge code review data
+ISSUE_SNAPSHOTS=$(echo "$DASHBOARD_DATA" "$ISSUE_SNAPSHOTS" | jq -s '
+  .[1] as $snapshots |
+  .[0].codeReview as $cr |
+  $snapshots | map(
+    . as $snap |
+    ($cr[] | select(.key == $snap.key)) as $c |
+    if $c then
+      . + {
+        originalStoryPoints: $c.originalSP,
+        type: "Story"
+      }
+    else . end
+  )
+')
+
+# Merge high priority bugs
+ISSUE_SNAPSHOTS=$(echo "$DASHBOARD_DATA" "$ISSUE_SNAPSHOTS" | jq -s '
+  .[1] as $snapshots |
+  .[0].highPriorityBugs as $bugs |
+  $snapshots | map(
+    . as $snap |
+    ($bugs[] | select(.key == $snap.key)) as $bug |
+    if $bug then
+      . + {
+        priority: $bug.priority,
+        type: "Bug"
+      }
+    else . end
+  )
+')
+
+# Index issue snapshots
+ISSUE_COUNT=$(echo "$ISSUE_SNAPSHOTS" | jq 'length')
+curl -s -X POST "${MEILI_URL}/indexes/issue-snapshots/documents" \
+  -H "Authorization: Bearer ${MEILI_KEY}" \
+  -H "Content-Type: application/json" \
+  -d "$ISSUE_SNAPSHOTS" >/dev/null
+
+echo "Indexed sprint snapshot and ${ISSUE_COUNT} issue snapshots into Meilisearch"
+```
+
+Auto-starts Meilisearch Docker container if needed, creates indexes with proper schema, and indexes both sprint-level and issue-level snapshots for historical analysis.
+</step>
 </process>
 
 <output>

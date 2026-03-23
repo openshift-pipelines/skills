@@ -65,6 +65,7 @@ Use AskUserQuestion to determine what the user wants to configure:
 - GitHub authentication (optional, increases API rate limits)
 - Konflux authentication (required for `/osp:konflux-image`, `/osp:component-builds`)
 - OpenShift cluster authentication (required for deployment testing)
+- Meilisearch (view/reset historical analytics data)
 - View current configuration
 - Reset all configuration
 
@@ -403,6 +404,136 @@ oc config get-contexts
 # Switch context
 oc config use-context MY_CONTEXT
 ```
+```
+</step>
+
+<step name="configure_meilisearch">
+If configuring Meilisearch (view/reset sprint history data):
+
+1. Check Meilisearch status:
+```bash
+# Check if Docker is available
+if ! command -v docker &>/dev/null; then
+  echo "Docker not installed — Meilisearch requires Docker"
+  exit 0
+fi
+
+# Check config file
+CONFIG_FILE="$HOME/.config/osp/config.json"
+if [ -f "$CONFIG_FILE" ]; then
+  MEILI_KEY=$(jq -r '.meilisearch.key // empty' "$CONFIG_FILE")
+  MEILI_URL=$(jq -r '.meilisearch.url // "http://localhost:7700"' "$CONFIG_FILE")
+else
+  echo "No Meilisearch configuration found"
+  echo "Meilisearch will be auto-configured on first /osp:sprint-status run"
+  exit 0
+fi
+
+# Check container status
+CONTAINER_STATUS=$(docker ps -a --filter name=osp-meilisearch --format '{{.Status}}' 2>/dev/null)
+
+echo "=== Meilisearch Configuration ==="
+echo ""
+echo "URL: ${MEILI_URL}"
+echo "Master Key: ${MEILI_KEY:+[SET - hidden]}"
+echo ""
+
+if [ -z "$CONTAINER_STATUS" ]; then
+  echo "Container: Not created"
+  echo "Status: Will be auto-started on first /osp:sprint-status run"
+elif echo "$CONTAINER_STATUS" | grep -q "Up"; then
+  echo "Container: Running"
+  echo "Status: $(echo "$CONTAINER_STATUS" | sed 's/Up /Uptime: /')"
+
+  # Check indexes
+  SPRINT_COUNT=$(curl -s -H "Authorization: Bearer ${MEILI_KEY}" \
+    "${MEILI_URL}/indexes/sprint-snapshots/stats" 2>/dev/null | jq -r '.numberOfDocuments // 0')
+  ISSUE_COUNT=$(curl -s -H "Authorization: Bearer ${MEILI_KEY}" \
+    "${MEILI_URL}/indexes/issue-snapshots/stats" 2>/dev/null | jq -r '.numberOfDocuments // 0')
+
+  echo ""
+  echo "Indexed Data:"
+  echo "  Sprint snapshots: ${SPRINT_COUNT}"
+  echo "  Issue snapshots: ${ISSUE_COUNT}"
+else
+  echo "Container: Stopped"
+  echo "Status: Run /osp:sprint-status to restart automatically"
+fi
+
+echo ""
+```
+
+2. If user wants to reset Meilisearch data:
+
+**Question**: What would you like to do?
+- View current status (shown above)
+- Reset all data (delete container and volume)
+- Delete indexes only (keep container)
+- Cancel
+
+3. Handle reset actions:
+
+```bash
+# Option: Reset all data
+docker stop osp-meilisearch 2>/dev/null
+docker rm osp-meilisearch 2>/dev/null
+docker volume rm osp-meili-data 2>/dev/null
+
+# Remove from config
+jq 'del(.meilisearch)' ~/.config/osp/config.json > ~/.config/osp/config.json.tmp
+mv ~/.config/osp/config.json.tmp ~/.config/osp/config.json
+
+echo "Meilisearch container and data removed"
+echo "Will be recreated on next /osp:sprint-status run"
+```
+
+```bash
+# Option: Delete indexes only
+MEILI_KEY=$(jq -r '.meilisearch.key' ~/.config/osp/config.json)
+MEILI_URL=$(jq -r '.meilisearch.url' ~/.config/osp/config.json)
+
+curl -s -X DELETE "${MEILI_URL}/indexes/sprint-snapshots" \
+  -H "Authorization: Bearer ${MEILI_KEY}"
+
+curl -s -X DELETE "${MEILI_URL}/indexes/issue-snapshots" \
+  -H "Authorization: Bearer ${MEILI_KEY}"
+
+echo "Meilisearch indexes deleted"
+echo "Will be recreated on next /osp:sprint-status run"
+```
+
+4. Show data access information:
+
+```
+## Accessing Meilisearch Data
+
+**Web UI (Development):**
+Meilisearch doesn't have a built-in UI, but you can use:
+- Meilisearch Cloud UI: https://cloud.meilisearch.com (connect to localhost:7700)
+- InstantMeiliSearch (React): https://github.com/meilisearch/meilisearch-react
+
+**API Access:**
+Base URL: http://localhost:7700
+Authorization: Bearer <master-key>
+
+Query examples:
+# Search issues
+curl -X POST 'http://localhost:7700/indexes/issue-snapshots/search' \
+  -H "Authorization: Bearer ${MEILI_KEY}" \
+  -H 'Content-Type: application/json' \
+  --data-binary '{"q": "blocked", "filter": "team = Pioneers"}'
+
+# Get sprint history
+curl -X POST 'http://localhost:7700/indexes/sprint-snapshots/search' \
+  -H "Authorization: Bearer ${MEILI_KEY}" \
+  -H 'Content-Type: application/json' \
+  --data-binary '{"filter": "team = Pioneers", "sort": ["snapshotDate:desc"]}'
+
+**Skills Integration:**
+Once /osp:sprint-history is implemented, you'll be able to query this data via:
+- /osp:sprint-history [team] velocity
+- /osp:sprint-history [team] issue <key>
+- /osp:sprint-history [team] trends
 ```
 </step>
 

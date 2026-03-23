@@ -1330,10 +1330,50 @@ async function main() {
   console.log(`${colors.cyan}Rendering dashboard...${colors.reset}`);
   const dashboardFile = renderDashboard(data, extractedTeamName);
 
-  // 11. Print summary
+  // 12. Print summary
   printSummary(data);
   console.log(`Dashboard: ${dashboardFile}`);
   console.log('=========================================\n');
+
+  // 13. Publish to GitHub Pages if --publish flag
+  const shouldPublish = process.argv.includes('--publish');
+  if (shouldPublish) {
+    console.log(`${colors.cyan}Publishing to GitHub Pages...${colors.reset}`);
+    const projectRoot = path.join(__dirname, '..');
+    const sprintDir = path.join(projectRoot, 'docs', 'sprint');
+
+    if (!fs.existsSync(sprintDir)) {
+      fs.mkdirSync(sprintDir, { recursive: true });
+    }
+
+    // Save JSON data file
+    const jsonPath = path.join(sprintDir, `${extractedTeamName.toLowerCase()}.json`);
+    fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2));
+    console.log(`${colors.green}Data saved: docs/sprint/${extractedTeamName.toLowerCase()}.json${colors.reset}`);
+
+    // Build GitHub Pages version if dashboard exists
+    const dashboardDir = path.join(projectRoot, 'dashboard');
+    if (fs.existsSync(dashboardDir)) {
+      try {
+        console.log(`${colors.dim}Building GitHub Pages dashboard...${colors.reset}`);
+        execSync('npm run build:ghpages', { cwd: dashboardDir, stdio: 'pipe' });
+        console.log(`${colors.green}GitHub Pages build complete${colors.reset}`);
+      } catch (e) {
+        console.log(`${colors.yellow}GitHub Pages build skipped: ${e.message}${colors.reset}`);
+      }
+    }
+
+    // Git commit and push
+    try {
+      execSync(`git add docs/sprint/`, { cwd: projectRoot, stdio: 'pipe' });
+      execSync(`git commit -m "data: update sprint data for ${extractedTeamName}"`, { cwd: projectRoot, stdio: 'pipe' });
+      execSync('git push origin main', { cwd: projectRoot, stdio: 'pipe' });
+      console.log(`${colors.green}Published! View at: https://openshift-pipelines.github.io/skills/sprint/${extractedTeamName.toLowerCase()}${colors.reset}`);
+    } catch (e) {
+      console.log(`${colors.yellow}Git push skipped: ${e.message}${colors.reset}`);
+      console.log(`${colors.dim}Commit manually: git add docs/sprint/ && git commit -m "update sprint data" && git push${colors.reset}`);
+    }
+  }
 }
 
 main().catch(err => {

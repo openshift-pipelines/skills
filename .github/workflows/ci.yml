@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+  validate-skills:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate skill YAML frontmatter
+        run: |
+          # Check all skill files have required frontmatter fields
+          for file in commands/osp/*.md; do
+            echo "Checking $file..."
+
+            # Check for required fields
+            if ! head -50 "$file" | grep -q "^name:"; then
+              echo "ERROR: $file missing 'name' in frontmatter"
+              exit 1
+            fi
+
+            if ! head -50 "$file" | grep -q "^description:"; then
+              echo "ERROR: $file missing 'description' in frontmatter"
+              exit 1
+            fi
+
+            if ! head -50 "$file" | grep -q "^allowed-tools:"; then
+              echo "ERROR: $file missing 'allowed-tools' in frontmatter"
+              exit 1
+            fi
+
+            echo "  OK"
+          done
+          echo "All skill files validated successfully"
+
+  install-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Test installation script
+        run: |
+          # Test help output
+          node bin/install.js --help
+
+          # Test local installation (non-interactive)
+          mkdir -p test-dir/.claude/commands
+          node bin/install.js -c test-dir/.claude/commands
+
+          # Verify files were copied
+          ls -la test-dir/.claude/commands/osp/
+
+          # Check all skill files exist
+          for skill in help configure task pipeline debug map-jira-to-upstream release-status; do
+            if [ ! -f "test-dir/.claude/commands/osp/${skill}.md" ]; then
+              echo "ERROR: ${skill}.md not found after installation"
+              exit 1
+            fi
+          done
+          echo "Installation test passed"

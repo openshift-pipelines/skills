@@ -808,6 +808,175 @@ async function fetchHistoricalSnapshots(teamName, config) {
   }
 }
 
+// Auto-backfill historical sprints into Meilisearch on first run
+async function backfillIfNeeded(teamName, auth, meiliKey) {
+  if (!meiliKey) return;
+
+  const headers = {
+    'Authorization': `Bearer ${meiliKey}`,
+    'Content-Type': 'application/json'
+  };
+
+  // Check how many snapshots exist for this team
+  let existingCount = 0;
+  try {
+    const result = await httpRequest('POST', 'http://localhost:7700/indexes/sprint-snapshots/search', headers, {
+      filter: `team = "${teamName}"`,
+      limit: 1
+    });
+    existingCount = result?.estimatedTotalHits || result?.hits?.length || 0;
+  } catch (e) {
+    // Index might not have filterable attributes yet
+    existingCount = 0;
+  }
+
+  if (existingCount >= 2) {
+    return; // Already has history, skip backfill
+  }
+
+  console.log(`${colors.cyan}First run detected — backfilling historical sprints for ${teamName}...${colors.reset}`);
+
+  // Fetch all closed sprints for this team across all boards
+  const boardsResponse = await jiraGet('/rest/agile/1.0/board?projectKeyOrId=SRVKP&type=scrum', auth);
+  let allClosed = [];
+  const seenIds = new Set();
+
+  for (const board of boardsResponse.values || []) {
+    try {
+      let startAt = 0;
+      let total = 1;
+      while (startAt < total) {
+        const resp = await jiraGet(`/rest/agile/1.0/board/${board.id}/sprint?state=closed&maxResults=50&startAt=${startAt}`, auth);
+        total = resp.total || 0;
+        const matching = (resp.values || []).filter(s =>
+          new RegExp(teamName, 'i').test(s.name) && !seenIds.has(s.id)
+        );
+        matching.forEach(s => { seenIds.add(s.id); allClosed.push(s); });
+        startAt += 50;
+        await sleep(100);
+      }
+    } catch (e) { /* skip boards that error */ }
+  }
+
+  allClosed.sort((a, b) => new Date(a.startDate || 0) - new Date(b.startDate || 0));
+  console.log(`${colors.green}Found ${allClosed.length} closed sprints to backfill${colors.reset}`);
+
+  const pendingLabels = ['docs-pending', 'release-notes-pending', 'tests-pending'];
+  const issueFields = 'summary,status,priority,issuetype,assignee,components,labels,customfield_10028,customfield_10020,customfield_10517,customfield_10021,customfield_10483,parent';
+
+  for (let i = 0; i < allClosed.length; i++) {
+    const sprint = allClosed[i];
+    console.log(`${colors.dim}  [${i + 1}/${allClosed.length}] ${sprint.name}${colors.reset}`);
+
+    try {
+      // Fetch issues
+      let issues = [];
+      let startAt = 0;
+      let total = 1;
+      while (startAt < total) {
+        const resp = await jiraGet(`/rest/agile/1.0/sprint/${sprint.id}/issue?maxResults=100&startAt=${startAt}&fields=${issueFields}`, auth);
+        total = resp.total || 0;
+        issues.push(...(resp.issues || []));
+        startAt += 100;
+        await sleep(100);
+      }
+
+      // Compute metrics
+      const totalIssues = issues.length;
+      const totalSPs = issues.reduce((s, i) => s + (i.fields.customfield_10028 || 0), 0);
+      const completedSPs = issues.filter(i => /Closed|Verified|Release Pending/i.test(i.fields.status?.name || '')).reduce((s, i) => s + (i.fields.customfield_10028 || 0), 0);
+      const completionPercent = totalSPs > 0 ? Math.round((completedSPs / totalSPs) * 100) : 0;
+      const blockedCount = issues.filter(i => i.fields.customfield_10517 === true || (i.fields.customfield_10021 || []).length > 0).length;
+      const blockedSPs = issues.filter(i => i.fields.customfield_10517 === true || (i.fields.customfield_10021 || []).length > 0).reduce((s, i) => s + (i.fields.customfield_10028 || 0), 0);
+      const crIssues = issues.filter(i => i.fields.status?.name === 'Code Review');
+      const codeReviewSPs = crIssues.reduce((s, i) => s + (i.fields.customfield_10028 || 0), 0);
+      const cfIssues = issues.filter(i => !/Closed|Verified|Release Pending/i.test(i.fields.status?.name || ''));
+      const carryForwardCount = cfIssues.length;
+      const carryForwardCriticalCount = cfIssues.filter(i => {
+        const sprints = (i.fields.customfield_10020 || []).filter(s => new RegExp(teamName, 'i').test(s.name || ''));
+        return sprints.length >= 5;
+      }).length;
+
+      const dodComplete = issues.filter(i => {
+        const labels = i.fields.labels || [];
+        return !labels.some(l => pendingLabels.some(p => l.includes(p))) && /Closed|Verified|Release Pending/i.test(i.fields.status?.name || '');
+      }).length;
+      const dodCompletePercent = totalIssues > 0 ? Math.round((dodComplete / totalIssues) * 100) : 0;
+      const dodAtRisk = issues.filter(i => {
+        const labels = i.fields.labels || [];
+        return labels.some(l => pendingLabels.some(p => l.includes(p))) && /Code Review|Dev Complete|On QA/i.test(i.fields.status?.name || '');
+      }).length;
+      const dodAtRiskPercent = totalIssues > 0 ? Math.round((dodAtRisk / totalIssues) * 100) : 0;
+
+      const planned = issues.filter(i => i.fields.parent != null);
+      const vulns = issues.filter(i => i.fields.issuetype?.name === 'Vulnerability');
+      const unplanned = issues.filter(i => i.fields.parent == null && i.fields.issuetype?.name !== 'Vulnerability');
+      const plannedPercent = totalIssues > 0 ? Math.round((planned.length / totalIssues) * 100) : 0;
+      const unplannedPercent = totalIssues > 0 ? Math.round((unplanned.length / totalIssues) * 100) : 0;
+      const cvePercent = totalIssues > 0 ? Math.round((vulns.length / totalIssues) * 100) : 0;
+
+      const blockedPercent = totalIssues > 0 ? Math.round((blockedCount / totalIssues) * 100) : 0;
+      let healthScore = 'red';
+      if (completionPercent >= 70 && blockedPercent < 10) healthScore = 'green';
+      else if (completionPercent >= 50 || blockedPercent < 20) healthScore = 'yellow';
+
+      const ts = Math.floor(new Date(sprint.endDate || sprint.completeDate || Date.now()).getTime() / 1000);
+
+      const snapshot = {
+        id: `${teamName}-${sprint.id}-${ts}`,
+        team: teamName, sprintId: sprint.id, sprintName: sprint.name,
+        snapshotDate: sprint.endDate || sprint.completeDate || new Date().toISOString(),
+        sprintStartDate: sprint.startDate, sprintEndDate: sprint.endDate,
+        totalIssues, totalSPs, completedSPs, completionPercent,
+        blockedCount, blockedSPs, codeReviewCount: crIssues.length, codeReviewSPs,
+        carryForwardCount, carryForwardCriticalCount,
+        dodCompletePercent, dodAtRiskPercent, healthScore,
+        plannedPercent, unplannedPercent, cvePercent,
+        assigneeCount: new Set(issues.map(i => i.fields.assignee?.displayName).filter(Boolean)).size,
+        componentCount: new Set(issues.flatMap(i => (i.fields.components || []).map(c => c.name))).size,
+      };
+
+      await httpRequest('POST', 'http://localhost:7700/indexes/sprint-snapshots/documents', headers, [snapshot]);
+
+      // Index issue snapshots
+      const issueSnapshots = issues.map(issue => ({
+        id: `${issue.key}-${sprint.id}-${ts}`,
+        key: issue.key, summary: issue.fields.summary,
+        status: issue.fields.status?.name || 'Unknown',
+        priority: issue.fields.priority?.name || 'Normal',
+        type: issue.fields.issuetype?.name || 'Story',
+        assignee: issue.fields.assignee?.displayName || 'Unassigned',
+        components: (issue.fields.components || []).map(c => c.name),
+        storyPoints: issue.fields.customfield_10028 || 0,
+        sprintCount: ((issue.fields.customfield_10020 || []).filter(s => new RegExp(teamName, 'i').test(s.name || ''))).length,
+        blocked: issue.fields.customfield_10517 === true,
+        dodScore: (() => {
+          const labels = issue.fields.labels || [];
+          const hasPending = labels.some(l => ['pending', 'req', 'missing'].some(p => l.includes(p)));
+          if (!hasPending && /Closed|Verified/i.test(issue.fields.status?.name || '')) return 'complete';
+          if (hasPending && /Code Review|Dev Complete|On QA/i.test(issue.fields.status?.name || '')) return 'atRisk';
+          if (hasPending) return 'incomplete';
+          return 'na';
+        })(),
+        team: teamName, sprintId: sprint.id, sprintName: sprint.name,
+        snapshotDate: sprint.endDate || sprint.completeDate || new Date().toISOString(),
+      }));
+
+      if (issueSnapshots.length > 0) {
+        await httpRequest('POST', 'http://localhost:7700/indexes/issue-snapshots/documents', headers, issueSnapshots);
+      }
+
+      console.log(`${colors.dim}    ${completedSPs}/${totalSPs} SP (${completionPercent}%) | ${issues.length} issues indexed${colors.reset}`);
+    } catch (e) {
+      console.log(`${colors.dim}    Skipped: ${e.message}${colors.reset}`);
+    }
+
+    await sleep(200);
+  }
+
+  console.log(`${colors.green}Backfill complete: ${allClosed.length} sprints indexed${colors.reset}`);
+}
+
 // Index to Meilisearch
 async function indexToMeilisearch(data, config) {
   // Check Docker availability
@@ -1110,7 +1279,10 @@ async function main() {
   console.log(`${colors.cyan}Indexing to Meilisearch...${colors.reset}`);
   await indexToMeilisearch(data, config);
 
-  // 10. Fetch historical snapshots from Meilisearch for trends tab
+  // 10. Auto-backfill historical sprints on first run
+  await backfillIfNeeded(extractedTeamName, config.auth, config.meilisearch?.key);
+
+  // 11. Fetch historical snapshots from Meilisearch for trends tab
   console.log(`${colors.cyan}Fetching historical trends...${colors.reset}`);
   const historicalData = await fetchHistoricalSnapshots(extractedTeamName, config);
   data.trends = historicalData;

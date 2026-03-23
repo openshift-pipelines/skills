@@ -283,13 +283,19 @@ async function fetchEpicProgress(issues, auth) {
 
   await sleep(100); // Rate limiting
 
-  const jql = `parent in (${epicKeys.join(',')}) OR "Epic Link" in (${epicKeys.join(',')})`;
+  const jql = `parent in (${epicKeys.join(',')})`;
   const encodedJql = encodeURIComponent(jql);
 
-  const epicChildrenResponse = await jiraGet(
-    `/rest/api/3/search?jql=${encodedJql}&maxResults=500&fields=status,customfield_10028,parent`,
-    auth
-  );
+  let epicChildrenResponse;
+  try {
+    epicChildrenResponse = await jiraGet(
+      `/rest/api/3/search?jql=${encodedJql}&maxResults=500&fields=status,customfield_10028,parent`,
+      auth
+    );
+  } catch (e) {
+    console.log(`${colors.dim}Epic progress fetch skipped: ${e.message}${colors.reset}`);
+    return [];
+  }
 
   const epicChildren = epicChildrenResponse.issues || [];
 

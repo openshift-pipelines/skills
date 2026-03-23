@@ -620,6 +620,33 @@ COMPONENTS=$(echo "$SPRINT_ISSUES" | jq '
   }) | add
 ')
 
+# Compute days remaining and sprint duration
+SPRINT_END=$(echo "$SPRINT_INFO" | jq -r '.endDate')
+SPRINT_START=$(echo "$SPRINT_INFO" | jq -r '.startDate')
+NOW=$(date +%s)
+END_EPOCH=$(date -d "$SPRINT_END" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%S" "${SPRINT_END%%.*}" +%s 2>/dev/null || echo "$NOW")
+START_EPOCH=$(date -d "$SPRINT_START" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%S" "${SPRINT_START%%.*}" +%s 2>/dev/null || echo "$NOW")
+DAYS_REMAINING=$(( (END_EPOCH - NOW) / 86400 ))
+SPRINT_DURATION=$(( (END_EPOCH - START_EPOCH) / 86400 ))
+SPRINT_DAY=$(( SPRINT_DURATION - DAYS_REMAINING ))
+
+# Compute completion percentage
+COMPLETED_SP=$(echo "$VELOCITY_EXTENDED" | jq -r '.current.completed // 0')
+TOTAL_SP=$(echo "$SUMMARY" | jq -r '.totalSPs // 0')
+COMPLETION_PCT=$(echo "$COMPLETED_SP $TOTAL_SP" | awk '{if ($2 > 0) printf "%d", ($1/$2)*100; else print 0}')
+
+# Compute health score
+BLOCKED_COUNT=$(echo "$SUMMARY" | jq -r '.blocked.count // 0')
+TOTAL_ISSUES=$(echo "$SUMMARY" | jq -r '.totalIssues // 0')
+BLOCKED_PCT=$(echo "$BLOCKED_COUNT $TOTAL_ISSUES" | awk '{if ($2 > 0) printf "%d", ($1/$2)*100; else print 0}')
+if [ "$COMPLETION_PCT" -ge 70 ] && [ "$BLOCKED_PCT" -lt 10 ]; then
+  HEALTH_SCORE="green"
+elif [ "$COMPLETION_PCT" -ge 50 ] || [ "$BLOCKED_PCT" -lt 20 ]; then
+  HEALTH_SCORE="yellow"
+else
+  HEALTH_SCORE="red"
+fi
+
 # Assemble final JSON payload
 DASHBOARD_DATA=$(jq -n \
   --arg team "$TEAM_NAME" \
@@ -638,12 +665,22 @@ DASHBOARD_DATA=$(jq -n \
   --arg futureSprintName "${FUTURE_SPRINT_NAME:-}" \
   --argjson assignees "$ASSIGNEES" \
   --argjson components "$COMPONENTS" \
+  --argjson daysRemaining "$DAYS_REMAINING" \
+  --argjson sprintDuration "$SPRINT_DURATION" \
+  --argjson sprintDay "$SPRINT_DAY" \
+  --argjson completionPercent "$COMPLETION_PCT" \
+  --arg healthScore "$HEALTH_SCORE" \
   '{
     meta: {
       team: $team,
       sprint: $sprint,
       generatedAt: $generated,
-      jiraBaseUrl: "https://redhat.atlassian.net"
+      jiraBaseUrl: "https://redhat.atlassian.net",
+      daysRemaining: $daysRemaining,
+      sprintDuration: $sprintDuration,
+      sprintDay: $sprintDay,
+      completionPercent: $completionPercent,
+      healthScore: $healthScore
     },
     summary: $summary,
     velocity: $velocity,
@@ -688,10 +725,16 @@ TEMP_FILE=$(mktemp /tmp/sprint-dashboard-${TEAM_NAME}-$(date +%s).html)
 chmod 600 "$TEMP_FILE"
 
 # Read template and inject data
-DASHBOARD_JSON=$(cat /tmp/dashboard_data.json)
-
-# Replace `const DATA = {};` with actual JSON
-sed "s|const DATA = {};|const DATA = ${DASHBOARD_JSON};|" "$TEMPLATE_PATH" > "$TEMP_FILE"
+# Safe JSON injection using python3 (handles all special characters)
+python3 -c "
+import sys
+template = open('$TEMPLATE_PATH', 'r').read()
+with open('/tmp/dashboard_data.json', 'r') as f:
+    json_data = f.read().strip()
+output = template.replace('const DATA = {};', 'const DATA = ' + json_data + ';', 1)
+with open('$TEMP_FILE', 'w') as f:
+    f.write(output)
+"
 
 echo "Dashboard written to: $TEMP_FILE"
 

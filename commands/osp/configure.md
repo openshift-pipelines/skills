@@ -61,6 +61,7 @@ Use AskUserQuestion to determine what the user wants to configure:
 
 **Question**: What would you like to configure?
 - Jira authentication (required for `/osp:release-status`, `/osp:map-jira-to-upstream`)
+- Jira Cloud authentication (required for `/osp:sprint-status` — redhat.atlassian.net)
 - GitHub authentication (optional, increases API rate limits)
 - Konflux authentication (required for `/osp:konflux-image`, `/osp:component-builds`)
 - OpenShift cluster authentication (required for deployment testing)
@@ -127,6 +128,73 @@ chmod 600 ~/.config/osp/config.json
 ```
 
 Replace TOKEN_PLACEHOLDER with the actual token using the Edit tool.
+</step>
+
+<step name="configure_jira_cloud">
+If configuring Jira Cloud:
+
+1. Explain how to get a Jira Cloud API token:
+
+## Getting a Jira Cloud API Token
+
+**Direct link**: https://id.atlassian.com/manage-profile/security/api-tokens
+
+Steps:
+1. Go to https://id.atlassian.com/manage-profile/security/api-tokens
+2. Click "Create API token"
+3. Give it a label (e.g., "Claude Skills")
+4. Click "Create"
+5. **Copy the token immediately** — it's only shown once!
+
+You also need your Jira Cloud email address (your Red Hat email).
+
+2. Ask for email and token via AskUserQuestion:
+
+**Question 1**: What is your Jira Cloud email address? (e.g., user@redhat.com)
+**Question 2**: Paste your Jira Cloud API token.
+
+3. Save to config file:
+```bash
+mkdir -p ~/.config/osp
+chmod 700 ~/.config/osp
+
+# Read existing config or create new
+if [ -f ~/.config/osp/config.json ]; then
+  CONFIG=$(cat ~/.config/osp/config.json)
+else
+  CONFIG='{}'
+fi
+
+# Add jira_cloud section
+echo "$CONFIG" | jq \
+  --arg email "USER_EMAIL" \
+  --arg token "USER_TOKEN" \
+  '. + {jira_cloud: {base_url: "https://redhat.atlassian.net", email: $email, token: $token}}' \
+  > ~/.config/osp/config.json
+
+chmod 600 ~/.config/osp/config.json
+```
+
+Replace USER_EMAIL and USER_TOKEN with actual values using the Edit tool.
+
+4. Verify the credential:
+```bash
+EMAIL=$(jq -r '.jira_cloud.email' ~/.config/osp/config.json)
+TOKEN=$(jq -r '.jira_cloud.token' ~/.config/osp/config.json)
+AUTH=$(echo -n "${EMAIL}:${TOKEN}" | base64)
+
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+  -H "Authorization: Basic ${AUTH}" \
+  "https://redhat.atlassian.net/rest/api/3/myself")
+
+if [ "$HTTP_CODE" = "200" ]; then
+  DISPLAY_NAME=$(curl -s -H "Authorization: Basic ${AUTH}" \
+    "https://redhat.atlassian.net/rest/api/3/myself" | jq -r '.displayName')
+  echo "Jira Cloud: Connected as ${DISPLAY_NAME}"
+else
+  echo "Jira Cloud: Authentication failed (HTTP $HTTP_CODE)"
+fi
+```
 </step>
 
 <step name="configure_konflux">
@@ -361,6 +429,25 @@ fi
 
 Expected: `200` for success, `401` for invalid token, `403` for insufficient permissions.
 
+```bash
+# Test Jira Cloud access
+if [ -f ~/.config/osp/config.json ]; then
+  JC_EMAIL=$(jq -r '.jira_cloud.email // empty' ~/.config/osp/config.json)
+  JC_TOKEN=$(jq -r '.jira_cloud.token // empty' ~/.config/osp/config.json)
+  if [ -n "$JC_EMAIL" ] && [ -n "$JC_TOKEN" ]; then
+    AUTH=$(echo -n "${JC_EMAIL}:${JC_TOKEN}" | base64)
+    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+      -H "Authorization: Basic ${AUTH}" \
+      "https://redhat.atlassian.net/rest/api/3/myself")
+    if [ "$HTTP_CODE" = "200" ]; then
+      echo "Jira Cloud: Connected"
+    else
+      echo "Jira Cloud: Failed (HTTP $HTTP_CODE)"
+    fi
+  fi
+fi
+```
+
 2. **Test GitHub access:**
 ```bash
 gh api user --jq '.login' 2>/dev/null || echo "Not authenticated"
@@ -398,6 +485,7 @@ fi
 | Service  | Status | Method |
 |----------|--------|--------|
 | Jira     | ✓ Connected | Environment variable |
+| Jira Cloud | ✓ Connected | Config file |
 | GitHub   | ✓ Connected | gh CLI |
 | Konflux  | ✓ Connected | SSO Cookie |
 ```
@@ -415,6 +503,7 @@ echo "=== Config File ==="
 if [ -f ~/.config/osp/config.json ]; then
   # Show config with token redacted
   jq 'if .jira.token then .jira.token = "[REDACTED]" else . end |
+      if (.jira_cloud // {}).token then .jira_cloud.token = "[REDACTED]" else . end |
       if .github.token then .github.token = "[REDACTED]" else . end' \
     ~/.config/osp/config.json
 else

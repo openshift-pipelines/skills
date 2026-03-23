@@ -91,7 +91,7 @@ Jira Cloud Agile API caps at `maxResults=100`. Paginate using `startAt` until `s
 | issuetype | issuetype | Bug, Story, Vulnerability, etc. |
 | assignee | assignee | Who's working on it |
 | components | components | Tekton Pipelines, UI, etc. |
-| labels | labels | Additional categorization |
+| labels | labels | DoD compliance signals (docs-pending, tests-pending, release-notes-pending, etc.) |
 | created | created | Issue creation date |
 | Story Points | customfield_10028 | Current story point estimate |
 | Original Story Points | customfield_10977 | Original estimate before redo |
@@ -225,6 +225,31 @@ Over last 5 closed sprints (or fewer if not enough history):
 - **Alignment trend**: planned-work % across last 5 sprints (computed from historical sprint data)
 - **Untracked warning**: flag count of issues with no Epic link
 
+### DoD Compliance
+
+The Definition of Done is stored in `docs/definition-of-done.md` in the repo and referenced by the skill. DoD compliance is tracked per issue using Jira labels:
+
+**DoD-related labels** (fetched via `labels` field):
+- `docs-pending` — documentation not yet provided
+- `release-notes-pending` — release notes not written
+- `tests-pending` — tests not written
+- `doc-req` — documentation required
+- `release-notes-req` — release notes required
+- `test-req` — tests required
+- `missing-docs` — reached QA without docs (violation)
+- `groomable` — needs grooming before dev
+
+**Per-issue DoD compliance scoring:**
+- **Complete**: No pending/req labels, status is Closed/Verified/Release Pending
+- **At Risk**: In Code Review/Dev Complete/On QA but has `*-pending` labels (Jira automation will reopen if not cleared)
+- **Incomplete**: Has `*-pending` or `*-req` labels in earlier statuses
+- **N/A**: Issue type is Spike, Task, or Sub-task (DoD may not fully apply)
+
+**Dashboard section: DoD Compliance**
+- Summary bar: X% complete, Y% at risk, Z% incomplete
+- Table of at-risk and incomplete issues showing which DoD items are missing
+- Flag issues approaching Done statuses with pending labels (these will be reopened by Jira automation)
+
 ### Future Sprint Prioritization
 
 Recommended priority order for future sprint issues:
@@ -319,6 +344,16 @@ The temp file path: `/tmp/sprint-dashboard-{team}-{timestamp}.html`
     "alignmentTrend": [ 80, 65, 71, 72 ],
     "untrackedCount": 4
   },
+  "dod": {
+    "complete": { "count": 12, "percent": 50 },
+    "atRisk": { "count": 5, "percent": 21 },
+    "incomplete": { "count": 4, "percent": 17 },
+    "na": { "count": 3, "percent": 12 },
+    "issues": [
+      { "key": "SRVKP-10871", "summary": "...", "status": "Code Review", "score": "atRisk", "missing": ["docs-pending", "release-notes-pending"] },
+      "..."
+    ]
+  },
   "codeReview": [
     { "key": "SRVKP-10871", "summary": "...", "currentSP": 5, "originalSP": 3, "suggestedSP": 3, "assignee": "Aditya Shinde", "alreadyReestimated": true },
     "..."
@@ -372,7 +407,8 @@ The temp file path: `/tmp/sprint-dashboard-{team}-{timestamp}.html`
 3. **Expectation Alerts**: Over/under-commitment warnings, bottleneck flags
 4. **Roadmap Alignment**: Planned vs unplanned bar, Epic progress list, alignment trend, untracked warnings
 5. **Velocity Trend**: Horizontal bar chart (5 sprints), bars split by completed/carried/dropped, 3-sprint rolling avg line, commitment accuracy %
-6. **Code Review SP Redo**: Table of Code Review issues with current/original/suggested SPs
+6. **DoD Compliance**: Summary bar (complete/at-risk/incomplete %), table of at-risk and incomplete issues with missing DoD items
+7. **Code Review SP Redo**: Table of Code Review issues with current/original/suggested SPs
 7. **Blocked Issues**: Table with issue key, priority, blocked reason
 8. **High Priority Bugs**: Table with closure proximity indicators (colored dots)
 9. **Carry-Forward Worst Offenders**: Table sorted by sprint count, with latest comment
@@ -491,6 +527,8 @@ Feature, Epic, Story, Bug, Task, Sub-task, Outcome, Vulnerability, Weakness, Ser
 - [ ] Companion UI renders in browser with all sections and empty states
 - [ ] Terminal summary outputs key findings
 - [ ] Issue keys link to Jira Cloud
+- [ ] DoD compliance tracked per issue using label signals (docs-pending, tests-pending, release-notes-pending)
+- [ ] DoD compliance summary shown in dashboard (complete/at-risk/incomplete)
 - [ ] Null story points handled gracefully (treated as 0, flagged)
 - [ ] Existing skills unaffected (jira key preserved for backward compatibility)
 - [ ] Temp files secured (chmod 600, no credentials in payload)

@@ -16,7 +16,8 @@
 
 | File | Action | Responsibility |
 |------|--------|----------------|
-| `commands/osp/sprint-status.md` | Create | Skill definition — auth, data fetching, metric computation, JSON assembly, dashboard launch |
+| `docs/definition-of-done.md` | Create | DoD checklist at Story/Feature/Epic levels, label signals, SLI/SLO targets (already created) |
+| `commands/osp/sprint-status.md` | Create | Skill definition — auth, data fetching, metric computation, DoD compliance, JSON assembly, dashboard launch |
 | `docs/templates/sprint-dashboard.html` | Create | Companion UI — receives JSON payload, renders all dashboard sections |
 | `commands/osp/configure.md` | Modify | Add Jira Cloud auth section (email + API token, Basic auth verification) |
 | `commands/osp/help.md` | Modify | Add sprint-status to command reference table |
@@ -290,7 +291,8 @@ Create `docs/templates/sprint-dashboard.html`. Key design decisions:
 3. `renderAlerts()` — expectation management warnings
 4. `renderRoadmap()` — planned/unplanned/CVE bar, epic progress table
 5. `renderVelocity()` — horizontal bar chart, rolling averages, trend
-6. `renderCodeReview()` — SP redo recommendation table with totals
+6. `renderDoD()` — DoD compliance bar (complete/at-risk/incomplete %), table of non-compliant issues with missing items
+7. `renderCodeReview()` — SP redo recommendation table with totals
 7. `renderBlocked()` — blocked issues with reasons
 8. `renderBugs()` — high priority bugs with proximity dots
 9. `renderCarryForward()` — worst offenders with sprint count, severity coloring
@@ -403,9 +405,10 @@ Provide a sprint health dashboard for product owners managing multiple component
 7. Velocity trend: per-sprint committed/completed/carried, commitment accuracy per sprint (`completed/committed*100` as array), rolling averages, trend direction
 8. Expectation management: over/under-commitment, carry-forward rate, code review bottleneck
 9. Roadmap alignment: planned (has Epic parent) vs unplanned vs CVE, Epic progress, untracked count. **Also compute alignment trend** — for each of the last 5 historical sprints, classify their issues as planned/unplanned/CVE and compute the planned-work % to produce `alignmentTrend` array. This requires the historical sprint issues (already fetched in Step 4) to also have the `parent` field — ensure `parent` is included in the historical sprint issue fields.
-10. Future sprint priority: sort by type/priority (Vulnerability > Bug-Blocker > Bug-Critical > ...)
-11. Per-assignee: group by assignee, count/SPs/status breakdown (including Code Review issues pending count)/blocked/carry-forward per person
-12. Per-component: group by component, count/SPs/status/blocked/carry-forward/bugs
+10. DoD compliance: for each issue, check `labels` for DoD-related labels (`docs-pending`, `release-notes-pending`, `tests-pending`, `doc-req`, `release-notes-req`, `test-req`, `missing-docs`, `groomable`). Score each issue: Complete (no pending labels + Done status), At Risk (approaching Done with pending labels — Code Review/Dev Complete/On QA with pending labels), Incomplete (has pending/req labels in earlier statuses), N/A (Spike/Task/Sub-task). Aggregate counts/percentages. List at-risk and incomplete issues with which DoD items are missing.
+11. Future sprint priority: sort by type/priority (Vulnerability > Bug-Blocker > Bug-Critical > ...)
+12. Per-assignee: group by assignee, count/SPs/status breakdown (including Code Review issues pending count)/blocked/carry-forward per person
+13. Per-component: group by component, count/SPs/status/blocked/carry-forward/bugs
 
 Assemble into JSON schema from spec.
 

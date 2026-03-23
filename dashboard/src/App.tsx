@@ -14,6 +14,7 @@ import { AssigneeBreakdown } from './components/AssigneeBreakdown'
 import { ComponentBreakdown } from './components/ComponentBreakdown'
 import { FilterBar } from './components/FilterBar'
 import { OverviewCharts } from './components/OverviewCharts'
+import { ActionableInsights } from './components/ActionableInsights'
 import { IssuesCharts } from './components/IssuesCharts'
 import { CommittedVsDone } from './components/CommittedVsDone'
 import { DoDCharts } from './components/DoDCharts'
@@ -297,7 +298,10 @@ function App() {
               {/* Row 3: Visual Charts */}
               <OverviewCharts data={filteredData} />
 
-              {/* Row 4: Alerts */}
+              {/* Row 4: Actionable Insights */}
+              <ActionableInsights data={filteredData} />
+
+              {/* Row 5: Alerts */}
               <Alerts expectations={filteredData.expectations} />
 
               {/* Row 5: Quick Glance Tables (side by side) */}

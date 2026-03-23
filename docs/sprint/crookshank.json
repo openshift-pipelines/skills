@@ -1,0 +1,3207 @@
+{
+  "meta": {
+    "team": "CrookShank",
+    "sprint": {
+      "id": 48061,
+      "name": "Pipelines Sprint CrookShank 51",
+      "startDate": "2026-03-17T11:31:36.689Z",
+      "endDate": "2026-03-31T11:28:23.000Z",
+      "boardId": 4602
+    },
+    "generatedAt": "2026-03-23T14:26:13.827Z",
+    "jiraBaseUrl": "https://redhat.atlassian.net"
+  },
+  "daysRemaining": 7,
+  "sprintDuration": 13,
+  "sprintDay": 6,
+  "completionPercent": 7,
+  "healthScore": "yellow",
+  "summary": {
+    "totalIssues": 33,
+    "totalSPs": 88,
+    "byStatus": {
+      "To Do": {
+        "count": 9,
+        "sp": 15
+      },
+      "In Progress": {
+        "count": 10,
+        "sp": 34
+      },
+      "Code Review": {
+        "count": 9,
+        "sp": 31
+      },
+      "Closed": {
+        "count": 4,
+        "sp": 6
+      },
+      "On QA": {
+        "count": 1,
+        "sp": 2
+      }
+    },
+    "blocked": {
+      "count": 6,
+      "sp": 13.5
+    },
+    "noStoryPoints": 2
+  },
+  "velocity": {
+    "current": {
+      "committed": 88,
+      "completed": 6
+    },
+    "history": [],
+    "avg3": null,
+    "avg5": null,
+    "trend": "insufficient_data",
+    "commitmentAccuracy": []
+  },
+  "expectations": {
+    "overCommitted": {
+      "flag": false,
+      "committed": 88,
+      "avgVelocity": null,
+      "delta": 0
+    },
+    "underCommitted": {
+      "flag": false
+    },
+    "carryForwardRate": [],
+    "codeReviewBottleneck": {
+      "flag": true,
+      "percent": 35
+    }
+  },
+  "roadmap": {
+    "planned": {
+      "count": 11,
+      "sp": 46,
+      "percent": 33
+    },
+    "unplanned": {
+      "count": 17,
+      "sp": 40,
+      "percent": 52
+    },
+    "cve": {
+      "count": 5,
+      "sp": 2,
+      "percent": 15
+    },
+    "epics": [],
+    "alignmentTrend": [],
+    "untrackedCount": 22
+  },
+  "dod": {
+    "complete": {
+      "count": 1,
+      "percent": 3
+    },
+    "atRisk": {
+      "count": 1,
+      "percent": 3
+    },
+    "incomplete": {
+      "count": 29,
+      "percent": 88
+    },
+    "na": {
+      "count": 2,
+      "percent": 6
+    },
+    "issues": [
+      {
+        "key": "SRVKP-11019",
+        "summary": "CVE | tektoncd-results | Found \"GHSA-6v2p-p543-phr9\" vulnerability of high security level",
+        "status": "To Do",
+        "labels": [
+          "doc-req",
+          "groomable",
+          "release-notes-req"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-10896",
+        "summary": "Redact kubernetes secrets from logs",
+        "status": "In Progress",
+        "labels": [
+          "doc-req",
+          "konflux",
+          "release-notes-req"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-11018",
+        "summary": "CVE | GHSA-hcg3-q754-cr77 | Tektoncd/hub",
+        "status": "To Do",
+        "labels": [
+          "GHSA-hcg3-q754-cr77",
+          "doc-req",
+          "groomable",
+          "release-notes-req"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-11061",
+        "summary": "Pipelines as Code Watcher Pod OOM Killed in OSP 1.20.2",
+        "status": "In Progress",
+        "labels": [
+          "doc-req",
+          "release-notes-req"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-11021",
+        "summary": "[Regression] Relative task references in Pipeline broken",
+        "status": "Code Review",
+        "labels": [
+          "doc-req",
+          "release-notes-req"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-10824",
+        "summary": "CVE-2026-25639 openshift-pipelines/pipelines-hub-ui-rhel8: Axios affected by Denial of Service via __proto__ Key in mergeConfig [pipelines-1.15]",
+        "status": "Closed",
+        "labels": [
+          "CVE-2026-25639",
+          "Security",
+          "SecurityTracking",
+          "doc-req",
+          "docs-pending",
+          "flaw:bz#2438237",
+          "flawuuid:f6efbd47-9364-46e6-8910-11910f03b486",
+          "pscomponent:openshift-pipelines/pipelines-hub-ui-rhel8",
+          "release-notes-pending",
+          "release-notes-req"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "docs-pending",
+          "release-notes-pending",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-10845",
+        "summary": "CVE-2025-69873 openshift-pipelines/pipelines-hub-ui-rhel8: ReDoS via $data reference [pipelines-1.15]",
+        "status": "Closed",
+        "labels": [
+          "CVE-2025-69873",
+          "Security",
+          "SecurityTracking",
+          "doc-req",
+          "docs-pending",
+          "flaw:bz#2439070",
+          "flawuuid:d2241393-4e28-4c40-bc88-c37872ff58ae",
+          "pscomponent:openshift-pipelines/pipelines-hub-ui-rhel8",
+          "release-notes-pending",
+          "release-notes-req"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "docs-pending",
+          "release-notes-pending",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-8172",
+        "summary": "Unauthenticated  access to metrics exposed by OpenShift Pipelines operator",
+        "status": "In Progress",
+        "labels": [
+          "candidate-next",
+          "groomed"
+        ],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-8477",
+        "summary": "Missing ResultDB entries observed in 1.19 for PRs and TRs",
+        "status": "In Progress",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-10469",
+        "summary": "[operator] Fetch TLS config and expose to components ",
+        "status": "Code Review",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-10481",
+        "summary": "CVE-2025-56005 openshift-pipelines/pipelines-hub-ui-rhel8: From CVEorg collector [pipelines-1.15]",
+        "status": "To Do",
+        "labels": [
+          "CVE-2025-56005",
+          "Security",
+          "SecurityTracking",
+          "flaw:bz#2431308",
+          "flawuuid:70b9a17f-46ed-4409-a2e4-fe3cd43c3386",
+          "pscomponent:openshift-pipelines/pipelines-hub-ui-rhel8"
+        ],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-10826",
+        "summary": "CVE-2026-25639 openshift-pipelines/pipelines-hub-ui-rhel9: Axios affected by Denial of Service via __proto__ Key in mergeConfig [pipelines-1.20]",
+        "status": "To Do",
+        "labels": [
+          "CVE-2026-25639",
+          "Security",
+          "SecurityTracking",
+          "doc-req",
+          "docs-pending",
+          "flaw:bz#2438237",
+          "flawuuid:f6efbd47-9364-46e6-8910-11910f03b486",
+          "groomable",
+          "pscomponent:openshift-pipelines/pipelines-hub-ui-rhel9",
+          "release-notes-pending",
+          "release-notes-req"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "docs-pending",
+          "release-notes-pending",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-10234",
+        "summary": "Global resolver-cache-config TTL Overrides Individual Resolver TTL",
+        "status": "Code Review",
+        "labels": [
+          "release-testing-bug"
+        ],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-7342",
+        "summary": "Docs: Missing Procedure for Overriding Step Resources in PipelineRun",
+        "status": "To Do",
+        "labels": [
+          "docs-pending",
+          "groomable",
+          "release-notes-pending",
+          "test-req",
+          "tests-pending"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "docs-pending",
+          "release-notes-pending",
+          "test-req",
+          "tests-pending"
+        ]
+      },
+      {
+        "key": "SRVKP-10833",
+        "summary": "[QA] ServiceMonitor has hardcoded openshift-operators in namespaceSelector, causing Prometheus failures when operator is installed in different namespace",
+        "status": "On QA",
+        "labels": [
+          "doc-req",
+          "docs-pending",
+          "groomed",
+          "release-notes-pending",
+          "release-notes-req"
+        ],
+        "score": "atRisk",
+        "missing": [
+          "doc-req",
+          "docs-pending",
+          "release-notes-pending",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-8544",
+        "summary": "Migrate PaC from OpenCensus to OpenTelemetry ",
+        "status": "Code Review",
+        "labels": [
+          "osp_2026_roadmap",
+          "ranked"
+        ],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-8533",
+        "summary": "Migrate Results from OpenCensus to OpenTelemetry ",
+        "status": "Code Review",
+        "labels": [
+          "osp_2026_roadmap",
+          "ranked"
+        ],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-9614",
+        "summary": "[tekton-pipelines-webhook] Centrally Managed TLS for Webhook",
+        "status": "In Progress",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-9626",
+        "summary": "Update all VirtualisedTable list to data-view for pipeline and pipeline run tabs",
+        "status": "In Progress",
+        "labels": [
+          "candidate-next"
+        ],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-9632",
+        "summary": "[console-plugin]Centrally Managed TLS for console-plugin",
+        "status": "In Progress",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-9680",
+        "summary": "Update CSS to align the PipelineRun status card on the overview page with PF6 CSS",
+        "status": "Code Review",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-9712",
+        "summary": "Update all VirtualisedTable list to data-view for EventListener and Trigger Template tabs",
+        "status": "To Do",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-10441",
+        "summary": "Improving storage documentation",
+        "status": "Code Review",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-10647",
+        "summary": "Release OpenShift Pipelines CLI for Pipelines 1.15.5",
+        "status": "To Do",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-10981",
+        "summary": "[Code Review] SRVKP-10877 FBC on push build keep running one and a half hours and can't finish",
+        "status": "Code Review",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-10982",
+        "summary": "[Code Review] SRVKP-7197 Add Configurable Prefix for GitOps Comments to Prevent CI Conflicts",
+        "status": "Code Review",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-11118",
+        "summary": "Add blob caching to GitHub provider to reduce duplicate API calls",
+        "status": "To Do",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      },
+      {
+        "key": "SRVKP-11119",
+        "summary": "OSP 1.15.5 patch release configuration ",
+        "status": "Closed",
+        "labels": [
+          "doc-req",
+          "release-notes-req"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-11125",
+        "summary": "Try out skills created by PAC for various things and have it at a common place for others to use",
+        "status": "To Do",
+        "labels": [
+          "doc-req",
+          "groomable",
+          "release-notes-req"
+        ],
+        "score": "incomplete",
+        "missing": [
+          "doc-req",
+          "release-notes-req"
+        ]
+      },
+      {
+        "key": "SRVKP-11140",
+        "summary": "Enhance Maven Task to support optional ENV_VARS parameter",
+        "status": "In Progress",
+        "labels": [],
+        "score": "incomplete",
+        "missing": []
+      }
+    ]
+  },
+  "codeReview": [
+    {
+      "key": "SRVKP-11021",
+      "summary": "[Regression] Relative task references in Pipeline broken",
+      "currentSP": 3,
+      "originalSP": 3,
+      "suggestedSP": 2,
+      "assignee": "Akshay Pant",
+      "alreadyReestimated": false
+    },
+    {
+      "key": "SRVKP-10469",
+      "summary": "[operator] Fetch TLS config and expose to components ",
+      "currentSP": 5,
+      "originalSP": 5,
+      "suggestedSP": 3,
+      "assignee": "Emil Natan",
+      "alreadyReestimated": false
+    },
+    {
+      "key": "SRVKP-10234",
+      "summary": "Global resolver-cache-config TTL Overrides Individual Resolver TTL",
+      "currentSP": 3,
+      "originalSP": 3,
+      "suggestedSP": 2,
+      "assignee": "Naomi Gelman",
+      "alreadyReestimated": false
+    },
+    {
+      "key": "SRVKP-8544",
+      "summary": "Migrate PaC from OpenCensus to OpenTelemetry ",
+      "currentSP": 8,
+      "originalSP": 8,
+      "suggestedSP": 4,
+      "assignee": "Zaki Shaikh",
+      "alreadyReestimated": false
+    },
+    {
+      "key": "SRVKP-8533",
+      "summary": "Migrate Results from OpenCensus to OpenTelemetry ",
+      "currentSP": 5,
+      "originalSP": 5,
+      "suggestedSP": 3,
+      "assignee": "Divyanshu Agrawal",
+      "alreadyReestimated": false
+    },
+    {
+      "key": "SRVKP-9680",
+      "summary": "Update CSS to align the PipelineRun status card on the overview page with PF6 CSS",
+      "currentSP": 1,
+      "originalSP": 5,
+      "suggestedSP": 1,
+      "assignee": "Shiv Verma",
+      "alreadyReestimated": true
+    },
+    {
+      "key": "SRVKP-10441",
+      "summary": "Improving storage documentation",
+      "currentSP": 3,
+      "originalSP": 3,
+      "suggestedSP": 2,
+      "assignee": "Naomi Gelman",
+      "alreadyReestimated": false
+    },
+    {
+      "key": "SRVKP-10981",
+      "summary": "[Code Review] SRVKP-10877 FBC on push build keep running one and a half hours and can't finish",
+      "currentSP": 2,
+      "originalSP": 2,
+      "suggestedSP": 1,
+      "assignee": "Zaki Shaikh",
+      "alreadyReestimated": false
+    },
+    {
+      "key": "SRVKP-10982",
+      "summary": "[Code Review] SRVKP-7197 Add Configurable Prefix for GitOps Comments to Prevent CI Conflicts",
+      "currentSP": 1,
+      "originalSP": 1,
+      "suggestedSP": 1,
+      "assignee": "Zaki Shaikh",
+      "alreadyReestimated": false
+    }
+  ],
+  "blocked": [
+    {
+      "key": "SRVKP-10896",
+      "summary": "Redact kubernetes secrets from logs",
+      "priority": "Critical",
+      "reason": "No activity for 4 days",
+      "assignee": "Naomi Gelman",
+      "blockedType": "stale"
+    },
+    {
+      "key": "SRVKP-11018",
+      "summary": "CVE | GHSA-hcg3-q754-cr77 | Tektoncd/hub",
+      "priority": "Critical",
+      "reason": "No activity for 6 days",
+      "assignee": "Shiv Verma",
+      "blockedType": "stale"
+    },
+    {
+      "key": "SRVKP-11061",
+      "summary": "Pipelines as Code Watcher Pod OOM Killed in OSP 1.20.2",
+      "priority": "Major",
+      "reason": "No activity for 4 days",
+      "assignee": "Akshay Pant",
+      "blockedType": "stale"
+    },
+    {
+      "key": "SRVKP-10981",
+      "summary": "[Code Review] SRVKP-10877 FBC on push build keep running one and a half hours and can't finish",
+      "priority": "Undefined",
+      "reason": "No activity for 6 days",
+      "assignee": "Zaki Shaikh",
+      "blockedType": "stale"
+    },
+    {
+      "key": "SRVKP-10982",
+      "summary": "[Code Review] SRVKP-7197 Add Configurable Prefix for GitOps Comments to Prevent CI Conflicts",
+      "priority": "Undefined",
+      "reason": "No activity for 6 days",
+      "assignee": "Zaki Shaikh",
+      "blockedType": "stale"
+    },
+    {
+      "key": "SRVKP-11125",
+      "summary": "Try out skills created by PAC for various things and have it at a common place for others to use",
+      "priority": "Major",
+      "reason": "No activity for 6 days",
+      "assignee": "Divyanshu Agrawal",
+      "blockedType": "stale"
+    }
+  ],
+  "highPriorityBugs": [
+    {
+      "key": "SRVKP-11019",
+      "summary": "CVE | tektoncd-results | Found \"GHSA-6v2p-p543-phr9\" vulnerability of high security level",
+      "priority": "Blocker",
+      "status": "To Do",
+      "proximity": "far"
+    },
+    {
+      "key": "SRVKP-10896",
+      "summary": "Redact kubernetes secrets from logs",
+      "priority": "Critical",
+      "status": "In Progress",
+      "proximity": "mid"
+    },
+    {
+      "key": "SRVKP-11018",
+      "summary": "CVE | GHSA-hcg3-q754-cr77 | Tektoncd/hub",
+      "priority": "Critical",
+      "status": "To Do",
+      "proximity": "far"
+    },
+    {
+      "key": "SRVKP-11061",
+      "summary": "Pipelines as Code Watcher Pod OOM Killed in OSP 1.20.2",
+      "priority": "Major",
+      "status": "In Progress",
+      "proximity": "mid"
+    },
+    {
+      "key": "SRVKP-11021",
+      "summary": "[Regression] Relative task references in Pipeline broken",
+      "priority": "Major",
+      "status": "Code Review",
+      "proximity": "near"
+    },
+    {
+      "key": "SRVKP-8172",
+      "summary": "Unauthenticated  access to metrics exposed by OpenShift Pipelines operator",
+      "priority": "Major",
+      "status": "In Progress",
+      "proximity": "mid"
+    },
+    {
+      "key": "SRVKP-8477",
+      "summary": "Missing ResultDB entries observed in 1.19 for PRs and TRs",
+      "priority": "Critical",
+      "status": "In Progress",
+      "proximity": "mid"
+    },
+    {
+      "key": "SRVKP-7342",
+      "summary": "Docs: Missing Procedure for Overriding Step Resources in PipelineRun",
+      "priority": "Major",
+      "status": "To Do",
+      "proximity": "far"
+    },
+    {
+      "key": "SRVKP-10833",
+      "summary": "[QA] ServiceMonitor has hardcoded openshift-operators in namespaceSelector, causing Prometheus failures when operator is installed in different namespace",
+      "priority": "Major",
+      "status": "On QA",
+      "proximity": "near"
+    }
+  ],
+  "carryForward": [
+    {
+      "key": "SRVKP-9680",
+      "summary": "Update CSS to align the PipelineRun status card on the overview page with PF6 CSS",
+      "sprintCount": 7,
+      "status": "Code Review",
+      "severity": "critical",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10469",
+      "summary": "[operator] Fetch TLS config and expose to components ",
+      "sprintCount": 5,
+      "status": "Code Review",
+      "severity": "critical",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10441",
+      "summary": "Improving storage documentation",
+      "sprintCount": 4,
+      "status": "Code Review",
+      "severity": "warning",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-8477",
+      "summary": "Missing ResultDB entries observed in 1.19 for PRs and TRs",
+      "sprintCount": 3,
+      "status": "In Progress",
+      "severity": "warning",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-8533",
+      "summary": "Migrate Results from OpenCensus to OpenTelemetry ",
+      "sprintCount": 3,
+      "status": "Code Review",
+      "severity": "warning",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-9632",
+      "summary": "[console-plugin]Centrally Managed TLS for console-plugin",
+      "sprintCount": 3,
+      "status": "In Progress",
+      "severity": "warning",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11021",
+      "summary": "[Regression] Relative task references in Pipeline broken",
+      "sprintCount": 2,
+      "status": "Code Review",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10481",
+      "summary": "CVE-2025-56005 openshift-pipelines/pipelines-hub-ui-rhel8: From CVEorg collector [pipelines-1.15]",
+      "sprintCount": 2,
+      "status": "To Do",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10826",
+      "summary": "CVE-2026-25639 openshift-pipelines/pipelines-hub-ui-rhel9: Axios affected by Denial of Service via __proto__ Key in mergeConfig [pipelines-1.20]",
+      "sprintCount": 2,
+      "status": "To Do",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10234",
+      "summary": "Global resolver-cache-config TTL Overrides Individual Resolver TTL",
+      "sprintCount": 2,
+      "status": "Code Review",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10833",
+      "summary": "[QA] ServiceMonitor has hardcoded openshift-operators in namespaceSelector, causing Prometheus failures when operator is installed in different namespace",
+      "sprintCount": 2,
+      "status": "On QA",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-8544",
+      "summary": "Migrate PaC from OpenCensus to OpenTelemetry ",
+      "sprintCount": 2,
+      "status": "Code Review",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-9614",
+      "summary": "[tekton-pipelines-webhook] Centrally Managed TLS for Webhook",
+      "sprintCount": 2,
+      "status": "In Progress",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10981",
+      "summary": "[Code Review] SRVKP-10877 FBC on push build keep running one and a half hours and can't finish",
+      "sprintCount": 2,
+      "status": "Code Review",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10982",
+      "summary": "[Code Review] SRVKP-7197 Add Configurable Prefix for GitOps Comments to Prevent CI Conflicts",
+      "sprintCount": 2,
+      "status": "Code Review",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11019",
+      "summary": "CVE | tektoncd-results | Found \"GHSA-6v2p-p543-phr9\" vulnerability of high security level",
+      "sprintCount": 1,
+      "status": "To Do",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10896",
+      "summary": "Redact kubernetes secrets from logs",
+      "sprintCount": 1,
+      "status": "In Progress",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11018",
+      "summary": "CVE | GHSA-hcg3-q754-cr77 | Tektoncd/hub",
+      "sprintCount": 1,
+      "status": "To Do",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11061",
+      "summary": "Pipelines as Code Watcher Pod OOM Killed in OSP 1.20.2",
+      "sprintCount": 1,
+      "status": "In Progress",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-8172",
+      "summary": "Unauthenticated  access to metrics exposed by OpenShift Pipelines operator",
+      "sprintCount": 1,
+      "status": "In Progress",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-7342",
+      "summary": "Docs: Missing Procedure for Overriding Step Resources in PipelineRun",
+      "sprintCount": 1,
+      "status": "To Do",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-9626",
+      "summary": "Update all VirtualisedTable list to data-view for pipeline and pipeline run tabs",
+      "sprintCount": 1,
+      "status": "In Progress",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-9712",
+      "summary": "Update all VirtualisedTable list to data-view for EventListener and Trigger Template tabs",
+      "sprintCount": 1,
+      "status": "To Do",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-10647",
+      "summary": "Release OpenShift Pipelines CLI for Pipelines 1.15.5",
+      "sprintCount": 1,
+      "status": "To Do",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11104",
+      "summary": "[POC] Add release notes update functionality for the jira-sync tool",
+      "sprintCount": 1,
+      "status": "In Progress",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11118",
+      "summary": "Add blob caching to GitHub provider to reduce duplicate API calls",
+      "sprintCount": 1,
+      "status": "To Do",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11124",
+      "summary": "Release captain KT to Shiv",
+      "sprintCount": 1,
+      "status": "In Progress",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11125",
+      "summary": "Try out skills created by PAC for various things and have it at a common place for others to use",
+      "sprintCount": 1,
+      "status": "To Do",
+      "severity": "normal",
+      "latestComment": ""
+    },
+    {
+      "key": "SRVKP-11140",
+      "summary": "Enhance Maven Task to support optional ENV_VARS parameter",
+      "sprintCount": 1,
+      "status": "In Progress",
+      "severity": "normal",
+      "latestComment": ""
+    }
+  ],
+  "futureSprint": {
+    "name": "",
+    "issues": []
+  },
+  "assignees": {
+    "Emil Natan": {
+      "totalIssues": 3,
+      "totalSP": 11,
+      "byStatus": {
+        "To Do": {
+          "count": 1,
+          "sp": 1
+        },
+        "In Progress": {
+          "count": 1,
+          "sp": 5
+        },
+        "Code Review": {
+          "count": 1,
+          "sp": 5
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-11019",
+          "summary": "CVE | tektoncd-results | Found \"GHSA-6v2p-p543-phr9\" vulnerability of high security level",
+          "status": "To Do",
+          "sp": 1
+        },
+        {
+          "key": "SRVKP-8477",
+          "summary": "Missing ResultDB entries observed in 1.19 for PRs and TRs",
+          "status": "In Progress",
+          "sp": 5
+        },
+        {
+          "key": "SRVKP-10469",
+          "summary": "[operator] Fetch TLS config and expose to components ",
+          "status": "Code Review",
+          "sp": 5
+        }
+      ]
+    },
+    "Naomi Gelman": {
+      "totalIssues": 5,
+      "totalSP": 11,
+      "byStatus": {
+        "In Progress": {
+          "count": 2,
+          "sp": 3
+        },
+        "Code Review": {
+          "count": 2,
+          "sp": 6
+        },
+        "To Do": {
+          "count": 1,
+          "sp": 2
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-10896",
+          "summary": "Redact kubernetes secrets from logs",
+          "status": "In Progress",
+          "sp": 3
+        },
+        {
+          "key": "SRVKP-10234",
+          "summary": "Global resolver-cache-config TTL Overrides Individual Resolver TTL",
+          "status": "Code Review",
+          "sp": 3
+        },
+        {
+          "key": "SRVKP-7342",
+          "summary": "Docs: Missing Procedure for Overriding Step Resources in PipelineRun",
+          "status": "To Do",
+          "sp": 2
+        },
+        {
+          "key": "SRVKP-10441",
+          "summary": "Improving storage documentation",
+          "status": "Code Review",
+          "sp": 3
+        },
+        {
+          "key": "SRVKP-11140",
+          "summary": "Enhance Maven Task to support optional ENV_VARS parameter",
+          "status": "In Progress",
+          "sp": 0
+        }
+      ]
+    },
+    "Shiv Verma": {
+      "totalIssues": 9,
+      "totalSP": 9,
+      "byStatus": {
+        "To Do": {
+          "count": 4,
+          "sp": 2
+        },
+        "Closed": {
+          "count": 4,
+          "sp": 6
+        },
+        "Code Review": {
+          "count": 1,
+          "sp": 1
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-11018",
+          "summary": "CVE | GHSA-hcg3-q754-cr77 | Tektoncd/hub",
+          "status": "To Do",
+          "sp": 0.5
+        },
+        {
+          "key": "SRVKP-10824",
+          "summary": "CVE-2026-25639 openshift-pipelines/pipelines-hub-ui-rhel8: Axios affected by Denial of Service via __proto__ Key in mergeConfig [pipelines-1.15]",
+          "status": "Closed",
+          "sp": 0.5
+        },
+        {
+          "key": "SRVKP-10845",
+          "summary": "CVE-2025-69873 openshift-pipelines/pipelines-hub-ui-rhel8: ReDoS via $data reference [pipelines-1.15]",
+          "status": "Closed",
+          "sp": 0.5
+        },
+        {
+          "key": "SRVKP-10481",
+          "summary": "CVE-2025-56005 openshift-pipelines/pipelines-hub-ui-rhel8: From CVEorg collector [pipelines-1.15]",
+          "status": "To Do",
+          "sp": 0.5
+        },
+        {
+          "key": "SRVKP-10624",
+          "summary": "CVE-2025-61140 openshift-pipelines/pipelines-hub-ui-rhel8: jsonpath: Prototype Pollution vulnerability in the value function [pipelines-1.15]",
+          "status": "Closed",
+          "sp": 0
+        },
+        {
+          "key": "SRVKP-10826",
+          "summary": "CVE-2026-25639 openshift-pipelines/pipelines-hub-ui-rhel9: Axios affected by Denial of Service via __proto__ Key in mergeConfig [pipelines-1.20]",
+          "status": "To Do",
+          "sp": 0.5
+        },
+        {
+          "key": "SRVKP-9680",
+          "summary": "Update CSS to align the PipelineRun status card on the overview page with PF6 CSS",
+          "status": "Code Review",
+          "sp": 1
+        },
+        {
+          "key": "SRVKP-10647",
+          "summary": "Release OpenShift Pipelines CLI for Pipelines 1.15.5",
+          "status": "To Do",
+          "sp": 0.5
+        },
+        {
+          "key": "SRVKP-11119",
+          "summary": "OSP 1.15.5 patch release configuration ",
+          "status": "Closed",
+          "sp": 5
+        }
+      ]
+    },
+    "Akshay Pant": {
+      "totalIssues": 3,
+      "totalSP": 11,
+      "byStatus": {
+        "In Progress": {
+          "count": 1,
+          "sp": 5
+        },
+        "Code Review": {
+          "count": 1,
+          "sp": 3
+        },
+        "To Do": {
+          "count": 1,
+          "sp": 3
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-11061",
+          "summary": "Pipelines as Code Watcher Pod OOM Killed in OSP 1.20.2",
+          "status": "In Progress",
+          "sp": 5
+        },
+        {
+          "key": "SRVKP-11021",
+          "summary": "[Regression] Relative task references in Pipeline broken",
+          "status": "Code Review",
+          "sp": 3
+        },
+        {
+          "key": "SRVKP-11118",
+          "summary": "Add blob caching to GitHub provider to reduce duplicate API calls",
+          "status": "To Do",
+          "sp": 3
+        }
+      ]
+    },
+    "Jawed Khelil": {
+      "totalIssues": 4,
+      "totalSP": 14,
+      "byStatus": {
+        "In Progress": {
+          "count": 3,
+          "sp": 12
+        },
+        "On QA": {
+          "count": 1,
+          "sp": 2
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-8172",
+          "summary": "Unauthenticated  access to metrics exposed by OpenShift Pipelines operator",
+          "status": "In Progress",
+          "sp": 6
+        },
+        {
+          "key": "SRVKP-10833",
+          "summary": "[QA] ServiceMonitor has hardcoded openshift-operators in namespaceSelector, causing Prometheus failures when operator is installed in different namespace",
+          "status": "On QA",
+          "sp": 2
+        },
+        {
+          "key": "SRVKP-9614",
+          "summary": "[tekton-pipelines-webhook] Centrally Managed TLS for Webhook",
+          "status": "In Progress",
+          "sp": 3
+        },
+        {
+          "key": "SRVKP-9632",
+          "summary": "[console-plugin]Centrally Managed TLS for console-plugin",
+          "status": "In Progress",
+          "sp": 3
+        }
+      ]
+    },
+    "Zaki Shaikh": {
+      "totalIssues": 3,
+      "totalSP": 11,
+      "byStatus": {
+        "Code Review": {
+          "count": 3,
+          "sp": 11
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-8544",
+          "summary": "Migrate PaC from OpenCensus to OpenTelemetry ",
+          "status": "Code Review",
+          "sp": 8
+        },
+        {
+          "key": "SRVKP-10981",
+          "summary": "[Code Review] SRVKP-10877 FBC on push build keep running one and a half hours and can't finish",
+          "status": "Code Review",
+          "sp": 2
+        },
+        {
+          "key": "SRVKP-10982",
+          "summary": "[Code Review] SRVKP-7197 Add Configurable Prefix for GitOps Comments to Prevent CI Conflicts",
+          "status": "Code Review",
+          "sp": 1
+        }
+      ]
+    },
+    "Divyanshu Agrawal": {
+      "totalIssues": 4,
+      "totalSP": 11,
+      "byStatus": {
+        "Code Review": {
+          "count": 1,
+          "sp": 5
+        },
+        "In Progress": {
+          "count": 2,
+          "sp": 4
+        },
+        "To Do": {
+          "count": 1,
+          "sp": 2
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-8533",
+          "summary": "Migrate Results from OpenCensus to OpenTelemetry ",
+          "status": "Code Review",
+          "sp": 5
+        },
+        {
+          "key": "SRVKP-11104",
+          "summary": "[POC] Add release notes update functionality for the jira-sync tool",
+          "status": "In Progress",
+          "sp": 2
+        },
+        {
+          "key": "SRVKP-11124",
+          "summary": "Release captain KT to Shiv",
+          "status": "In Progress",
+          "sp": 2
+        },
+        {
+          "key": "SRVKP-11125",
+          "summary": "Try out skills created by PAC for various things and have it at a common place for others to use",
+          "status": "To Do",
+          "sp": 2
+        }
+      ]
+    },
+    "Arvind Krishnamurthy": {
+      "totalIssues": 2,
+      "totalSP": 10,
+      "byStatus": {
+        "In Progress": {
+          "count": 1,
+          "sp": 5
+        },
+        "To Do": {
+          "count": 1,
+          "sp": 5
+        }
+      },
+      "blocked": 0,
+      "carryForwardCount": 0,
+      "issues": [
+        {
+          "key": "SRVKP-9626",
+          "summary": "Update all VirtualisedTable list to data-view for pipeline and pipeline run tabs",
+          "status": "In Progress",
+          "sp": 5
+        },
+        {
+          "key": "SRVKP-9712",
+          "summary": "Update all VirtualisedTable list to data-view for EventListener and Trigger Template tabs",
+          "status": "To Do",
+          "sp": 5
+        }
+      ]
+    }
+  },
+  "components": {
+    "Tekton Results": {
+      "totalIssues": 3,
+      "totalSP": 11,
+      "byStatus": {
+        "To Do": {
+          "count": 1,
+          "sp": 1
+        },
+        "In Progress": {
+          "count": 1,
+          "sp": 5
+        },
+        "Code Review": {
+          "count": 1,
+          "sp": 5
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 2,
+      "issues": [
+        {
+          "key": "SRVKP-11019",
+          "summary": "CVE | tektoncd-results | Found \"GHSA-6v2p-p543-phr9\" vulnerability of high security level",
+          "status": "To Do",
+          "sp": 1,
+          "priority": "Blocker"
+        },
+        {
+          "key": "SRVKP-8477",
+          "summary": "Missing ResultDB entries observed in 1.19 for PRs and TRs",
+          "status": "In Progress",
+          "sp": 5,
+          "priority": "Critical"
+        },
+        {
+          "key": "SRVKP-8533",
+          "summary": "Migrate Results from OpenCensus to OpenTelemetry ",
+          "status": "Code Review",
+          "sp": 5,
+          "priority": "Major"
+        }
+      ]
+    },
+    "Tekton Pipelines": {
+      "totalIssues": 3,
+      "totalSP": 8,
+      "byStatus": {
+        "In Progress": {
+          "count": 1,
+          "sp": 3
+        },
+        "Code Review": {
+          "count": 1,
+          "sp": 3
+        },
+        "To Do": {
+          "count": 1,
+          "sp": 2
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 2,
+      "issues": [
+        {
+          "key": "SRVKP-10896",
+          "summary": "Redact kubernetes secrets from logs",
+          "status": "In Progress",
+          "sp": 3,
+          "priority": "Critical"
+        },
+        {
+          "key": "SRVKP-10234",
+          "summary": "Global resolver-cache-config TTL Overrides Individual Resolver TTL",
+          "status": "Code Review",
+          "sp": 3,
+          "priority": "Normal"
+        },
+        {
+          "key": "SRVKP-7342",
+          "summary": "Docs: Missing Procedure for Overriding Step Resources in PipelineRun",
+          "status": "To Do",
+          "sp": 2,
+          "priority": "Major"
+        }
+      ]
+    },
+    "Tekton Hub": {
+      "totalIssues": 6,
+      "totalSP": 2.5,
+      "byStatus": {
+        "To Do": {
+          "count": 3,
+          "sp": 1.5
+        },
+        "Closed": {
+          "count": 3,
+          "sp": 1
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 1,
+      "issues": [
+        {
+          "key": "SRVKP-11018",
+          "summary": "CVE | GHSA-hcg3-q754-cr77 | Tektoncd/hub",
+          "status": "To Do",
+          "sp": 0.5,
+          "priority": "Critical"
+        },
+        {
+          "key": "SRVKP-10824",
+          "summary": "CVE-2026-25639 openshift-pipelines/pipelines-hub-ui-rhel8: Axios affected by Denial of Service via __proto__ Key in mergeConfig [pipelines-1.15]",
+          "status": "Closed",
+          "sp": 0.5,
+          "priority": "Undefined"
+        },
+        {
+          "key": "SRVKP-10845",
+          "summary": "CVE-2025-69873 openshift-pipelines/pipelines-hub-ui-rhel8: ReDoS via $data reference [pipelines-1.15]",
+          "status": "Closed",
+          "sp": 0.5,
+          "priority": "Undefined"
+        },
+        {
+          "key": "SRVKP-10481",
+          "summary": "CVE-2025-56005 openshift-pipelines/pipelines-hub-ui-rhel8: From CVEorg collector [pipelines-1.15]",
+          "status": "To Do",
+          "sp": 0.5,
+          "priority": "Undefined"
+        },
+        {
+          "key": "SRVKP-10624",
+          "summary": "CVE-2025-61140 openshift-pipelines/pipelines-hub-ui-rhel8: jsonpath: Prototype Pollution vulnerability in the value function [pipelines-1.15]",
+          "status": "Closed",
+          "sp": 0,
+          "priority": "Undefined"
+        },
+        {
+          "key": "SRVKP-10826",
+          "summary": "CVE-2026-25639 openshift-pipelines/pipelines-hub-ui-rhel9: Axios affected by Denial of Service via __proto__ Key in mergeConfig [pipelines-1.20]",
+          "status": "To Do",
+          "sp": 0.5,
+          "priority": "Undefined"
+        }
+      ]
+    },
+    "pac": {
+      "totalIssues": 1,
+      "totalSP": 5,
+      "byStatus": {
+        "In Progress": {
+          "count": 1,
+          "sp": 5
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 1,
+      "issues": [
+        {
+          "key": "SRVKP-11061",
+          "summary": "Pipelines as Code Watcher Pod OOM Killed in OSP 1.20.2",
+          "status": "In Progress",
+          "sp": 5,
+          "priority": "Major"
+        }
+      ]
+    },
+    "Pipelines as Code": {
+      "totalIssues": 6,
+      "totalSP": 22,
+      "byStatus": {
+        "In Progress": {
+          "count": 1,
+          "sp": 5
+        },
+        "Code Review": {
+          "count": 4,
+          "sp": 14
+        },
+        "To Do": {
+          "count": 1,
+          "sp": 3
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 2,
+      "issues": [
+        {
+          "key": "SRVKP-11061",
+          "summary": "Pipelines as Code Watcher Pod OOM Killed in OSP 1.20.2",
+          "status": "In Progress",
+          "sp": 5,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-11021",
+          "summary": "[Regression] Relative task references in Pipeline broken",
+          "status": "Code Review",
+          "sp": 3,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-8544",
+          "summary": "Migrate PaC from OpenCensus to OpenTelemetry ",
+          "status": "Code Review",
+          "sp": 8,
+          "priority": "Blocker"
+        },
+        {
+          "key": "SRVKP-10981",
+          "summary": "[Code Review] SRVKP-10877 FBC on push build keep running one and a half hours and can't finish",
+          "status": "Code Review",
+          "sp": 2,
+          "priority": "Undefined"
+        },
+        {
+          "key": "SRVKP-10982",
+          "summary": "[Code Review] SRVKP-7197 Add Configurable Prefix for GitOps Comments to Prevent CI Conflicts",
+          "status": "Code Review",
+          "sp": 1,
+          "priority": "Undefined"
+        },
+        {
+          "key": "SRVKP-11118",
+          "summary": "Add blob caching to GitHub provider to reduce duplicate API calls",
+          "status": "To Do",
+          "sp": 3,
+          "priority": "Major"
+        }
+      ]
+    },
+    "pipelines-as-code": {
+      "totalIssues": 1,
+      "totalSP": 5,
+      "byStatus": {
+        "In Progress": {
+          "count": 1,
+          "sp": 5
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 1,
+      "issues": [
+        {
+          "key": "SRVKP-11061",
+          "summary": "Pipelines as Code Watcher Pod OOM Killed in OSP 1.20.2",
+          "status": "In Progress",
+          "sp": 5,
+          "priority": "Major"
+        }
+      ]
+    },
+    "Operator": {
+      "totalIssues": 5,
+      "totalSP": 19,
+      "byStatus": {
+        "In Progress": {
+          "count": 3,
+          "sp": 12
+        },
+        "Code Review": {
+          "count": 1,
+          "sp": 5
+        },
+        "On QA": {
+          "count": 1,
+          "sp": 2
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 2,
+      "issues": [
+        {
+          "key": "SRVKP-8172",
+          "summary": "Unauthenticated  access to metrics exposed by OpenShift Pipelines operator",
+          "status": "In Progress",
+          "sp": 6,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-10469",
+          "summary": "[operator] Fetch TLS config and expose to components ",
+          "status": "Code Review",
+          "sp": 5,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-10833",
+          "summary": "[QA] ServiceMonitor has hardcoded openshift-operators in namespaceSelector, causing Prometheus failures when operator is installed in different namespace",
+          "status": "On QA",
+          "sp": 2,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-9614",
+          "summary": "[tekton-pipelines-webhook] Centrally Managed TLS for Webhook",
+          "status": "In Progress",
+          "sp": 3,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-9632",
+          "summary": "[console-plugin]Centrally Managed TLS for console-plugin",
+          "status": "In Progress",
+          "sp": 3,
+          "priority": "Major"
+        }
+      ]
+    },
+    "Performance": {
+      "totalIssues": 1,
+      "totalSP": 5,
+      "byStatus": {
+        "In Progress": {
+          "count": 1,
+          "sp": 5
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 1,
+      "issues": [
+        {
+          "key": "SRVKP-8477",
+          "summary": "Missing ResultDB entries observed in 1.19 for PRs and TRs",
+          "status": "In Progress",
+          "sp": 5,
+          "priority": "Critical"
+        }
+      ]
+    },
+    "p12n": {
+      "totalIssues": 2,
+      "totalSP": 5.5,
+      "byStatus": {
+        "To Do": {
+          "count": 1,
+          "sp": 0.5
+        },
+        "Closed": {
+          "count": 1,
+          "sp": 5
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 0,
+      "issues": [
+        {
+          "key": "SRVKP-10481",
+          "summary": "CVE-2025-56005 openshift-pipelines/pipelines-hub-ui-rhel8: From CVEorg collector [pipelines-1.15]",
+          "status": "To Do",
+          "sp": 0.5,
+          "priority": "Undefined"
+        },
+        {
+          "key": "SRVKP-11119",
+          "summary": "OSP 1.15.5 patch release configuration ",
+          "status": "Closed",
+          "sp": 5,
+          "priority": "Major"
+        }
+      ]
+    },
+    "Documentation": {
+      "totalIssues": 1,
+      "totalSP": 2,
+      "byStatus": {
+        "To Do": {
+          "count": 1,
+          "sp": 2
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 1,
+      "issues": [
+        {
+          "key": "SRVKP-7342",
+          "summary": "Docs: Missing Procedure for Overriding Step Resources in PipelineRun",
+          "status": "To Do",
+          "sp": 2,
+          "priority": "Major"
+        }
+      ]
+    },
+    "QA": {
+      "totalIssues": 1,
+      "totalSP": 2,
+      "byStatus": {
+        "On QA": {
+          "count": 1,
+          "sp": 2
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 1,
+      "issues": [
+        {
+          "key": "SRVKP-10833",
+          "summary": "[QA] ServiceMonitor has hardcoded openshift-operators in namespaceSelector, causing Prometheus failures when operator is installed in different namespace",
+          "status": "On QA",
+          "sp": 2,
+          "priority": "Major"
+        }
+      ]
+    },
+    "UI": {
+      "totalIssues": 4,
+      "totalSP": 14,
+      "byStatus": {
+        "In Progress": {
+          "count": 2,
+          "sp": 8
+        },
+        "Code Review": {
+          "count": 1,
+          "sp": 1
+        },
+        "To Do": {
+          "count": 1,
+          "sp": 5
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 0,
+      "issues": [
+        {
+          "key": "SRVKP-9626",
+          "summary": "Update all VirtualisedTable list to data-view for pipeline and pipeline run tabs",
+          "status": "In Progress",
+          "sp": 5,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-9632",
+          "summary": "[console-plugin]Centrally Managed TLS for console-plugin",
+          "status": "In Progress",
+          "sp": 3,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-9680",
+          "summary": "Update CSS to align the PipelineRun status card on the overview page with PF6 CSS",
+          "status": "Code Review",
+          "sp": 1,
+          "priority": "Undefined"
+        },
+        {
+          "key": "SRVKP-9712",
+          "summary": "Update all VirtualisedTable list to data-view for EventListener and Trigger Template tabs",
+          "status": "To Do",
+          "sp": 5,
+          "priority": "Major"
+        }
+      ]
+    },
+    "Tekton Chains": {
+      "totalIssues": 1,
+      "totalSP": 3,
+      "byStatus": {
+        "Code Review": {
+          "count": 1,
+          "sp": 3
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 0,
+      "issues": [
+        {
+          "key": "SRVKP-10441",
+          "summary": "Improving storage documentation",
+          "status": "Code Review",
+          "sp": 3,
+          "priority": "Undefined"
+        }
+      ]
+    },
+    "Unassigned": {
+      "totalIssues": 4,
+      "totalSP": 6.5,
+      "byStatus": {
+        "To Do": {
+          "count": 2,
+          "sp": 2.5
+        },
+        "In Progress": {
+          "count": 2,
+          "sp": 4
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 0,
+      "issues": [
+        {
+          "key": "SRVKP-10647",
+          "summary": "Release OpenShift Pipelines CLI for Pipelines 1.15.5",
+          "status": "To Do",
+          "sp": 0.5,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-11104",
+          "summary": "[POC] Add release notes update functionality for the jira-sync tool",
+          "status": "In Progress",
+          "sp": 2,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-11124",
+          "summary": "Release captain KT to Shiv",
+          "status": "In Progress",
+          "sp": 2,
+          "priority": "Major"
+        },
+        {
+          "key": "SRVKP-11125",
+          "summary": "Try out skills created by PAC for various things and have it at a common place for others to use",
+          "status": "To Do",
+          "sp": 2,
+          "priority": "Major"
+        }
+      ]
+    },
+    "Tekton Ecosystem": {
+      "totalIssues": 1,
+      "totalSP": 0,
+      "byStatus": {
+        "In Progress": {
+          "count": 1,
+          "sp": 0
+        }
+      },
+      "blocked": 0,
+      "carryForward": [],
+      "highPriorityBugs": 0,
+      "issues": [
+        {
+          "key": "SRVKP-11140",
+          "summary": "Enhance Maven Task to support optional ENV_VARS parameter",
+          "status": "In Progress",
+          "sp": 0,
+          "priority": "Undefined"
+        }
+      ]
+    }
+  },
+  "trends": {
+    "sprintSnapshots": [
+      {
+        "id": "CrookShank-47879-1714456500",
+        "team": "CrookShank",
+        "sprintId": 47879,
+        "sprintName": "Pipelines SprintCrookshanks262",
+        "snapshotDate": "2024-04-30T05:55:00.000Z",
+        "sprintStartDate": "2024-04-17T05:56:01.046Z",
+        "sprintEndDate": "2024-04-30T05:55:00.000Z",
+        "totalIssues": 8,
+        "totalSPs": 29,
+        "completedSPs": 29,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 75,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 63,
+        "unplannedPercent": 38,
+        "cvePercent": 0,
+        "assigneeCount": 5,
+        "componentCount": 5
+      },
+      {
+        "id": "CrookShank-47886-1715795580",
+        "team": "CrookShank",
+        "sprintId": 47886,
+        "sprintName": "Pipelines Sprint Crookshanks 3",
+        "snapshotDate": "2024-05-15T17:53:00.000Z",
+        "sprintStartDate": "2024-04-30T10:59:24.277Z",
+        "sprintEndDate": "2024-05-15T17:53:00.000Z",
+        "totalIssues": 12,
+        "totalSPs": 37,
+        "completedSPs": 37,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 83,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 58,
+        "unplannedPercent": 42,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 6
+      },
+      {
+        "id": "CrookShank-47947-1716919140",
+        "team": "CrookShank",
+        "sprintId": 47947,
+        "sprintName": "Pipelines Sprint Crookshanks 4",
+        "snapshotDate": "2024-05-28T17:59:00.000Z",
+        "sprintStartDate": "2024-05-14T18:03:24.420Z",
+        "sprintEndDate": "2024-05-28T17:59:00.000Z",
+        "totalIssues": 4,
+        "totalSPs": 15,
+        "completedSPs": 15,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 25,
+        "unplannedPercent": 75,
+        "cvePercent": 0,
+        "assigneeCount": 3,
+        "componentCount": 3
+      },
+      {
+        "id": "CrookShank-47890-1718122800",
+        "team": "CrookShank",
+        "sprintId": 47890,
+        "sprintName": "Pipelines Sprint Crookshanks 5",
+        "snapshotDate": "2024-06-11T16:20:00.000Z",
+        "sprintStartDate": "2024-05-28T16:24:12.724Z",
+        "sprintEndDate": "2024-06-11T16:20:00.000Z",
+        "totalIssues": 14,
+        "totalSPs": 46,
+        "completedSPs": 46,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 86,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 64,
+        "unplannedPercent": 36,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 6
+      },
+      {
+        "id": "CrookShank-47903-1719337320",
+        "team": "CrookShank",
+        "sprintId": 47903,
+        "sprintName": "Pipelines Sprint Crookshanks 6",
+        "snapshotDate": "2024-06-25T17:42:00.000Z",
+        "sprintStartDate": "2024-06-12T02:32:19.399Z",
+        "sprintEndDate": "2024-06-25T17:42:00.000Z",
+        "totalIssues": 7,
+        "totalSPs": 32,
+        "completedSPs": 32,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 71,
+        "unplannedPercent": 29,
+        "cvePercent": 0,
+        "assigneeCount": 2,
+        "componentCount": 2
+      },
+      {
+        "id": "CrookShank-47927-1721757420",
+        "team": "CrookShank",
+        "sprintId": 47927,
+        "sprintName": "Pipelines Sprint Crookshanks 8",
+        "snapshotDate": "2024-07-23T17:57:00.000Z",
+        "sprintStartDate": "2024-07-23T10:58:28.440Z",
+        "sprintEndDate": "2024-07-23T17:57:00.000Z",
+        "totalIssues": 20,
+        "totalSPs": 80,
+        "completedSPs": 77,
+        "completionPercent": 96,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 95,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 55,
+        "unplannedPercent": 40,
+        "cvePercent": 5,
+        "assigneeCount": 6,
+        "componentCount": 5
+      },
+      {
+        "id": "CrookShank-48054-1722961800",
+        "team": "CrookShank",
+        "sprintId": 48054,
+        "sprintName": "Pipelines Sprint Crookshanks 9",
+        "snapshotDate": "2024-08-06T16:30:00.000Z",
+        "sprintStartDate": "2024-07-23T11:12:00.986Z",
+        "sprintEndDate": "2024-08-06T16:30:00.000Z",
+        "totalIssues": 21,
+        "totalSPs": 89,
+        "completedSPs": 86,
+        "completionPercent": 97,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 95,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 52,
+        "unplannedPercent": 43,
+        "cvePercent": 5,
+        "assigneeCount": 5,
+        "componentCount": 6
+      },
+      {
+        "id": "CrookShank-47902-1724176020",
+        "team": "CrookShank",
+        "sprintId": 47902,
+        "sprintName": "Pipelines Sprint Crookshank 10",
+        "snapshotDate": "2024-08-20T17:47:00.000Z",
+        "sprintStartDate": "2024-08-20T10:43:44.058Z",
+        "sprintEndDate": "2024-08-20T17:47:00.000Z",
+        "totalIssues": 20,
+        "totalSPs": 89,
+        "completedSPs": 86,
+        "completionPercent": 97,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 95,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 50,
+        "unplannedPercent": 45,
+        "cvePercent": 5,
+        "assigneeCount": 5,
+        "componentCount": 6
+      },
+      {
+        "id": "CrookShank-47912-1725380580",
+        "team": "CrookShank",
+        "sprintId": 47912,
+        "sprintName": "Pipelines Sprint Crookshank 11",
+        "snapshotDate": "2024-09-03T16:23:00.000Z",
+        "sprintStartDate": "2024-08-20T16:05:07.073Z",
+        "sprintEndDate": "2024-09-03T16:23:00.000Z",
+        "totalIssues": 22,
+        "totalSPs": 80,
+        "completedSPs": 80,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 95,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 50,
+        "unplannedPercent": 45,
+        "cvePercent": 5,
+        "assigneeCount": 5,
+        "componentCount": 7
+      },
+      {
+        "id": "CrookShank-47939-1726509240",
+        "team": "CrookShank",
+        "sprintId": 47939,
+        "sprintName": "Pipelines Sprint Crookshank 12",
+        "snapshotDate": "2024-09-16T17:54:00.000Z",
+        "sprintStartDate": "2024-09-03T10:34:09.614Z",
+        "sprintEndDate": "2024-09-16T17:54:00.000Z",
+        "totalIssues": 12,
+        "totalSPs": 55,
+        "completedSPs": 55,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 50,
+        "unplannedPercent": 42,
+        "cvePercent": 8,
+        "assigneeCount": 3,
+        "componentCount": 4
+      },
+      {
+        "id": "CrookShank-47945-1727806920",
+        "team": "CrookShank",
+        "sprintId": 47945,
+        "sprintName": "Pipelines Sprint Crookshank 13",
+        "snapshotDate": "2024-10-01T18:22:00.000Z",
+        "sprintStartDate": "2024-09-17T11:09:10.876Z",
+        "sprintEndDate": "2024-10-01T18:22:00.000Z",
+        "totalIssues": 24,
+        "totalSPs": 40,
+        "completedSPs": 28,
+        "completionPercent": 70,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 13,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 46,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 58,
+        "unplannedPercent": 42,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 7
+      },
+      {
+        "id": "CrookShank-47919-1729019700",
+        "team": "CrookShank",
+        "sprintId": 47919,
+        "sprintName": "Pipelines Sprint Crookshank 14",
+        "snapshotDate": "2024-10-15T19:15:00.000Z",
+        "sprintStartDate": "2024-10-01T11:00:08.328Z",
+        "sprintEndDate": "2024-10-15T19:15:00.000Z",
+        "totalIssues": 28,
+        "totalSPs": 51,
+        "completedSPs": 39,
+        "completionPercent": 76,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 13,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 54,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 57,
+        "unplannedPercent": 43,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 7
+      },
+      {
+        "id": "CrookShank-48091-1730230140",
+        "team": "CrookShank",
+        "sprintId": 48091,
+        "sprintName": "Pipelines Sprint Crookshank 15",
+        "snapshotDate": "2024-10-29T19:29:00.000Z",
+        "sprintStartDate": "2024-10-15T11:18:41.830Z",
+        "sprintEndDate": "2024-10-29T19:29:00.000Z",
+        "totalIssues": 13,
+        "totalSPs": 37,
+        "completedSPs": 37,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 54,
+        "unplannedPercent": 46,
+        "cvePercent": 0,
+        "assigneeCount": 5,
+        "componentCount": 5
+      },
+      {
+        "id": "CrookShank-48018-1731409740",
+        "team": "CrookShank",
+        "sprintId": 48018,
+        "sprintName": "Pipelines Sprint Crookshank 16",
+        "snapshotDate": "2024-11-12T11:09:00.000Z",
+        "sprintStartDate": "2024-10-29T11:09:22.421Z",
+        "sprintEndDate": "2024-11-12T11:09:00.000Z",
+        "totalIssues": 21,
+        "totalSPs": 88,
+        "completedSPs": 88,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 57,
+        "unplannedPercent": 43,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 8
+      },
+      {
+        "id": "CrookShank-48093-1732609740",
+        "team": "CrookShank",
+        "sprintId": 48093,
+        "sprintName": "Pipelines Sprint Crookshank 17",
+        "snapshotDate": "2024-11-26T08:29:00.000Z",
+        "sprintStartDate": "2024-11-25T08:29:43.908Z",
+        "sprintEndDate": "2024-11-26T08:29:00.000Z",
+        "totalIssues": 14,
+        "totalSPs": 54,
+        "completedSPs": 54,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 43,
+        "unplannedPercent": 57,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 13
+      },
+      {
+        "id": "CrookShank-48116-1733854380",
+        "team": "CrookShank",
+        "sprintId": 48116,
+        "sprintName": "Pipelines Sprint Crookshank 18",
+        "snapshotDate": "2024-12-10T18:13:00.000Z",
+        "sprintStartDate": "2024-11-25T12:54:21.279Z",
+        "sprintEndDate": "2024-12-10T18:13:00.000Z",
+        "totalIssues": 16,
+        "totalSPs": 68,
+        "completedSPs": 68,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 38,
+        "unplannedPercent": 63,
+        "cvePercent": 0,
+        "assigneeCount": 5,
+        "componentCount": 6
+      },
+      {
+        "id": "CrookShank-47943-1734976620",
+        "team": "CrookShank",
+        "sprintId": 47943,
+        "sprintName": "Pipelines Sprint Crookshank 19",
+        "snapshotDate": "2024-12-23T17:57:00.000Z",
+        "sprintStartDate": "2024-12-09T12:30:25.839Z",
+        "sprintEndDate": "2024-12-23T17:57:00.000Z",
+        "totalIssues": 17,
+        "totalSPs": 63,
+        "completedSPs": 63,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 41,
+        "unplannedPercent": 59,
+        "cvePercent": 0,
+        "assigneeCount": 5,
+        "componentCount": 6
+      },
+      {
+        "id": "CrookShank-51541-1737481620",
+        "team": "CrookShank",
+        "sprintId": 51541,
+        "sprintName": "Pipelines Sprint Crookshank 20",
+        "snapshotDate": "2025-01-21T17:47:00.000Z",
+        "sprintStartDate": "2025-01-08T12:23:08.230Z",
+        "sprintEndDate": "2025-01-21T17:47:00.000Z",
+        "totalIssues": 10,
+        "totalSPs": 56,
+        "completedSPs": 56,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 100,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 50,
+        "unplannedPercent": 50,
+        "cvePercent": 0,
+        "assigneeCount": 5,
+        "componentCount": 5
+      },
+      {
+        "id": "CrookShank-48127-1738686840",
+        "team": "CrookShank",
+        "sprintId": 48127,
+        "sprintName": "Pipelines Sprint Crookshank 21",
+        "snapshotDate": "2025-02-04T16:34:00.000Z",
+        "sprintStartDate": "2025-01-22T05:45:15.309Z",
+        "sprintEndDate": "2025-02-04T16:34:00.000Z",
+        "totalIssues": 19,
+        "totalSPs": 68,
+        "completedSPs": 60,
+        "completionPercent": 88,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 2,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 89,
+        "dodAtRiskPercent": 5,
+        "healthScore": "green",
+        "plannedPercent": 47,
+        "unplannedPercent": 53,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 7
+      },
+      {
+        "id": "CrookShank-18933-1739901480",
+        "team": "CrookShank",
+        "sprintId": 18933,
+        "sprintName": "Pipelines Sprint Crookshank 22",
+        "snapshotDate": "2025-02-18T17:58:00.000Z",
+        "sprintStartDate": "2025-02-04T11:02:05.484Z",
+        "sprintEndDate": "2025-02-18T17:58:00.000Z",
+        "totalIssues": 21,
+        "totalSPs": 65.5,
+        "completedSPs": 57.5,
+        "completionPercent": 88,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 2,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 90,
+        "dodAtRiskPercent": 5,
+        "healthScore": "green",
+        "plannedPercent": 43,
+        "unplannedPercent": 57,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 7
+      },
+      {
+        "id": "CrookShank-18941-1741106220",
+        "team": "CrookShank",
+        "sprintId": 18941,
+        "sprintName": "Pipelines Sprint Crookshank 23",
+        "snapshotDate": "2025-03-04T16:37:00.000Z",
+        "sprintStartDate": "2025-02-27T07:26:25.634Z",
+        "sprintEndDate": "2025-03-04T16:37:00.000Z",
+        "totalIssues": 16,
+        "totalSPs": 58,
+        "completedSPs": 55,
+        "completionPercent": 95,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 88,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 50,
+        "unplannedPercent": 50,
+        "cvePercent": 0,
+        "assigneeCount": 10,
+        "componentCount": 7
+      },
+      {
+        "id": "CrookShank-18964-1742319300",
+        "team": "CrookShank",
+        "sprintId": 18964,
+        "sprintName": "Pipelines Sprint Crookshank 24",
+        "snapshotDate": "2025-03-18T17:35:00.000Z",
+        "sprintStartDate": "2025-03-05T07:12:37.829Z",
+        "sprintEndDate": "2025-03-18T17:35:00.000Z",
+        "totalIssues": 25,
+        "totalSPs": 88,
+        "completedSPs": 88,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 92,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 56,
+        "unplannedPercent": 44,
+        "cvePercent": 0,
+        "assigneeCount": 11,
+        "componentCount": 9
+      },
+      {
+        "id": "CrookShank-48031-1743534960",
+        "team": "CrookShank",
+        "sprintId": 48031,
+        "sprintName": "Pipelines Sprint Crookshank 25",
+        "snapshotDate": "2025-04-01T19:16:00.000Z",
+        "sprintStartDate": "2025-03-18T19:13:43.917Z",
+        "sprintEndDate": "2025-04-01T19:16:00.000Z",
+        "totalIssues": 20,
+        "totalSPs": 72,
+        "completedSPs": 72,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 90,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 55,
+        "unplannedPercent": 45,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 6
+      },
+      {
+        "id": "CrookShank-48146-1744737540",
+        "team": "CrookShank",
+        "sprintId": 48146,
+        "sprintName": "Pipelines Sprint Crookshank 26",
+        "snapshotDate": "2025-04-15T17:19:00.000Z",
+        "sprintStartDate": "2025-04-01T10:55:15.375Z",
+        "sprintEndDate": "2025-04-15T17:19:00.000Z",
+        "totalIssues": 53,
+        "totalSPs": 107,
+        "completedSPs": 107,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 96,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 62,
+        "unplannedPercent": 36,
+        "cvePercent": 2,
+        "assigneeCount": 12,
+        "componentCount": 11
+      },
+      {
+        "id": "CrookShank-48145-1745947140",
+        "team": "CrookShank",
+        "sprintId": 48145,
+        "sprintName": "Pipelines Sprint Crookshank 27",
+        "snapshotDate": "2025-04-29T17:19:00.000Z",
+        "sprintStartDate": "2025-04-15T11:23:24.187Z",
+        "sprintEndDate": "2025-04-29T17:19:00.000Z",
+        "totalIssues": 53,
+        "totalSPs": 118,
+        "completedSPs": 110,
+        "completionPercent": 93,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 91,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 64,
+        "unplannedPercent": 34,
+        "cvePercent": 2,
+        "assigneeCount": 14,
+        "componentCount": 12
+      },
+      {
+        "id": "CrookShank-48155-1747151460",
+        "team": "CrookShank",
+        "sprintId": 48155,
+        "sprintName": "Pipelines Sprint Crookshank 28",
+        "snapshotDate": "2025-05-13T15:51:00.000Z",
+        "sprintStartDate": "2025-04-29T13:15:00.311Z",
+        "sprintEndDate": "2025-05-13T15:51:00.000Z",
+        "totalIssues": 42,
+        "totalSPs": 87,
+        "completedSPs": 79,
+        "completionPercent": 91,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 95,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 67,
+        "unplannedPercent": 33,
+        "cvePercent": 0,
+        "assigneeCount": 13,
+        "componentCount": 11
+      },
+      {
+        "id": "CrookShank-48000-1748368380",
+        "team": "CrookShank",
+        "sprintId": 48000,
+        "sprintName": "Pipelines Sprint Crookshank 29",
+        "snapshotDate": "2025-05-27T17:53:00.000Z",
+        "sprintStartDate": "2025-05-20T12:18:52.048Z",
+        "sprintEndDate": "2025-05-27T17:53:00.000Z",
+        "totalIssues": 12,
+        "totalSPs": 44,
+        "completedSPs": 36,
+        "completionPercent": 82,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 92,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 58,
+        "unplannedPercent": 42,
+        "cvePercent": 0,
+        "assigneeCount": 4,
+        "componentCount": 6
+      },
+      {
+        "id": "CrookShank-18989-1749573300",
+        "team": "CrookShank",
+        "sprintId": 18989,
+        "sprintName": "Pipelines Sprint Crookshank 30",
+        "snapshotDate": "2025-06-10T16:35:00.000Z",
+        "sprintStartDate": "2025-05-28T10:36:54.426Z",
+        "sprintEndDate": "2025-06-10T16:35:00.000Z",
+        "totalIssues": 19,
+        "totalSPs": 64,
+        "completedSPs": 53,
+        "completionPercent": 83,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 2,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 84,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 63,
+        "unplannedPercent": 37,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 13
+      },
+      {
+        "id": "CrookShank-18963-1750795140",
+        "team": "CrookShank",
+        "sprintId": 18963,
+        "sprintName": "Pipelines Sprint Crookshank 31",
+        "snapshotDate": "2025-06-24T19:59:00.000Z",
+        "sprintStartDate": "2025-06-11T10:50:43.384Z",
+        "sprintEndDate": "2025-06-24T19:59:00.000Z",
+        "totalIssues": 24,
+        "totalSPs": 71,
+        "completedSPs": 60,
+        "completionPercent": 85,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 2,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 88,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 67,
+        "unplannedPercent": 33,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 13
+      },
+      {
+        "id": "CrookShank-47916-1751996760",
+        "team": "CrookShank",
+        "sprintId": 47916,
+        "sprintName": "Pipelines Sprint Crookshanks 7",
+        "snapshotDate": "2025-07-08T17:46:00.000Z",
+        "sprintStartDate": "2024-06-27T11:32:08.888Z",
+        "sprintEndDate": "2025-07-08T17:46:00.000Z",
+        "totalIssues": 27,
+        "totalSPs": 95,
+        "completedSPs": 90,
+        "completionPercent": 95,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 2,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 93,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 59,
+        "unplannedPercent": 37,
+        "cvePercent": 4,
+        "assigneeCount": 7,
+        "componentCount": 5
+      },
+      {
+        "id": "CrookShank-19008-1752002580",
+        "team": "CrookShank",
+        "sprintId": 19008,
+        "sprintName": "Pipelines Sprint Crookshank 32",
+        "snapshotDate": "2025-07-08T19:23:00.000Z",
+        "sprintStartDate": "2025-06-25T05:10:34.838Z",
+        "sprintEndDate": "2025-07-08T19:23:00.000Z",
+        "totalIssues": 21,
+        "totalSPs": 67,
+        "completedSPs": 54,
+        "completionPercent": 81,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 2,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 76,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 67,
+        "unplannedPercent": 33,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 11
+      },
+      {
+        "id": "CrookShank-47936-1753211940",
+        "team": "CrookShank",
+        "sprintId": 47936,
+        "sprintName": "Pipelines Sprint Crookshank 33",
+        "snapshotDate": "2025-07-22T19:19:00.000Z",
+        "sprintStartDate": "2025-07-08T16:37:30.544Z",
+        "sprintEndDate": "2025-07-22T19:19:00.000Z",
+        "totalIssues": 21,
+        "totalSPs": 59,
+        "completedSPs": 51,
+        "completionPercent": 86,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 86,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 52,
+        "unplannedPercent": 48,
+        "cvePercent": 0,
+        "assigneeCount": 5,
+        "componentCount": 11
+      },
+      {
+        "id": "CrookShank-18982-1754421000",
+        "team": "CrookShank",
+        "sprintId": 18982,
+        "sprintName": "Pipelines Sprint Crookshank 34",
+        "snapshotDate": "2025-08-05T19:10:00.000Z",
+        "sprintStartDate": "2025-07-24T08:01:33.036Z",
+        "sprintEndDate": "2025-08-05T19:10:00.000Z",
+        "totalIssues": 30,
+        "totalSPs": 88,
+        "completedSPs": 86,
+        "completionPercent": 98,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 93,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 43,
+        "unplannedPercent": 57,
+        "cvePercent": 0,
+        "assigneeCount": 8,
+        "componentCount": 13
+      },
+      {
+        "id": "CrookShank-18957-1755633420",
+        "team": "CrookShank",
+        "sprintId": 18957,
+        "sprintName": "Pipelines Sprint Crookshank 35",
+        "snapshotDate": "2025-08-19T19:57:00.000Z",
+        "sprintStartDate": "2025-08-05T14:46:43.270Z",
+        "sprintEndDate": "2025-08-19T19:57:00.000Z",
+        "totalIssues": 29,
+        "totalSPs": 89,
+        "completedSPs": 87,
+        "completionPercent": 98,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 90,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 55,
+        "unplannedPercent": 45,
+        "cvePercent": 0,
+        "assigneeCount": 8,
+        "componentCount": 11
+      },
+      {
+        "id": "CrookShank-18956-1756819920",
+        "team": "CrookShank",
+        "sprintId": 18956,
+        "sprintName": "Pipelines Sprint Crookshank 36",
+        "snapshotDate": "2025-09-02T13:32:00.000Z",
+        "sprintStartDate": "2025-08-19T15:48:49.671Z",
+        "sprintEndDate": "2025-09-02T13:32:00.000Z",
+        "totalIssues": 19,
+        "totalSPs": 72,
+        "completedSPs": 72,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 89,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 58,
+        "unplannedPercent": 42,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 10
+      },
+      {
+        "id": "CrookShank-18931-1758057420",
+        "team": "CrookShank",
+        "sprintId": 18931,
+        "sprintName": "Pipelines Sprint Crookshank 37",
+        "snapshotDate": "2025-09-16T21:17:00.000Z",
+        "sprintStartDate": "2025-09-02T21:47:30.900Z",
+        "sprintEndDate": "2025-09-16T21:17:00.000Z",
+        "totalIssues": 21,
+        "totalSPs": 62,
+        "completedSPs": 60,
+        "completionPercent": 97,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 2,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 81,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 52,
+        "unplannedPercent": 48,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 11
+      },
+      {
+        "id": "CrookShank-18959-1759253400",
+        "team": "CrookShank",
+        "sprintId": 18959,
+        "sprintName": "Pipelines Sprint Crookshank 38",
+        "snapshotDate": "2025-09-30T17:30:00.000Z",
+        "sprintStartDate": "2025-09-16T13:33:02.684Z",
+        "sprintEndDate": "2025-09-30T17:30:00.000Z",
+        "totalIssues": 18,
+        "totalSPs": 55,
+        "completedSPs": 55,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 83,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 61,
+        "unplannedPercent": 39,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 11
+      },
+      {
+        "id": "CrookShank-18962-1760482860",
+        "team": "CrookShank",
+        "sprintId": 18962,
+        "sprintName": "Pipelines Sprint CrookShank 39",
+        "snapshotDate": "2025-10-14T23:01:00.000Z",
+        "sprintStartDate": "2025-09-30T13:52:16.175Z",
+        "sprintEndDate": "2025-10-14T23:01:00.000Z",
+        "totalIssues": 16,
+        "totalSPs": 56,
+        "completedSPs": 56,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 1,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 81,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 56,
+        "unplannedPercent": 44,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 10
+      },
+      {
+        "id": "CrookShank-47929-1761651480",
+        "team": "CrookShank",
+        "sprintId": 47929,
+        "sprintName": "Pipelines Sprint CrookShank 40",
+        "snapshotDate": "2025-10-28T11:38:00.000Z",
+        "sprintStartDate": "2025-10-14T11:40:14.168Z",
+        "sprintEndDate": "2025-10-28T11:38:00.000Z",
+        "totalIssues": 16,
+        "totalSPs": 52,
+        "completedSPs": 52,
+        "completionPercent": 100,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 0,
+        "carryForwardCriticalCount": 0,
+        "dodCompletePercent": 81,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 56,
+        "unplannedPercent": 44,
+        "cvePercent": 0,
+        "assigneeCount": 6,
+        "componentCount": 8
+      },
+      {
+        "id": "CrookShank-18965-1762864200",
+        "team": "CrookShank",
+        "sprintId": 18965,
+        "sprintName": "Pipelines Sprint CrookShank 41",
+        "snapshotDate": "2025-11-11T12:30:00.000Z",
+        "sprintStartDate": "2025-10-30T04:46:28.834Z",
+        "sprintEndDate": "2025-11-11T12:30:00.000Z",
+        "totalIssues": 23,
+        "totalSPs": 79,
+        "completedSPs": 68,
+        "completionPercent": 86,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 2,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 87,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 43,
+        "unplannedPercent": 57,
+        "cvePercent": 0,
+        "assigneeCount": 7,
+        "componentCount": 9
+      },
+      {
+        "id": "CrookShank-18981-1764073080",
+        "team": "CrookShank",
+        "sprintId": 18981,
+        "sprintName": "Pipelines Sprint CrookShank 42",
+        "snapshotDate": "2025-11-25T12:18:00.000Z",
+        "sprintStartDate": "2025-11-11T14:24:00.970Z",
+        "sprintEndDate": "2025-11-25T12:18:00.000Z",
+        "totalIssues": 25,
+        "totalSPs": 82,
+        "completedSPs": 68,
+        "completionPercent": 83,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 3,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 84,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 32,
+        "unplannedPercent": 68,
+        "cvePercent": 0,
+        "assigneeCount": 8,
+        "componentCount": 11
+      },
+      {
+        "id": "CrookShank-18950-1765298340",
+        "team": "CrookShank",
+        "sprintId": 18950,
+        "sprintName": "Pipelines Sprint CrookShank 43",
+        "snapshotDate": "2025-12-09T16:39:00.000Z",
+        "sprintStartDate": "2025-11-25T11:32:39.318Z",
+        "sprintEndDate": "2025-12-09T16:39:00.000Z",
+        "totalIssues": 28,
+        "totalSPs": 80,
+        "completedSPs": 66,
+        "completionPercent": 83,
+        "blockedCount": 1,
+        "blockedSPs": 3,
+        "codeReviewCount": 0,
+        "codeReviewSPs": 0,
+        "carryForwardCount": 3,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 82,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 29,
+        "unplannedPercent": 68,
+        "cvePercent": 4,
+        "assigneeCount": 9,
+        "componentCount": 10
+      },
+      {
+        "id": "CrookShank-18978-1766504100",
+        "team": "CrookShank",
+        "sprintId": 18978,
+        "sprintName": "Pipelines Sprint CrookShank 44",
+        "snapshotDate": "2025-12-23T15:35:00.000Z",
+        "sprintStartDate": "2025-12-10T09:15:04.448Z",
+        "sprintEndDate": "2025-12-23T15:35:00.000Z",
+        "totalIssues": 28,
+        "totalSPs": 77,
+        "completedSPs": 65,
+        "completionPercent": 84,
+        "blockedCount": 1,
+        "blockedSPs": 3,
+        "codeReviewCount": 1,
+        "codeReviewSPs": 1,
+        "carryForwardCount": 3,
+        "carryForwardCriticalCount": 2,
+        "dodCompletePercent": 86,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 36,
+        "unplannedPercent": 64,
+        "cvePercent": 0,
+        "assigneeCount": 9,
+        "componentCount": 11
+      },
+      {
+        "id": "CrookShank-18988-1767697080",
+        "team": "CrookShank",
+        "sprintId": 18988,
+        "sprintName": "Pipelines Sprint CrookShank 45",
+        "snapshotDate": "2026-01-06T10:58:00.000Z",
+        "sprintStartDate": "2025-12-23T10:58:09.288Z",
+        "sprintEndDate": "2026-01-06T10:58:00.000Z",
+        "totalIssues": 21,
+        "totalSPs": 54,
+        "completedSPs": 45,
+        "completionPercent": 83,
+        "blockedCount": 1,
+        "blockedSPs": 3,
+        "codeReviewCount": 3,
+        "codeReviewSPs": 3,
+        "carryForwardCount": 5,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 76,
+        "dodAtRiskPercent": 5,
+        "healthScore": "green",
+        "plannedPercent": 38,
+        "unplannedPercent": 62,
+        "cvePercent": 0,
+        "assigneeCount": 9,
+        "componentCount": 9
+      },
+      {
+        "id": "CrookShank-48003-1768941360",
+        "team": "CrookShank",
+        "sprintId": 48003,
+        "sprintName": "Pipelines Sprint CrookShank 46",
+        "snapshotDate": "2026-01-20T20:36:00.000Z",
+        "sprintStartDate": "2026-01-06T20:38:35.419Z",
+        "sprintEndDate": "2026-01-20T20:36:00.000Z",
+        "totalIssues": 46,
+        "totalSPs": 100,
+        "completedSPs": 89,
+        "completionPercent": 89,
+        "blockedCount": 1,
+        "blockedSPs": 3,
+        "codeReviewCount": 4,
+        "codeReviewSPs": 6,
+        "carryForwardCount": 6,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 87,
+        "dodAtRiskPercent": 2,
+        "healthScore": "green",
+        "plannedPercent": 37,
+        "unplannedPercent": 28,
+        "cvePercent": 35,
+        "assigneeCount": 10,
+        "componentCount": 11
+      },
+      {
+        "id": "CrookShank-19004-1770143580",
+        "team": "CrookShank",
+        "sprintId": 19004,
+        "sprintName": "Pipelines Sprint CrookShank 47",
+        "snapshotDate": "2026-02-03T18:33:00.000Z",
+        "sprintStartDate": "2026-01-21T08:33:10.505Z",
+        "sprintEndDate": "2026-02-03T18:33:00.000Z",
+        "totalIssues": 37,
+        "totalSPs": 89,
+        "completedSPs": 71,
+        "completionPercent": 80,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 2,
+        "codeReviewSPs": 6,
+        "carryForwardCount": 6,
+        "carryForwardCriticalCount": 2,
+        "dodCompletePercent": 84,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 46,
+        "unplannedPercent": 38,
+        "cvePercent": 16,
+        "assigneeCount": 10,
+        "componentCount": 12
+      },
+      {
+        "id": "CrookShank-47952-1771321140",
+        "team": "CrookShank",
+        "sprintId": 47952,
+        "sprintName": "Pipelines Sprint CrookShank 48",
+        "snapshotDate": "2026-02-17T09:39:00.000Z",
+        "sprintStartDate": "2026-02-04T10:33:27.883Z",
+        "sprintEndDate": "2026-02-17T09:39:00.000Z",
+        "totalIssues": 39,
+        "totalSPs": 80,
+        "completedSPs": 70,
+        "completionPercent": 88,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 2,
+        "codeReviewSPs": 8,
+        "carryForwardCount": 3,
+        "carryForwardCriticalCount": 1,
+        "dodCompletePercent": 92,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 41,
+        "unplannedPercent": 44,
+        "cvePercent": 15,
+        "assigneeCount": 9,
+        "componentCount": 9
+      },
+      {
+        "id": "CrookShank-48006-1772545200",
+        "team": "CrookShank",
+        "sprintId": 48006,
+        "sprintName": "Pipelines Sprint CrookShank 49",
+        "snapshotDate": "2026-03-03T13:40:00.000Z",
+        "sprintStartDate": "2026-02-17T13:41:30.127Z",
+        "sprintEndDate": "2026-03-03T13:40:00.000Z",
+        "totalIssues": 44,
+        "totalSPs": 81,
+        "completedSPs": 57,
+        "completionPercent": 70,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 3,
+        "codeReviewSPs": 11,
+        "carryForwardCount": 7,
+        "carryForwardCriticalCount": 2,
+        "dodCompletePercent": 77,
+        "dodAtRiskPercent": 0,
+        "healthScore": "green",
+        "plannedPercent": 30,
+        "unplannedPercent": 36,
+        "cvePercent": 34,
+        "assigneeCount": 9,
+        "componentCount": 11
+      },
+      {
+        "id": "CrookShank-47987-1773833280",
+        "team": "CrookShank",
+        "sprintId": 47987,
+        "sprintName": "Pipelines Sprint CrookShank 50",
+        "snapshotDate": "2026-03-18T11:28:00.000Z",
+        "sprintStartDate": "2026-03-04T11:28:54.632Z",
+        "sprintEndDate": "2026-03-18T11:28:00.000Z",
+        "totalIssues": 33,
+        "totalSPs": 79,
+        "completedSPs": 34,
+        "completionPercent": 43,
+        "blockedCount": 0,
+        "blockedSPs": 0,
+        "codeReviewCount": 9,
+        "codeReviewSPs": 31,
+        "carryForwardCount": 15,
+        "carryForwardCriticalCount": 2,
+        "dodCompletePercent": 45,
+        "dodAtRiskPercent": 3,
+        "healthScore": "yellow",
+        "plannedPercent": 42,
+        "unplannedPercent": 45,
+        "cvePercent": 12,
+        "assigneeCount": 8,
+        "componentCount": 12
+      },
+      {
+        "id": "CrookShank-48061-1774274683700",
+        "team": "CrookShank",
+        "sprintId": 48061,
+        "sprintName": "Pipelines Sprint CrookShank 51",
+        "snapshotDate": "2026-03-23T14:04:43.518Z",
+        "sprintStartDate": "2026-03-17T11:31:36.689Z",
+        "sprintEndDate": "2026-03-31T11:28:23.000Z",
+        "totalIssues": 33,
+        "totalSPs": 88,
+        "completedSPs": 6,
+        "completionPercent": 7,
+        "blockedCount": 6,
+        "blockedSPs": 13.5,
+        "codeReviewCount": 9,
+        "codeReviewSPs": 31,
+        "carryForwardCount": 29,
+        "carryForwardCriticalCount": 2,
+        "dodCompletePercent": 3,
+        "dodAtRiskPercent": 3,
+        "healthScore": "yellow",
+        "plannedPercent": 33,
+        "unplannedPercent": 52,
+        "cvePercent": 15,
+        "velocityAvg3": null,
+        "velocityAvg5": null,
+        "assigneeCount": 8,
+        "componentCount": 15
+      }
+    ],
+    "issueSnapshots": []
+  }
+}

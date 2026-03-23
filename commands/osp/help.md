@@ -41,6 +41,11 @@ Present the following command reference to the user in a clear, formatted manner
 |---------|-------------|
 | `/osp:map-jira-to-upstream` | Find upstream Tekton GitHub issues related to a Red Hat Jira issue |
 
+### Sprint Management
+| Command | Description |
+|---------|-------------|
+| `/osp:sprint-status` | Sprint health dashboard — velocity, blockers, carry-forwards, roadmap alignment |
+
 ### Release Management
 | Command | Description |
 |---------|-------------|
@@ -69,6 +74,7 @@ Present the following command reference to the user in a clear, formatted manner
 4. **Debug issues**: `/osp:debug` - Analyze failed runs
 5. **Map Jira to upstream**: `/osp:map-jira-to-upstream` - Cross-reference with tektoncd
 6. **Track release**: `/osp:release-status` - Check Jira version status and generate todos
+7. **Sprint health**: `/osp:sprint-status` - Sprint dashboard for product owners
 
 ## Common Workflows
 
@@ -91,6 +97,9 @@ Add this comment to `.konflux/dockerfiles/*.Dockerfile` and push to trigger rebu
 ### "Copy images for release"
 1. `/osp:konflux-image snapshot <app>` — Get image digest from Snapshots API (recommended)
 2. `/osp:registry-info` — Check which registry to use for release stage
+
+### "Sprint health check"
+1. `/osp:sprint-status <team>` — Full sprint health dashboard (velocity, blockers, carry-forwards, roadmap alignment)
 
 ## Troubleshooting Quick Reference
 

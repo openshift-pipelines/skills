@@ -1,12 +1,10 @@
 # Claude Skills for OpenShift Pipelines
 
-A collection of [Claude Code](https://claude.ai/claude-code) skills for OpenShift Pipelines and Tekton development workflows.
+A collection of [Claude Code](https://claude.ai/claude-code) skills for OpenShift Pipelines and Tekton development workflows. Includes a **sprint health dashboard** with React UI, Meilisearch-powered historical analytics, and standalone scripts that run without LLM tokens.
 
 ## Installation
 
 ### Install from GitHub (Recommended)
-
-No npm publish required - install directly from the GitHub repository:
 
 ```bash
 # Interactive installation (prompts for global/local)
@@ -19,328 +17,250 @@ npx github:openshift-pipelines/skills -- -g
 npx github:openshift-pipelines/skills -- -l
 ```
 
-### Install from npm (if published)
-
-```bash
-npx openshift-pipelines-skills
-npx openshift-pipelines-skills -g    # Global
-npx openshift-pipelines-skills -l    # Local
-```
-
 ### Manual Installation
 
 ```bash
 git clone https://github.com/openshift-pipelines/skills.git
 cd skills
-node bin/install.js -g    # Or -l for local
-```
-
-Or copy files directly:
-
-```bash
-git clone https://github.com/openshift-pipelines/skills.git
-cp -r skills/commands/osp ~/.claude/commands/
-```
-
-### Non-Interactive Installation (CI/Docker)
-
-```bash
-# Global installation without prompts
-npx github:openshift-pipelines/skills -- --global
-
-# With explicit config directory (useful in containers)
-CLAUDE_CONFIG_DIR=/home/user/.claude npx github:openshift-pipelines/skills -- --global
-```
-
-## Updating
-
-When the repository is updated with new skills or improvements, update your local installation using one of these methods:
-
-### Method 1: Clone and Install (Recommended)
-
-The most reliable way to get the latest version:
-
-```bash
-# Clone fresh (or pull if you already have it)
-git clone https://github.com/openshift-pipelines/skills.git /tmp/osp-skills
-cd /tmp/osp-skills
-
-# Install globally
-node bin/install.js -g
-
-# Clean up
-cd - && rm -rf /tmp/osp-skills
-```
-
-Or if you keep a local clone:
-
-```bash
-cd /path/to/skills
-git pull origin main
 node bin/install.js -g
 ```
 
-### Method 2: npx with Cache Clear
-
-npx caches packages, so you must clear the cache to get updates:
+### Build the React Dashboard
 
 ```bash
-# Clear npx cache and reinstall
-npx cache clean --force && npx github:openshift-pipelines/skills
-
-# Or use npm cache
-npm cache clean --force && npx github:openshift-pipelines/skills
+cd dashboard
+npm install
+npm run build    # Outputs to docs/templates/built/index.html
 ```
 
-### Method 3: Direct File Copy
+## Sprint Status Dashboard
 
-If you have the repo cloned:
+The flagship feature — a comprehensive sprint health dashboard for product owners managing multiple components and teams.
+
+### Quick Start (No LLM Tokens)
 
 ```bash
-cd /path/to/skills
-git pull origin main
-cp -r commands/osp ~/.claude/commands/
+# Run the sprint dashboard for a team
+node bin/sprint-status.js pioneers
+
+# Query historical sprint data
+node bin/sprint-history.js pioneers velocity
+node bin/sprint-history.js pioneers trends
+node bin/sprint-history.js pioneers issue SRVKP-1801
+node bin/sprint-history.js pioneers search "resource quota"
+node bin/sprint-history.js pioneers compare crookshank
 ```
 
-### After Updating
+### Via Claude Code Skills
 
-**Important**: Restart Claude Code after updating to reload the slash commands. The new commands won't be available until you restart.
+```
+/osp:sprint-status pioneers
+/osp:sprint-history pioneers trends
+```
 
-To verify the update:
+### What It Does
+
+`sprint-status` fetches live data from Jira Cloud, computes 13 metrics, renders an interactive React dashboard in your browser, and auto-indexes everything into Meilisearch for historical tracking.
+
+**Dashboard Features:**
+- **Tab-based layout** — Overview (single screen), Issues, Velocity, DoD, Roadmap, People, Components, Trends
+- **PO View / Assignee View** — toggle to filter the entire dashboard to one person
+- **Sprint health score** — green/yellow/red badge with completion percentage
+- **Days remaining** — progress bar with day count and SP completion
+- **Actionable insights** — smart recommendations: who needs help, what's at risk, sprint reality check with descope candidates
+- **Global filter** — search across all tables by issue key, assignee, or component
+
+**Metrics Computed:**
+| Metric | Description |
+|--------|-------------|
+| Sprint Summary | Issues/SPs by status, blocked count, no-SP count |
+| Velocity Trend | Committed vs completed with rolling averages |
+| Committed vs Done Gap | The SP gap across sprints for expectation management |
+| Code Review SP Redo | Suggest reduced SPs for issues stuck in review |
+| Blocked Issues | Flag-blocked + stale-blocked (no activity for 3+ days) |
+| High Priority Bugs | Closure proximity with dot indicators |
+| Carry-Forward Analysis | Issues persisting across sprints, worst offenders |
+| DoD Compliance | Per-issue tracking via Jira labels (docs/tests/release-notes pending) |
+| Roadmap Alignment | Planned vs unplanned vs CVE work |
+| Future Sprint Priority | Ranked list: Vulnerabilities > Bugs > Stories |
+| Per-Assignee Breakdown | Workload, status, blocked, carry-forward per person |
+| Per-Component Breakdown | Same metrics grouped by component with issue listing |
+| Multi-Sprint Trends | 8 trend charts from Meilisearch historical data |
+
+**Charts (Recharts):**
+- Donut charts: status distribution, SP allocation, DoD compliance, roadmap alignment
+- Bar charts: SP by status, committed vs done gap, blocked trend, component/assignee workload
+- Line charts: completion rate, carry-forward trend, DoD trend, code review bottleneck
+- Health score timeline: colored circles across sprints
+
+### Meilisearch Integration
+
+Sprint data is automatically indexed into a local Meilisearch instance (Docker) on every run. On first run, the tool auto-backfills all closed sprints from Jira history.
+
 ```bash
-ls -la ~/.claude/commands/osp/
+# Meilisearch starts automatically via Docker
+# Container: osp-meilisearch on port 7700
+# Volume: osp-meili-data (persistent)
+# No manual setup needed
 ```
 
-## Available Commands
+**Two indexes:**
+- `sprint-snapshots` — aggregate metrics per sprint (velocity, completion, blocked, DoD, roadmap)
+- `issue-snapshots` — per-issue state per sprint (status, SP, assignee, DoD score)
 
-After installation, the following commands are available in Claude Code:
+### Blocked Issue Detection
+
+Issues are flagged as blocked via three signals:
+1. **Jira Blocked field** (`customfield_10517`)
+2. **Jira Flagged/impediment** (`customfield_10021`)
+3. **Stale detection** — no comments or updates for 3+ days on non-closed issues
+
+### Definition of Done (DoD)
+
+DoD compliance is tracked per issue using Jira labels:
+
+| Label | Meaning |
+|-------|---------|
+| `docs-pending` | Documentation not provided |
+| `release-notes-pending` | Release notes not written |
+| `tests-pending` | Tests not written |
+| `doc-req` | Documentation required |
+| `missing-docs` | Reached QA without docs |
+
+Full DoD checklists at Story/Feature/Epic levels are in `docs/definition-of-done.md`.
+
+## All Available Commands
 
 | Command | Description |
 |---------|-------------|
 | `/osp:help` | Show available commands and usage guide |
-| `/osp:configure` | Set up Jira authentication and settings |
+| `/osp:configure` | Set up Jira, Jira Cloud, GitHub, Konflux, and Meilisearch settings |
+| `/osp:sprint-status` | Sprint health dashboard with React UI |
+| `/osp:sprint-history` | Historical sprint analytics via Meilisearch |
 | `/osp:pipeline` | Create or modify Tekton Pipeline resources |
 | `/osp:task` | Create or modify Tekton Task resources |
 | `/osp:debug` | Debug failed PipelineRuns or TaskRuns |
-| `/osp:map-jira-to-upstream` | Find upstream Tekton GitHub issues related to a Red Hat Jira issue |
-| `/osp:release-status` | Track release status from Jira version and generate todo list |
+| `/osp:map-jira-to-upstream` | Find upstream Tekton GitHub issues for a Jira issue |
+| `/osp:release-status` | Track release status from Jira version |
+| `/osp:release-checklist` | Generate component release checklist |
+| `/osp:component-status` | Check release readiness of a component |
+| `/osp:component-builds` | Check Konflux build status and image freshness |
+| `/osp:konflux-image` | Extract image references from Konflux pipelines |
+| `/osp:operator-release` | Run operator update workflows |
+| `/osp:hack-config` | Configure hack repo for minor release |
+| `/osp:component-config` | Configure a component for minor release |
+| `/osp:operator-config` | Configure operator for minor release |
+| `/osp:release-config` | Create Konflux release resources |
+| `/osp:stage-release` | Execute stage release |
+| `/osp:prod-release` | Execute production release |
+| `/osp:pr-pipeline-status` | Check PR pipeline status |
+
+### Standalone Scripts
+
+| Script | Description |
+|--------|-------------|
+| `node bin/sprint-status.js <team>` | Full sprint dashboard (no LLM tokens) |
+| `node bin/sprint-history.js <team> <subcommand>` | Historical analytics (no LLM tokens) |
+| `node bin/install.js` | Install skills to Claude Code |
 
 ## Configuration
 
-### Jira Authentication
+### Jira Cloud Authentication (for sprint-status)
 
-The `/osp:map-jira-to-upstream` command requires access to Red Hat Jira (issues.redhat.com).
+```bash
+# Via environment variables
+export JIRA_CLOUD_EMAIL="user@redhat.com"
+export JIRA_CLOUD_TOKEN="your-api-token"
 
-**Option 1: Environment Variable (Recommended)**
+# Or via config file (run /osp:configure)
+# Stored in ~/.config/osp/config.json under jira_cloud
+```
 
-Add to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.):
+Token: https://id.atlassian.com/manage-profile/security/api-tokens
+
+### Jira Server Authentication (for release-status, map-jira-to-upstream)
 
 ```bash
 export JIRA_TOKEN="your-personal-access-token"
 ```
 
-**Option 2: Config File**
-
-Run `/osp:configure` in Claude Code, or manually create:
-
-```bash
-mkdir -p ~/.config/osp
-cat > ~/.config/osp/config.json << 'EOF'
-{
-  "jira": {
-    "base_url": "https://issues.redhat.com",
-    "token": "your-personal-access-token"
-  }
-}
-EOF
-chmod 600 ~/.config/osp/config.json
-```
-
-**Getting a Jira Personal Access Token:**
-
-1. Log in to https://issues.redhat.com
-2. Click your profile icon → **Personal Access Tokens**
-3. Click **Create token**
-4. Name it (e.g., "Claude Skills") and set scope to **Read**
-5. Copy the token immediately (shown only once)
+Token: https://issues.redhat.com/secure/ViewProfile.jspa?selectedTab=com.atlassian.pats.pats-plugin:jira-user-personal-access-tokens
 
 ### GitHub Authentication (Optional)
 
-For higher API rate limits when searching upstream issues:
-
 ```bash
-# Using gh CLI (recommended)
-gh auth login
-
-# Or set environment variable
-export GITHUB_TOKEN="your-github-token"
+gh auth login    # Recommended
+# Or: export GITHUB_TOKEN="your-token"
 ```
-
-## Usage Examples
-
-### Map a Jira Issue to Upstream
-
-```
-/osp:map-jira-to-upstream
-
-> Enter Jira issue: SRVKP-1234
-```
-
-This will:
-1. Fetch the Jira issue details via API
-2. Extract keywords, error messages, and components
-3. Search tektoncd GitHub repositories
-4. Report related upstream issues with recommendations
-
-### Track Release Status
-
-```
-/osp:release-status
-
-> Enter Jira version: https://issues.redhat.com/projects/SRVKP/versions/12453355
-```
-
-This will:
-1. Fetch version details and all associated issues
-2. Categorize issues by status (Done, In Progress, To Do)
-3. Search GitHub for related PRs on pending issues
-4. Generate a summary report with status breakdown
-5. Create a todo list for remaining work
-
-### Create a Tekton Task
-
-```
-/osp:task
-```
-
-Interactive wizard to create a properly structured Tekton Task YAML.
-
-### Debug a Failed Pipeline
-
-```
-/osp:debug
-```
-
-Systematic analysis of PipelineRun/TaskRun failures with remediation suggestions.
 
 ## Project Structure
 
 ```
 .
 ├── bin/
-│   └── install.js              # npx installer script
-├── commands/
-│   └── osp/                    # OpenShift Pipelines namespace
-│       ├── help.md             # /osp:help
-│       ├── configure.md        # /osp:configure
-│       ├── pipeline.md         # /osp:pipeline
-│       ├── task.md             # /osp:task
-│       ├── debug.md            # /osp:debug
-│       ├── map-jira-to-upstream.md  # /osp:map-jira-to-upstream
-│       └── release-status.md   # /osp:release-status
+│   ├── install.js              # npx installer
+│   ├── sprint-status.js        # Standalone sprint dashboard (1,200 lines)
+│   ├── sprint-history.js       # Standalone history queries
+│   └── konflux-auth.js         # Konflux SSO cookie extraction
+├── commands/osp/               # Claude Code skills (22 files)
+│   ├── sprint-status.md        # Sprint health dashboard skill
+│   ├── sprint-history.md       # Historical analytics skill
+│   ├── configure.md            # Auth setup (Jira, Jira Cloud, Konflux, Meilisearch)
+│   ├── help.md                 # Command reference
+│   └── ...                     # Pipeline, task, debug, release skills
+├── dashboard/                  # React + Vite + Tailwind app
+│   ├── src/
+│   │   ├── components/         # 17 React components
+│   │   ├── lib/types.ts        # TypeScript types
+│   │   └── App.tsx             # Tab-based layout with PO/Assignee views
+│   ├── package.json
+│   └── vite.config.ts          # Builds to single HTML file
+├── docs/
+│   ├── definition-of-done.md   # Story/Feature/Epic DoD checklists
+│   ├── templates/
+│   │   ├── built/index.html    # React build output (single file)
+│   │   ├── sprint-dashboard.html   # Legacy HTML dashboard
+│   │   └── sprint-analytics.html   # Chart.js analytics dashboard
+│   ├── superpowers/specs/      # Design specifications
+│   └── references/             # Release process documentation
+├── tests/
+│   └── install.test.js         # Vitest tests (22 passing)
 ├── package.json
-├── .gitignore
-└── README.md
+└── vitest.config.js
 ```
 
-## Adding New Skills
+## Tech Stack
 
-Create a new `.md` file in `commands/osp/` following this template:
+| Component | Technology |
+|-----------|-----------|
+| Skills | Markdown with YAML frontmatter (Claude Code skill format) |
+| Dashboard | React 19 + TypeScript + Tailwind CSS + Recharts |
+| Build | Vite 5 + vite-plugin-singlefile (outputs single HTML) |
+| Data | Jira Cloud REST API (Agile + Platform v3) |
+| Search | Meilisearch (Docker, auto-managed) |
+| Scripts | Node.js (built-in modules only, no npm dependencies) |
+| Tests | Vitest |
 
-```markdown
----
-name: skill-name
-description: Brief description of the skill
-allowed-tools:
-  - Read
-  - Write
-  - Bash
-  - AskUserQuestion
-  - WebFetch
-  - WebSearch
----
+## Updating
 
-# Skill Title
-
-<objective>
-What this skill accomplishes
-</objective>
-
-<execution_context>
-Background information and context for the skill
-</execution_context>
-
-<process>
-<step name="step_name">
-Step instructions...
-</step>
-</process>
-
-<output>
-Expected output description
-</output>
-
-<success_criteria>
-- [ ] Criteria 1
-- [ ] Criteria 2
-</success_criteria>
+```bash
+# Clone and install (recommended)
+git clone https://github.com/openshift-pipelines/skills.git /tmp/osp-skills
+cd /tmp/osp-skills && node bin/install.js -g
+cd dashboard && npm install && npm run build
+cd - && rm -rf /tmp/osp-skills
 ```
 
-### Available Tools for Skills
-
-| Tool | Description |
-|------|-------------|
-| `Read` | Read files from the filesystem |
-| `Write` | Create or overwrite files |
-| `Edit` | Make targeted edits to files |
-| `Bash` | Execute shell commands |
-| `Glob` | Find files by pattern |
-| `Grep` | Search file contents |
-| `WebFetch` | Fetch and analyze web pages |
-| `WebSearch` | Search the web |
-| `AskUserQuestion` | Prompt user for input |
-| `Task` | Spawn sub-agents for complex tasks |
-
-## Troubleshooting
-
-### Commands not appearing after installation
-
-1. Restart Claude Code to reload slash commands
-2. Verify files exist:
-   ```bash
-   ls ~/.claude/commands/osp/  # For global install
-   ls .claude/commands/osp/    # For local install
-   ```
-
-### Jira authentication failing
-
-1. Verify your token is valid:
-   ```bash
-   curl -s -H "Authorization: Bearer ${JIRA_TOKEN}" \
-     "https://issues.redhat.com/rest/api/2/myself" | jq .displayName
-   ```
-2. Ensure the token has "Read" scope
-3. Check if the token has expired
-
-### Permission issues
-
-If using Claude Code's permission system, ensure these are allowed in `.claude/settings.json`:
-- `curl` for API calls
-- `jq` for JSON parsing
-- `gh` for GitHub CLI (optional)
+Restart Claude Code after updating to reload slash commands.
 
 ## Contributing
-
-Contributions are welcome! Please:
 
 1. Fork the repository
 2. Create a feature branch
 3. Add or modify skills in `commands/osp/`
-4. Test your changes locally:
-   ```bash
-   node bin/install.js -l
-   ```
-5. Submit a pull request
+4. For dashboard changes: `cd dashboard && npm run dev` for hot reload
+5. Run tests: `npm test`
+6. Submit a pull request
 
 ## Resources
 
@@ -348,8 +268,8 @@ Contributions are welcome! Please:
 - [OpenShift Pipelines Documentation](https://docs.openshift.com/pipelines/)
 - [Tekton Hub](https://hub.tekton.dev/)
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
-- [Red Hat Jira](https://issues.redhat.com)
-- [tektoncd GitHub Organization](https://github.com/tektoncd)
+- [Red Hat Jira Cloud](https://redhat.atlassian.net)
+- [Meilisearch Documentation](https://www.meilisearch.com/docs)
 
 ## License
 

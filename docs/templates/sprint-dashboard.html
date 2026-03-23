@@ -1542,6 +1542,37 @@
           content.appendChild(alert3);
         }
 
+        // Issues table
+        if (component.issues && component.issues.length > 0) {
+          var table = $('table', {});
+          var thead = $('thead', {});
+          var headerRow = $('tr', {});
+          headerRow.appendChild($('th', {}, 'Key'));
+          headerRow.appendChild($('th', {}, 'Summary'));
+          headerRow.appendChild($('th', {}, 'Status'));
+          headerRow.appendChild($('th', {}, 'SP'));
+          headerRow.appendChild($('th', {}, 'Priority'));
+          thead.appendChild(headerRow);
+          table.appendChild(thead);
+
+          var tbody = $('tbody', {});
+          for (var ii = 0; ii < component.issues.length; ii++) {
+            var issue = component.issues[ii];
+            var filterText = [issue.key, issue.summary, issue.status, name].join(' ');
+            var row = $('tr', { 'data-filter': filterText });
+            row.appendChild($('td', {}, link(issue.key)));
+            var summaryText = (issue.summary || '').substring(0, 50) + ((issue.summary || '').length > 50 ? '...' : '');
+            row.appendChild($('td', {}, summaryText));
+            row.appendChild($('td', {}, issue.status || ''));
+            row.appendChild($('td', {}, String(issue.sp || 0)));
+            row.appendChild($('td', {}, issue.priority || ''));
+            tbody.appendChild(row);
+          }
+          table.appendChild(tbody);
+
+          content.appendChild(table);
+        }
+
         section.appendChild(header);
         section.appendChild(content);
         wrapper.appendChild(section);

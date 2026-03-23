@@ -615,7 +615,8 @@ COMPONENTS=$(echo "$SPRINT_ISSUES" | jq '
       byStatus: (group_by(.issue.fields.status.name) | map({(.[0].issue.fields.status.name): {count: length, sp: ([.[].issue.fields.customfield_10028 // 0] | add)}}) | add),
       blocked: ([.[] | select(.issue.fields.customfield_10517 == true or (.issue.fields.customfield_10021 // [] | length > 0))] | length),
       carryForward: [],
-      highPriorityBugs: ([.[] | select(.issue.fields.issuetype.name == "Bug" and (.issue.fields.priority.name | test("Critical|Blocker|Major")))] | length)
+      highPriorityBugs: ([.[] | select(.issue.fields.issuetype.name == "Bug" and (.issue.fields.priority.name | test("Critical|Blocker|Major")))] | length),
+      issues: [.[].issue | {key: .key, summary: .fields.summary, status: .fields.status.name, sp: (.fields.customfield_10028 // 0), priority: .fields.priority.name}]
     }
   }) | add
 ')

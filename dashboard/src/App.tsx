@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
-import type { DashboardData } from './lib/types'
+import type { DashboardData, AppData, MultiTeamData, AssigneeData, ComponentData, StatusBreakdown } from './lib/types'
+import { isMultiTeam } from './lib/types'
 import { HealthScore } from './components/HealthScore'
 import { Alerts } from './components/Alerts'
 import { BlockedIssues } from './components/BlockedIssues'
@@ -26,7 +27,7 @@ import { formatDate } from './lib/utils'
 
 declare global {
   interface Window {
-    __DASHBOARD_DATA__: DashboardData | Record<string, never>
+    __DASHBOARD_DATA__: AppData | Record<string, never>
   }
 }
 
@@ -42,6 +43,163 @@ const TABS = [
 ] as const
 
 type TabId = typeof TABS[number]['id']
+
+function mergeStatusBreakdowns(breakdowns: StatusBreakdown[]): StatusBreakdown {
+  const merged: StatusBreakdown = {}
+  breakdowns.forEach(breakdown => {
+    Object.entries(breakdown).forEach(([status, data]) => {
+      if (!merged[status]) {
+        merged[status] = { count: 0, sp: 0 }
+      }
+      merged[status].count += data.count
+      merged[status].sp += data.sp
+    })
+  })
+  return merged
+}
+
+function mergeDod(dods: DashboardData['dod'][]): DashboardData['dod'] {
+  const allIssues = dods.flatMap(d => d.issues)
+  const total = allIssues.length || 1
+  const complete = allIssues.filter(i => i.score === 'complete').length
+  const atRisk = allIssues.filter(i => i.score === 'atRisk').length
+  const incomplete = allIssues.filter(i => i.score === 'incomplete').length
+  const na = allIssues.filter(i => i.score === 'na').length
+
+  return {
+    complete: { count: complete, percent: Math.round((complete / total) * 100) },
+    atRisk: { count: atRisk, percent: Math.round((atRisk / total) * 100) },
+    incomplete: { count: incomplete, percent: Math.round((incomplete / total) * 100) },
+    na: { count: na, percent: Math.round((na / total) * 100) },
+    issues: allIssues,
+  }
+}
+
+function mergeTeamData(teams: Record<string, DashboardData>, meta: { generatedAt: string; jiraBaseUrl: string }): DashboardData {
+  const allTeamData = Object.values(teams)
+  if (allTeamData.length === 0) return null!
+  if (allTeamData.length === 1) return allTeamData[0]
+
+  // Merge summaries
+  const mergedSummary = {
+    totalIssues: allTeamData.reduce((s, t) => s + t.summary.totalIssues, 0),
+    totalSPs: allTeamData.reduce((s, t) => s + t.summary.totalSPs, 0),
+    byStatus: mergeStatusBreakdowns(allTeamData.map(t => t.summary.byStatus)),
+    blocked: {
+      count: allTeamData.reduce((s, t) => s + t.summary.blocked.count, 0),
+      sp: allTeamData.reduce((s, t) => s + t.summary.blocked.sp, 0),
+    },
+    noStoryPoints: allTeamData.reduce((s, t) => s + t.summary.noStoryPoints, 0),
+  }
+
+  // Merge arrays (blocked, codeReview, carryForward, highPriorityBugs)
+  const mergedBlocked = allTeamData.flatMap(t => t.blocked)
+  const mergedCR = allTeamData.flatMap(t => t.codeReview)
+  const mergedCF = allTeamData.flatMap(t => t.carryForward).sort((a, b) => b.sprintCount - a.sprintCount)
+  const mergedBugs = allTeamData.flatMap(t => t.highPriorityBugs)
+
+  // Merge assignees (combine across teams)
+  const mergedAssignees: Record<string, AssigneeData> = {}
+  allTeamData.forEach(t => {
+    Object.entries(t.assignees).forEach(([name, data]) => {
+      if (mergedAssignees[name]) {
+        mergedAssignees[name].totalIssues += data.totalIssues
+        mergedAssignees[name].totalSP += data.totalSP
+        mergedAssignees[name].blocked += data.blocked
+        mergedAssignees[name].carryForwardCount += data.carryForwardCount
+        mergedAssignees[name].issues.push(...data.issues)
+        // Merge byStatus
+        Object.entries(data.byStatus).forEach(([status, statusData]) => {
+          if (!mergedAssignees[name].byStatus[status]) {
+            mergedAssignees[name].byStatus[status] = { count: 0, sp: 0 }
+          }
+          mergedAssignees[name].byStatus[status].count += statusData.count
+          mergedAssignees[name].byStatus[status].sp += statusData.sp
+        })
+      } else {
+        mergedAssignees[name] = {
+          ...data,
+          issues: [...data.issues],
+          byStatus: { ...data.byStatus }
+        }
+      }
+    })
+  })
+
+  // Merge components (THIS IS THE KEY — cross-team component view)
+  const mergedComponents: Record<string, ComponentData> = {}
+  allTeamData.forEach(t => {
+    Object.entries(t.components).forEach(([name, data]) => {
+      if (mergedComponents[name]) {
+        mergedComponents[name].totalIssues += data.totalIssues
+        mergedComponents[name].totalSP += data.totalSP
+        mergedComponents[name].blocked += data.blocked
+        mergedComponents[name].highPriorityBugs += data.highPriorityBugs
+        mergedComponents[name].issues.push(...data.issues)
+        // Merge byStatus
+        Object.entries(data.byStatus).forEach(([status, statusData]) => {
+          if (!mergedComponents[name].byStatus[status]) {
+            mergedComponents[name].byStatus[status] = { count: 0, sp: 0 }
+          }
+          mergedComponents[name].byStatus[status].count += statusData.count
+          mergedComponents[name].byStatus[status].sp += statusData.sp
+        })
+      } else {
+        mergedComponents[name] = {
+          ...data,
+          issues: [...data.issues],
+          byStatus: { ...data.byStatus }
+        }
+      }
+    })
+  })
+
+  // Use first team's velocity/roadmap/dod as base (these don't merge well across teams)
+  const firstTeam = allTeamData[0]
+
+  // Merge velocity
+  const mergedVelocity = {
+    current: {
+      committed: allTeamData.reduce((s, t) => s + t.velocity.current.committed, 0),
+      completed: allTeamData.reduce((s, t) => s + t.velocity.current.completed, 0),
+    },
+    history: firstTeam.velocity.history, // Can't easily merge histories
+    avg3: null,
+    avg5: null,
+    trend: 'stable',
+    commitmentAccuracy: [],
+  }
+
+  const totalSPs = mergedSummary.totalSPs || 1
+  const completedSPs = mergedVelocity.current.completed
+
+  return {
+    meta: {
+      team: 'All Teams',
+      sprint: { id: 0, name: 'All Active Sprints', startDate: firstTeam.meta.sprint.startDate, endDate: firstTeam.meta.sprint.endDate },
+      generatedAt: meta.generatedAt,
+      jiraBaseUrl: meta.jiraBaseUrl,
+    },
+    summary: mergedSummary,
+    velocity: mergedVelocity,
+    expectations: firstTeam.expectations, // Use first team's expectations
+    roadmap: firstTeam.roadmap,
+    dod: mergeDod(allTeamData.map(t => t.dod)),
+    codeReview: mergedCR,
+    blocked: mergedBlocked,
+    highPriorityBugs: mergedBugs,
+    carryForward: mergedCF,
+    futureSprint: firstTeam.futureSprint,
+    assignees: mergedAssignees,
+    components: mergedComponents,
+    daysRemaining: firstTeam.daysRemaining,
+    sprintDuration: firstTeam.sprintDuration,
+    sprintDay: firstTeam.sprintDay,
+    completionPercent: Math.round((completedSPs / totalSPs) * 100),
+    healthScore: (Math.round((completedSPs / totalSPs) * 100) >= 70 ? 'green' : Math.round((completedSPs / totalSPs) * 100) >= 50 ? 'yellow' : 'red') as 'green' | 'yellow' | 'red',
+    trends: { sprintSnapshots: [], issueSnapshots: [] },
+  }
+}
 
 function filterByAssignee(data: DashboardData, assignee: string): DashboardData {
   if (!assignee) return data
@@ -146,16 +304,16 @@ function getTeamFromPath(): string | null {
 }
 
 function App() {
-  const [dynamicData, setDynamicData] = useState<DashboardData | null>(null)
+  const [dynamicData, setDynamicData] = useState<AppData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const embeddedData = window.__DASHBOARD_DATA__ as DashboardData
+  const embeddedData = window.__DASHBOARD_DATA__ as AppData
   const teamFromPath = getTeamFromPath()
 
   // Load data from JSON file if on GitHub Pages (no embedded data, team in URL path)
   useEffect(() => {
-    const hasEmbedded = embeddedData && embeddedData.meta && embeddedData.summary
+    const hasEmbedded = embeddedData && (isMultiTeam(embeddedData) || (embeddedData as DashboardData).meta)
     if (hasEmbedded || !teamFromPath) return
 
     setLoading(true)
@@ -172,22 +330,69 @@ function App() {
       .catch(err => { setError(err.message); setLoading(false) })
   }, [teamFromPath])
 
-  const data: DashboardData | null = dynamicData || (embeddedData?.meta ? embeddedData : null)
+  const rawData: AppData | null = dynamicData || (embeddedData && (isMultiTeam(embeddedData) || (embeddedData as DashboardData).meta) ? embeddedData : null)
 
   const [activeTab, setActiveTab] = useState<TabId>('overview')
   const [filter, setFilter] = useState('')
   const [viewMode, setViewMode] = useState<'po' | 'assignee'>('po')
   const [selectedAssignee, setSelectedAssignee] = useState<string>('')
+  const [selectedTeam, setSelectedTeam] = useState<string>('all')
+  const [selectedComponent, setSelectedComponent] = useState<string>('all')
 
-  const hasData = data && data.meta && data.summary
+  // Resolve multi-team data to single DashboardData based on team filter
+  const resolvedData = useMemo((): DashboardData | null => {
+    if (!rawData) return null
 
-  const filteredData = useMemo((): DashboardData | null => {
-    if (!hasData || !data) return data
-    if (viewMode === 'assignee' && selectedAssignee) {
-      return filterByAssignee(data, selectedAssignee)
+    if (isMultiTeam(rawData)) {
+      if (selectedTeam !== 'all') {
+        // Single team selected — use that team's data
+        return rawData.teams[selectedTeam] || null
+      }
+
+      // All teams — merge data from all teams
+      return mergeTeamData(rawData.teams, rawData.meta)
     }
-    return data
-  }, [data, viewMode, selectedAssignee, hasData])
+
+    return rawData as DashboardData
+  }, [rawData, selectedTeam])
+
+  const hasData = resolvedData && resolvedData.meta && resolvedData.summary
+
+  // Apply component filter
+  const componentFilteredData = useMemo((): DashboardData | null => {
+    if (!resolvedData || selectedComponent === 'all') return resolvedData
+
+    // Filter all issue arrays to only include issues from the selected component
+    const compData = resolvedData.components[selectedComponent]
+    if (!compData) return resolvedData
+
+    const compIssueKeys = new Set(compData.issues.map(i => i.key))
+
+    return {
+      ...resolvedData,
+      blocked: resolvedData.blocked.filter(i => compIssueKeys.has(i.key)),
+      codeReview: resolvedData.codeReview.filter(i => compIssueKeys.has(i.key)),
+      highPriorityBugs: resolvedData.highPriorityBugs.filter(i => compIssueKeys.has(i.key)),
+      carryForward: resolvedData.carryForward.filter(i => compIssueKeys.has(i.key)),
+      // Recompute summary for filtered issues
+      summary: {
+        ...resolvedData.summary,
+        totalIssues: compData.totalIssues,
+        totalSPs: compData.totalSP,
+        blocked: { count: compData.blocked, sp: 0 },
+      },
+      components: { [selectedComponent]: compData },
+    }
+  }, [resolvedData, selectedComponent])
+
+  // Apply assignee filter
+  const filteredData = useMemo((): DashboardData | null => {
+    if (!hasData || !componentFilteredData) return componentFilteredData
+    if (viewMode === 'assignee' && selectedAssignee) {
+      return filterByAssignee(componentFilteredData, selectedAssignee)
+    }
+    return componentFilteredData
+  }, [componentFilteredData, viewMode, selectedAssignee, hasData])
 
   if (loading) {
     return (
@@ -241,8 +446,36 @@ function App() {
       <div className="flex-shrink-0 border-b border-slate-800 bg-slate-950 px-6 py-3">
         <div className="flex items-center justify-between max-w-screen-2xl mx-auto">
           <div className="flex items-center gap-4">
-            <h1 className="text-lg font-semibold text-white">{data.meta.sprint.name}</h1>
+            <h1 className="text-lg font-semibold text-white">{resolvedData.meta.sprint.name}</h1>
             <HealthScore score={fd.healthScore} completionPercent={fd.completionPercent} />
+
+            {/* Team Filter — only show when multiTeam */}
+            {isMultiTeam(rawData) && (
+              <select
+                value={selectedTeam}
+                onChange={e => { setSelectedTeam(e.target.value); setSelectedComponent('all') }}
+                className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1 text-sm text-slate-200"
+              >
+                <option value="all">All Teams</option>
+                {Object.keys((rawData as MultiTeamData).teams).sort().map(name => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
+            )}
+
+            {/* Component Filter — always show when data has components */}
+            {resolvedData && Object.keys(resolvedData.components).length > 0 && (
+              <select
+                value={selectedComponent}
+                onChange={e => setSelectedComponent(e.target.value)}
+                className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1 text-sm text-slate-200"
+              >
+                <option value="all">All Components</option>
+                {(isMultiTeam(rawData) ? (rawData as MultiTeamData).allComponents : Object.keys(resolvedData.components)).sort().map(name => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
+            )}
 
             {/* View Toggle */}
             <div className="flex bg-slate-800 rounded-lg p-0.5">
@@ -268,14 +501,14 @@ function App() {
                 className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1 text-sm text-slate-200"
               >
                 <option value="">Select assignee...</option>
-                {Object.keys(data.assignees).sort().map(name => (
+                {Object.keys(resolvedData.assignees).sort().map(name => (
                   <option key={name} value={name}>{name}</option>
                 ))}
               </select>
             )}
           </div>
           <p className="text-xs text-slate-500">
-            Ends {formatDate(data.meta.sprint.endDate)} &middot; Generated {formatDate(data.meta.generatedAt)}
+            Ends {formatDate(resolvedData.meta.sprint.endDate)} &middot; Generated {formatDate(resolvedData.meta.generatedAt)}
           </p>
         </div>
       </div>
@@ -391,7 +624,7 @@ function App() {
                     <div className="space-y-2">
                       {fd.blocked.slice(0, 3).map(item => (
                         <div key={item.key} className="flex items-center gap-3 text-sm">
-                          <a href={`${data.meta.jiraBaseUrl}/browse/${item.key}`} target="_blank" className="text-blue-400 hover:underline font-mono text-xs">{item.key}</a>
+                          <a href={`${resolvedData.meta.jiraBaseUrl}/browse/${item.key}`} target="_blank" className="text-blue-400 hover:underline font-mono text-xs">{item.key}</a>
                           <span className="text-slate-300 truncate flex-1">{item.summary}</span>
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-500/20 text-red-400">{item.priority}</span>
                         </div>
@@ -411,7 +644,7 @@ function App() {
                   <div className="space-y-2">
                     {fd.carryForward.filter(i => i.severity !== 'normal').slice(0, 3).map(item => (
                       <div key={item.key} className="flex items-center gap-3 text-sm">
-                        <a href={`${data.meta.jiraBaseUrl}/browse/${item.key}`} target="_blank" className="text-blue-400 hover:underline font-mono text-xs">{item.key}</a>
+                        <a href={`${resolvedData.meta.jiraBaseUrl}/browse/${item.key}`} target="_blank" className="text-blue-400 hover:underline font-mono text-xs">{item.key}</a>
                         <span className="text-slate-300 truncate flex-1">{item.summary}</span>
                         <span className={`text-xs font-bold ${item.severity === 'critical' ? 'text-red-400' : 'text-amber-400'}`}>
                           {item.sprintCount} sprints
@@ -432,11 +665,11 @@ function App() {
             <div className="space-y-4">
               <IssuesCharts data={fd} />
               <FilterBar value={filter} onChange={setFilter} />
-              <BlockedIssues items={fd.blocked} jiraBaseUrl={data.meta.jiraBaseUrl} filter={filterLower} />
-              <CodeReviewRedo items={fd.codeReview} jiraBaseUrl={data.meta.jiraBaseUrl} filter={filterLower} />
-              <CarryForward items={fd.carryForward} jiraBaseUrl={data.meta.jiraBaseUrl} filter={filterLower} />
-              <HighPriorityBugs items={fd.highPriorityBugs} jiraBaseUrl={data.meta.jiraBaseUrl} filter={filterLower} />
-              <FutureSprint futureSprint={fd.futureSprint} jiraBaseUrl={data.meta.jiraBaseUrl} filter={filterLower} />
+              <BlockedIssues items={fd.blocked} jiraBaseUrl={resolvedData.meta.jiraBaseUrl} filter={filterLower} />
+              <CodeReviewRedo items={fd.codeReview} jiraBaseUrl={resolvedData.meta.jiraBaseUrl} filter={filterLower} />
+              <CarryForward items={fd.carryForward} jiraBaseUrl={resolvedData.meta.jiraBaseUrl} filter={filterLower} />
+              <HighPriorityBugs items={fd.highPriorityBugs} jiraBaseUrl={resolvedData.meta.jiraBaseUrl} filter={filterLower} />
+              <FutureSprint futureSprint={fd.futureSprint} jiraBaseUrl={resolvedData.meta.jiraBaseUrl} filter={filterLower} />
             </div>
           )}
 
@@ -454,7 +687,7 @@ function App() {
             <div className="space-y-4">
               <DoDCharts dod={fd.dod} />
               <FilterBar value={filter} onChange={setFilter} />
-              <DoDCompliance dod={fd.dod} jiraBaseUrl={data.meta.jiraBaseUrl} filter={filterLower} />
+              <DoDCompliance dod={fd.dod} jiraBaseUrl={resolvedData.meta.jiraBaseUrl} filter={filterLower} />
             </div>
           )}
 
@@ -462,7 +695,7 @@ function App() {
           {activeTab === 'roadmap' && (
             <div className="space-y-4">
               <RoadmapCharts roadmap={fd.roadmap} />
-              <RoadmapAlignment roadmap={fd.roadmap} jiraBaseUrl={data.meta.jiraBaseUrl} />
+              <RoadmapAlignment roadmap={fd.roadmap} jiraBaseUrl={resolvedData.meta.jiraBaseUrl} />
             </div>
           )}
 
@@ -471,7 +704,7 @@ function App() {
             <div className="space-y-4">
               <PeopleCharts assignees={fd.assignees} />
               <FilterBar value={filter} onChange={setFilter} />
-              <AssigneeBreakdown assignees={fd.assignees} jiraBaseUrl={data.meta.jiraBaseUrl} filter={filterLower} />
+              <AssigneeBreakdown assignees={fd.assignees} jiraBaseUrl={resolvedData.meta.jiraBaseUrl} filter={filterLower} />
             </div>
           )}
 
@@ -480,13 +713,17 @@ function App() {
             <div className="space-y-4">
               <ComponentCharts components={fd.components} />
               <FilterBar value={filter} onChange={setFilter} />
-              <ComponentBreakdown components={fd.components} jiraBaseUrl={data.meta.jiraBaseUrl} filter={filterLower} />
+              <ComponentBreakdown components={fd.components} jiraBaseUrl={resolvedData.meta.jiraBaseUrl} filter={filterLower} />
             </div>
           )}
 
           {/* TRENDS TAB */}
           {activeTab === 'trends' && (
-            <TrendsView sprintSnapshots={data.trends?.sprintSnapshots || []} />
+            <TrendsView sprintSnapshots={
+              isMultiTeam(rawData) && selectedTeam === 'all'
+                ? (rawData as MultiTeamData).trends.sprintSnapshots
+                : resolvedData.trends?.sprintSnapshots || []
+            } />
           )}
 
         </div>

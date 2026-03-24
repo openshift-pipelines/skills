@@ -205,3 +205,23 @@ export interface AnalyticsData {
   sprintSnapshots: SprintSnapshot[]
   issueSnapshots: IssueSnapshot[]
 }
+
+export interface MultiTeamData {
+  multiTeam: true
+  teams: Record<string, DashboardData>
+  allComponents: string[]
+  trends: {
+    sprintSnapshots: SprintSnapshot[]
+    issueSnapshots: IssueSnapshot[]
+  }
+  meta: {
+    generatedAt: string
+    jiraBaseUrl: string
+  }
+}
+
+export type AppData = DashboardData | MultiTeamData
+
+export function isMultiTeam(data: AppData | null): data is MultiTeamData {
+  return !!data && 'multiTeam' in data && data.multiTeam === true
+}

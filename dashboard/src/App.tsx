@@ -362,26 +362,97 @@ function App() {
   const componentFilteredData = useMemo((): DashboardData | null => {
     if (!resolvedData || selectedComponent === 'all') return resolvedData
 
-    // Filter all issue arrays to only include issues from the selected component
     const compData = resolvedData.components[selectedComponent]
     if (!compData) return resolvedData
 
     const compIssueKeys = new Set(compData.issues.map(i => i.key))
 
+    // Filter all issue arrays
+    const filteredBlocked = resolvedData.blocked.filter(i => compIssueKeys.has(i.key))
+    const filteredCR = resolvedData.codeReview.filter(i => compIssueKeys.has(i.key))
+    const filteredBugs = resolvedData.highPriorityBugs.filter(i => compIssueKeys.has(i.key))
+    const filteredCF = resolvedData.carryForward.filter(i => compIssueKeys.has(i.key))
+    const filteredFuture = {
+      ...resolvedData.futureSprint,
+      issues: resolvedData.futureSprint.issues.filter(i => compIssueKeys.has(i.key)),
+    }
+
+    // Recompute byStatus from component issues
+    const byStatus: Record<string, { count: number; sp: number }> = {}
+    compData.issues.forEach(issue => {
+      if (!byStatus[issue.status]) byStatus[issue.status] = { count: 0, sp: 0 }
+      byStatus[issue.status].count++
+      byStatus[issue.status].sp += issue.sp || 0
+    })
+
+    const totalSPs = compData.totalSP
+    const blockedSP = filteredBlocked.reduce((s, i) => s + (compData.issues.find(ci => ci.key === i.key)?.sp || 0), 0)
+    const noSP = compData.issues.filter(i => !i.sp || i.sp === 0).length
+    const completedSP = (byStatus['Closed']?.sp || 0) + (byStatus['Verified']?.sp || 0) + (byStatus['Release Pending']?.sp || 0)
+    const completionPct = totalSPs > 0 ? Math.round((completedSP / totalSPs) * 100) : 0
+    const blockedPct = compData.totalIssues > 0 ? Math.round((filteredBlocked.length / compData.totalIssues) * 100) : 0
+    const health: 'green' | 'yellow' | 'red' = completionPct >= 70 && blockedPct < 10 ? 'green' : completionPct >= 50 || blockedPct < 20 ? 'yellow' : 'red'
+
+    // Filter DoD to component issues
+    const filteredDoDIssues = resolvedData.dod.issues.filter(i => compIssueKeys.has(i.key))
+    const dodTotal = filteredDoDIssues.length || 1
+    const dodComplete = filteredDoDIssues.filter(i => i.score === 'complete').length
+    const dodAtRisk = filteredDoDIssues.filter(i => i.score === 'atRisk').length
+    const dodIncomplete = filteredDoDIssues.filter(i => i.score === 'incomplete').length
+    const dodNa = filteredDoDIssues.filter(i => i.score === 'na').length
+
+    // Filter assignees to only those with issues in this component
+    const filteredAssignees: Record<string, typeof resolvedData.assignees[string]> = {}
+    Object.entries(resolvedData.assignees).forEach(([name, aData]) => {
+      const compIssues = aData.issues.filter(i => compIssueKeys.has(i.key))
+      if (compIssues.length > 0) {
+        const aByStatus: Record<string, { count: number; sp: number }> = {}
+        compIssues.forEach(i => {
+          if (!aByStatus[i.status]) aByStatus[i.status] = { count: 0, sp: 0 }
+          aByStatus[i.status].count++
+          aByStatus[i.status].sp += i.sp || 0
+        })
+        filteredAssignees[name] = {
+          ...aData,
+          totalIssues: compIssues.length,
+          totalSP: compIssues.reduce((s, i) => s + (i.sp || 0), 0),
+          byStatus: aByStatus,
+          blocked: filteredBlocked.filter(b => b.assignee === name).length,
+          carryForwardCount: filteredCF.filter(c => compIssues.some(ci => ci.key === c.key)).length,
+          issues: compIssues,
+        }
+      }
+    })
+
     return {
       ...resolvedData,
-      blocked: resolvedData.blocked.filter(i => compIssueKeys.has(i.key)),
-      codeReview: resolvedData.codeReview.filter(i => compIssueKeys.has(i.key)),
-      highPriorityBugs: resolvedData.highPriorityBugs.filter(i => compIssueKeys.has(i.key)),
-      carryForward: resolvedData.carryForward.filter(i => compIssueKeys.has(i.key)),
-      // Recompute summary for filtered issues
       summary: {
-        ...resolvedData.summary,
         totalIssues: compData.totalIssues,
-        totalSPs: compData.totalSP,
-        blocked: { count: compData.blocked, sp: 0 },
+        totalSPs: totalSPs,
+        byStatus,
+        blocked: { count: filteredBlocked.length, sp: blockedSP },
+        noStoryPoints: noSP,
       },
+      velocity: {
+        ...resolvedData.velocity,
+        current: { committed: totalSPs, completed: completedSP },
+      },
+      blocked: filteredBlocked,
+      codeReview: filteredCR,
+      highPriorityBugs: filteredBugs,
+      carryForward: filteredCF,
+      futureSprint: filteredFuture,
+      dod: {
+        complete: { count: dodComplete, percent: Math.round((dodComplete / dodTotal) * 100) },
+        atRisk: { count: dodAtRisk, percent: Math.round((dodAtRisk / dodTotal) * 100) },
+        incomplete: { count: dodIncomplete, percent: Math.round((dodIncomplete / dodTotal) * 100) },
+        na: { count: dodNa, percent: Math.round((dodNa / dodTotal) * 100) },
+        issues: filteredDoDIssues,
+      },
+      assignees: filteredAssignees,
       components: { [selectedComponent]: compData },
+      completionPercent: completionPct,
+      healthScore: health,
     }
   }, [resolvedData, selectedComponent])
 

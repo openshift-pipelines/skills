@@ -790,11 +790,14 @@ function App() {
 
           {/* TRENDS TAB */}
           {activeTab === 'trends' && (
-            <TrendsView sprintSnapshots={
-              isMultiTeam(rawData) && selectedTeam === 'all'
-                ? (rawData as MultiTeamData).trends.sprintSnapshots
-                : resolvedData.trends?.sprintSnapshots || []
-            } />
+            <TrendsView
+              sprintSnapshots={
+                isMultiTeam(rawData)
+                  ? (rawData as MultiTeamData).trends.sprintSnapshots
+                  : fd.trends?.sprintSnapshots || []
+              }
+              selectedTeam={selectedTeam}
+            />
           )}
 
         </div>

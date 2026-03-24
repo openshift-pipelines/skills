@@ -168,6 +168,7 @@ export interface DashboardData {
 
 // Analytics types
 export interface SprintSnapshot {
+  team?: string
   sprintName: string
   snapshotDate: string
   totalIssues: number
@@ -177,6 +178,7 @@ export interface SprintSnapshot {
   blockedCount: number
   codeReviewSPs: number
   carryForwardCount: number
+  carryForwardCriticalCount?: number
   dodCompletePercent: number
   dodAtRiskPercent?: number
   plannedPercent: number

@@ -1246,16 +1246,16 @@ function printSummary(data) {
 
 // Main
 async function main() {
-  const teamName = process.argv[2];
+  const fetchAll = process.argv.includes('--all');
+  const teamName = fetchAll ? null : process.argv[2];
 
-  if (!teamName) {
+  if (!fetchAll && !teamName) {
     console.log(`${colors.bright}Usage:${colors.reset} node bin/sprint-status.js <team-name>`);
+    console.log(`${colors.bright}       ${colors.reset} node bin/sprint-status.js --all [--publish]`);
     console.log(`${colors.bright}Example:${colors.reset} node bin/sprint-status.js pioneers`);
+    console.log(`${colors.bright}        ${colors.reset} node bin/sprint-status.js --all`);
     process.exit(1);
   }
-
-  console.log(`\n${colors.cyan}${colors.bright}Sprint Status Dashboard${colors.reset}`);
-  console.log(`${colors.dim}Fetching data for team: ${teamName}${colors.reset}\n`);
 
   // 1. Load config
   const config = loadConfig();
@@ -1263,115 +1263,295 @@ async function main() {
   // 2. Verify auth
   await verifyAuth(config.auth);
 
-  // 3. Discover team sprints
-  console.log(`${colors.cyan}Discovering team sprints...${colors.reset}`);
-  const activeSprints = await discoverTeamSprints(config.auth);
+  if (fetchAll) {
+    // Multi-team mode
+    console.log(`\n${colors.cyan}${colors.bright}Sprint Status Dashboard — All Teams${colors.reset}\n`);
 
-  const teamSprint = activeSprints.find(s =>
-    s.name.toLowerCase().includes(teamName.toLowerCase())
-  );
+    // 3. Discover all active team sprints
+    console.log(`${colors.cyan}Discovering team sprints...${colors.reset}`);
+    const activeSprints = await discoverTeamSprints(config.auth);
 
-  if (!teamSprint) {
-    console.error(`${colors.red}Error: No active sprint found for team "${teamName}"${colors.reset}`);
-    console.log(`\nAvailable teams with active sprints:`);
-    const teams = [...new Set(activeSprints.map(s => {
+    // Extract unique team names
+    const teamNames = [...new Set(activeSprints.map(s => {
       const match = s.name.match(/Pipelines Sprint (\w+)/);
       return match ? match[1] : null;
-    }))].filter(t => t);
-    teams.forEach(t => console.log(`  - ${t}`));
-    process.exit(1);
-  }
+    }).filter(Boolean))];
 
-  const sprintInfo = {
-    id: teamSprint.id,
-    name: teamSprint.name,
-    startDate: teamSprint.startDate,
-    endDate: teamSprint.endDate,
-    boardId: teamSprint.boardId
-  };
+    console.log(`${colors.green}Found teams: ${teamNames.join(', ')}${colors.reset}\n`);
 
-  console.log(`${colors.green}Selected sprint: ${sprintInfo.name} (ID: ${sprintInfo.id}, Board: ${sprintInfo.boardId})${colors.reset}`);
+    const teamsData = {};
+    const allComponents = new Set();
 
-  // 4. Fetch sprint issues
-  console.log(`${colors.cyan}Fetching sprint issues...${colors.reset}`);
-  const issues = await fetchAllSprintIssues(sprintInfo.id, config.auth);
+    // Process each team
+    for (const currentTeamName of teamNames) {
+      console.log(`${colors.cyan}${colors.bright}Processing ${currentTeamName}...${colors.reset}`);
 
-  // 5. Fetch historical sprints
-  console.log(`${colors.cyan}Fetching historical sprints...${colors.reset}`);
-  const extractedTeamName = teamSprint.name.match(/Pipelines Sprint (\w+)/)[1];
-  const historicalSprints = await fetchHistoricalSprints(sprintInfo.boardId, extractedTeamName, config.auth);
+      const teamSprint = activeSprints.find(s =>
+        s.name.toLowerCase().includes(currentTeamName.toLowerCase())
+      );
 
-  // 6. Fetch future sprint
-  console.log(`${colors.cyan}Fetching future sprint...${colors.reset}`);
-  const futureSprint = await fetchFutureSprint(sprintInfo.boardId, extractedTeamName, config.auth);
+      if (!teamSprint) {
+        console.log(`${colors.yellow}No active sprint found for ${currentTeamName}, skipping${colors.reset}\n`);
+        continue;
+      }
 
-  // 7. Fetch Epic progress
-  console.log(`${colors.cyan}Fetching Epic progress...${colors.reset}`);
-  const epicProgress = await fetchEpicProgress(issues, config.auth);
+      const sprintInfo = {
+        id: teamSprint.id,
+        name: teamSprint.name,
+        startDate: teamSprint.startDate,
+        endDate: teamSprint.endDate,
+        boardId: teamSprint.boardId
+      };
 
-  // 8. Compute metrics
-  console.log(`${colors.cyan}Computing metrics...${colors.reset}`);
-  const data = computeMetrics(issues, historicalSprints, futureSprint, epicProgress, extractedTeamName, sprintInfo);
+      console.log(`${colors.green}Sprint: ${sprintInfo.name}${colors.reset}`);
 
-  // 9. Index to Meilisearch (before rendering so we can fetch history)
-  console.log(`${colors.cyan}Indexing to Meilisearch...${colors.reset}`);
-  await indexToMeilisearch(data, config);
+      // Fetch sprint issues
+      console.log(`${colors.dim}Fetching sprint issues...${colors.reset}`);
+      const issues = await fetchAllSprintIssues(sprintInfo.id, config.auth);
 
-  // 10. Auto-backfill historical sprints on first run
-  await backfillIfNeeded(extractedTeamName, config.auth, config.meilisearch?.key);
+      // Fetch historical sprints
+      console.log(`${colors.dim}Fetching historical sprints...${colors.reset}`);
+      const historicalSprints = await fetchHistoricalSprints(sprintInfo.boardId, currentTeamName, config.auth);
 
-  // 11. Fetch historical snapshots from Meilisearch for trends tab
-  console.log(`${colors.cyan}Fetching historical trends...${colors.reset}`);
-  const historicalData = await fetchHistoricalSnapshots(extractedTeamName, config);
-  data.trends = historicalData;
-  console.log(`${colors.green}Historical snapshots: ${historicalData.sprintSnapshots.length} sprints, ${historicalData.issueSnapshots.length} issues${colors.reset}`);
+      // Fetch future sprint
+      console.log(`${colors.dim}Fetching future sprint...${colors.reset}`);
+      const futureSprint = await fetchFutureSprint(sprintInfo.boardId, currentTeamName, config.auth);
 
-  // 11. Render dashboard
-  console.log(`${colors.cyan}Rendering dashboard...${colors.reset}`);
-  const dashboardFile = renderDashboard(data, extractedTeamName);
+      // Fetch Epic progress
+      console.log(`${colors.dim}Fetching Epic progress...${colors.reset}`);
+      const epicProgress = await fetchEpicProgress(issues, config.auth);
 
-  // 12. Print summary
-  printSummary(data);
-  console.log(`Dashboard: ${dashboardFile}`);
-  console.log('=========================================\n');
+      // Compute metrics
+      console.log(`${colors.dim}Computing metrics...${colors.reset}`);
+      const data = computeMetrics(issues, historicalSprints, futureSprint, epicProgress, currentTeamName, sprintInfo);
 
-  // 13. Publish to GitHub Pages if --publish flag
-  const shouldPublish = process.argv.includes('--publish');
-  if (shouldPublish) {
-    console.log(`${colors.cyan}Publishing to GitHub Pages...${colors.reset}`);
-    const projectRoot = path.join(__dirname, '..');
-    const sprintDir = path.join(projectRoot, 'docs', 'sprint');
+      // Collect components
+      Object.keys(data.components || {}).forEach(c => allComponents.add(c));
 
-    if (!fs.existsSync(sprintDir)) {
-      fs.mkdirSync(sprintDir, { recursive: true });
+      // Index to Meilisearch
+      console.log(`${colors.dim}Indexing to Meilisearch...${colors.reset}`);
+      await indexToMeilisearch(data, config);
+
+      // Auto-backfill historical sprints on first run
+      await backfillIfNeeded(currentTeamName, config.auth, config.meilisearch?.key);
+
+      // Fetch historical snapshots
+      console.log(`${colors.dim}Fetching historical trends...${colors.reset}`);
+      const historicalData = await fetchHistoricalSnapshots(currentTeamName, config);
+      data.trends = historicalData;
+
+      teamsData[currentTeamName] = data;
+
+      console.log(`${colors.green}${currentTeamName} complete${colors.reset}\n`);
     }
 
-    // Save JSON data file
-    const jsonPath = path.join(sprintDir, `${extractedTeamName.toLowerCase()}.json`);
-    fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2));
-    console.log(`${colors.green}Data saved: docs/sprint/${extractedTeamName.toLowerCase()}.json${colors.reset}`);
-
-    // Build GitHub Pages version if dashboard exists
-    const dashboardDir = path.join(projectRoot, 'dashboard');
-    if (fs.existsSync(dashboardDir)) {
-      try {
-        console.log(`${colors.dim}Building GitHub Pages dashboard...${colors.reset}`);
-        execSync('npm run build:ghpages', { cwd: dashboardDir, stdio: 'pipe' });
-        console.log(`${colors.green}GitHub Pages build complete${colors.reset}`);
-      } catch (e) {
-        console.log(`${colors.yellow}GitHub Pages build skipped: ${e.message}${colors.reset}`);
+    // Fetch combined trends from all teams
+    console.log(`${colors.cyan}Fetching combined trends...${colors.reset}`);
+    const allTrends = { sprintSnapshots: [], issueSnapshots: [] };
+    for (const currentTeamName of teamNames) {
+      if (teamsData[currentTeamName]) {
+        const teamTrends = teamsData[currentTeamName].trends || {};
+        allTrends.sprintSnapshots.push(...(teamTrends.sprintSnapshots || []));
+        allTrends.issueSnapshots.push(...(teamTrends.issueSnapshots || []));
       }
     }
 
-    // Git commit and push
-    try {
-      execSync(`git add docs/sprint/`, { cwd: projectRoot, stdio: 'pipe' });
-      execSync(`git commit -m "data: update sprint data for ${extractedTeamName}"`, { cwd: projectRoot, stdio: 'pipe' });
-      execSync('git push origin main', { cwd: projectRoot, stdio: 'pipe' });
-      console.log(`${colors.green}Published! View at: https://openshift-pipelines.github.io/skills/sprint/${extractedTeamName.toLowerCase()}${colors.reset}`);
-    } catch (e) {
-      console.log(`${colors.yellow}Git push skipped: ${e.message}${colors.reset}`);
-      console.log(`${colors.dim}Commit manually: git add docs/sprint/ && git commit -m "update sprint data" && git push${colors.reset}`);
+    // Build combined data
+    const combinedData = {
+      multiTeam: true,
+      teams: teamsData,
+      allComponents: [...allComponents].sort(),
+      trends: allTrends,
+      meta: {
+        generatedAt: new Date().toISOString(),
+        jiraBaseUrl: 'https://redhat.atlassian.net',
+      }
+    };
+
+    // Render dashboard
+    console.log(`${colors.cyan}Rendering dashboard...${colors.reset}`);
+    const dashboardFile = renderDashboard(combinedData, 'all-teams');
+
+    // Print summary for each team
+    console.log('');
+    console.log('=========================================');
+    console.log('  Multi-Team Sprint Status Summary');
+    console.log('=========================================');
+    for (const [currentTeamName, data] of Object.entries(teamsData)) {
+      console.log(`\n${colors.cyan}${colors.bright}${currentTeamName}${colors.reset}`);
+      console.log(`  Sprint: ${data.meta.sprint.name}`);
+      console.log(`  Total Issues: ${data.summary.totalIssues}`);
+      console.log(`  Total SP: ${data.summary.totalSPs}`);
+      console.log(`  Completed: ${data.velocity.current.completed} SP (${data.completionPercent}%)`);
+      console.log(`  Blocked: ${data.summary.blocked.count} issues`);
+      console.log(`  Health: ${data.healthScore.toUpperCase()}`);
+    }
+    console.log('');
+    console.log(`Dashboard: ${dashboardFile}`);
+    console.log('=========================================\n');
+
+    // Publish to GitHub Pages if --publish flag
+    const shouldPublish = process.argv.includes('--publish');
+    if (shouldPublish) {
+      console.log(`${colors.cyan}Publishing to GitHub Pages...${colors.reset}`);
+      const projectRoot = path.join(__dirname, '..');
+      const sprintDir = path.join(projectRoot, 'docs', 'sprint');
+
+      if (!fs.existsSync(sprintDir)) {
+        fs.mkdirSync(sprintDir, { recursive: true });
+      }
+
+      // Save combined JSON data file
+      const allJsonPath = path.join(sprintDir, 'all.json');
+      fs.writeFileSync(allJsonPath, JSON.stringify(combinedData, null, 2));
+      console.log(`${colors.green}Data saved: docs/sprint/all.json${colors.reset}`);
+
+      // Save individual team JSONs
+      for (const [currentTeamName, data] of Object.entries(teamsData)) {
+        const jsonPath = path.join(sprintDir, `${currentTeamName.toLowerCase()}.json`);
+        fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2));
+        console.log(`${colors.green}Data saved: docs/sprint/${currentTeamName.toLowerCase()}.json${colors.reset}`);
+      }
+
+      // Build GitHub Pages version if dashboard exists
+      const dashboardDir = path.join(projectRoot, 'dashboard');
+      if (fs.existsSync(dashboardDir)) {
+        try {
+          console.log(`${colors.dim}Building GitHub Pages dashboard...${colors.reset}`);
+          execSync('npm run build:ghpages', { cwd: dashboardDir, stdio: 'pipe' });
+          console.log(`${colors.green}GitHub Pages build complete${colors.reset}`);
+        } catch (e) {
+          console.log(`${colors.yellow}GitHub Pages build skipped: ${e.message}${colors.reset}`);
+        }
+      }
+
+      // Git commit and push
+      try {
+        execSync(`git add docs/sprint/`, { cwd: projectRoot, stdio: 'pipe' });
+        execSync(`git commit -m "data: update sprint data for all teams"`, { cwd: projectRoot, stdio: 'pipe' });
+        execSync('git push origin main', { cwd: projectRoot, stdio: 'pipe' });
+        console.log(`${colors.green}Published! View at: https://openshift-pipelines.github.io/skills/sprint/all${colors.reset}`);
+      } catch (e) {
+        console.log(`${colors.yellow}Git push skipped: ${e.message}${colors.reset}`);
+        console.log(`${colors.dim}Commit manually: git add docs/sprint/ && git commit -m "update sprint data" && git push${colors.reset}`);
+      }
+    }
+
+  } else {
+    // Single-team mode (existing behavior)
+    console.log(`\n${colors.cyan}${colors.bright}Sprint Status Dashboard${colors.reset}`);
+    console.log(`${colors.dim}Fetching data for team: ${teamName}${colors.reset}\n`);
+
+    // 3. Discover team sprints
+    console.log(`${colors.cyan}Discovering team sprints...${colors.reset}`);
+    const activeSprints = await discoverTeamSprints(config.auth);
+
+    const teamSprint = activeSprints.find(s =>
+      s.name.toLowerCase().includes(teamName.toLowerCase())
+    );
+
+    if (!teamSprint) {
+      console.error(`${colors.red}Error: No active sprint found for team "${teamName}"${colors.reset}`);
+      console.log(`\nAvailable teams with active sprints:`);
+      const teams = [...new Set(activeSprints.map(s => {
+        const match = s.name.match(/Pipelines Sprint (\w+)/);
+        return match ? match[1] : null;
+      }))].filter(t => t);
+      teams.forEach(t => console.log(`  - ${t}`));
+      process.exit(1);
+    }
+
+    const sprintInfo = {
+      id: teamSprint.id,
+      name: teamSprint.name,
+      startDate: teamSprint.startDate,
+      endDate: teamSprint.endDate,
+      boardId: teamSprint.boardId
+    };
+
+    console.log(`${colors.green}Selected sprint: ${sprintInfo.name} (ID: ${sprintInfo.id}, Board: ${sprintInfo.boardId})${colors.reset}`);
+
+    // 4. Fetch sprint issues
+    console.log(`${colors.cyan}Fetching sprint issues...${colors.reset}`);
+    const issues = await fetchAllSprintIssues(sprintInfo.id, config.auth);
+
+    // 5. Fetch historical sprints
+    console.log(`${colors.cyan}Fetching historical sprints...${colors.reset}`);
+    const extractedTeamName = teamSprint.name.match(/Pipelines Sprint (\w+)/)[1];
+    const historicalSprints = await fetchHistoricalSprints(sprintInfo.boardId, extractedTeamName, config.auth);
+
+    // 6. Fetch future sprint
+    console.log(`${colors.cyan}Fetching future sprint...${colors.reset}`);
+    const futureSprint = await fetchFutureSprint(sprintInfo.boardId, extractedTeamName, config.auth);
+
+    // 7. Fetch Epic progress
+    console.log(`${colors.cyan}Fetching Epic progress...${colors.reset}`);
+    const epicProgress = await fetchEpicProgress(issues, config.auth);
+
+    // 8. Compute metrics
+    console.log(`${colors.cyan}Computing metrics...${colors.reset}`);
+    const data = computeMetrics(issues, historicalSprints, futureSprint, epicProgress, extractedTeamName, sprintInfo);
+
+    // 9. Index to Meilisearch (before rendering so we can fetch history)
+    console.log(`${colors.cyan}Indexing to Meilisearch...${colors.reset}`);
+    await indexToMeilisearch(data, config);
+
+    // 10. Auto-backfill historical sprints on first run
+    await backfillIfNeeded(extractedTeamName, config.auth, config.meilisearch?.key);
+
+    // 11. Fetch historical snapshots from Meilisearch for trends tab
+    console.log(`${colors.cyan}Fetching historical trends...${colors.reset}`);
+    const historicalData = await fetchHistoricalSnapshots(extractedTeamName, config);
+    data.trends = historicalData;
+    console.log(`${colors.green}Historical snapshots: ${historicalData.sprintSnapshots.length} sprints, ${historicalData.issueSnapshots.length} issues${colors.reset}`);
+
+    // 11. Render dashboard
+    console.log(`${colors.cyan}Rendering dashboard...${colors.reset}`);
+    const dashboardFile = renderDashboard(data, extractedTeamName);
+
+    // 12. Print summary
+    printSummary(data);
+    console.log(`Dashboard: ${dashboardFile}`);
+    console.log('=========================================\n');
+
+    // 13. Publish to GitHub Pages if --publish flag
+    const shouldPublish = process.argv.includes('--publish');
+    if (shouldPublish) {
+      console.log(`${colors.cyan}Publishing to GitHub Pages...${colors.reset}`);
+      const projectRoot = path.join(__dirname, '..');
+      const sprintDir = path.join(projectRoot, 'docs', 'sprint');
+
+      if (!fs.existsSync(sprintDir)) {
+        fs.mkdirSync(sprintDir, { recursive: true });
+      }
+
+      // Save JSON data file
+      const jsonPath = path.join(sprintDir, `${extractedTeamName.toLowerCase()}.json`);
+      fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2));
+      console.log(`${colors.green}Data saved: docs/sprint/${extractedTeamName.toLowerCase()}.json${colors.reset}`);
+
+      // Build GitHub Pages version if dashboard exists
+      const dashboardDir = path.join(projectRoot, 'dashboard');
+      if (fs.existsSync(dashboardDir)) {
+        try {
+          console.log(`${colors.dim}Building GitHub Pages dashboard...${colors.reset}`);
+          execSync('npm run build:ghpages', { cwd: dashboardDir, stdio: 'pipe' });
+          console.log(`${colors.green}GitHub Pages build complete${colors.reset}`);
+        } catch (e) {
+          console.log(`${colors.yellow}GitHub Pages build skipped: ${e.message}${colors.reset}`);
+        }
+      }
+
+      // Git commit and push
+      try {
+        execSync(`git add docs/sprint/`, { cwd: projectRoot, stdio: 'pipe' });
+        execSync(`git commit -m "data: update sprint data for ${extractedTeamName}"`, { cwd: projectRoot, stdio: 'pipe' });
+        execSync('git push origin main', { cwd: projectRoot, stdio: 'pipe' });
+        console.log(`${colors.green}Published! View at: https://openshift-pipelines.github.io/skills/sprint/${extractedTeamName.toLowerCase()}${colors.reset}`);
+      } catch (e) {
+        console.log(`${colors.yellow}Git push skipped: ${e.message}${colors.reset}`);
+        console.log(`${colors.dim}Commit manually: git add docs/sprint/ && git commit -m "update sprint data" && git push${colors.reset}`);
+      }
     }
   }
 }

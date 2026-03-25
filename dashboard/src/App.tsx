@@ -670,7 +670,7 @@ function App() {
               <OverviewCharts data={fd} />
 
               {/* Row 4: Actionable Insights */}
-              <ActionableInsights data={fd} />
+              <ActionableInsights data={fd} jiraBaseUrl={resolvedData.meta.jiraBaseUrl} />
 
               {/* Row 5: Alerts */}
               <Alerts expectations={fd.expectations} />

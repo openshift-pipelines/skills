@@ -78,6 +78,12 @@ export interface DoD {
   issues: DoDIssue[]
 }
 
+export interface PrLink {
+  url: string
+  status: string
+  name: string
+}
+
 export interface CodeReviewItem {
   key: string
   summary: string
@@ -86,6 +92,7 @@ export interface CodeReviewItem {
   suggestedSP: number
   assignee: string
   alreadyReestimated: boolean
+  prs?: PrLink[]
 }
 
 export interface BlockedItem {
@@ -95,6 +102,7 @@ export interface BlockedItem {
   reason: string
   assignee: string
   blockedType?: 'flagged' | 'stale' | 'flagged+stale'
+  prs?: PrLink[]
 }
 
 export interface BugItem {

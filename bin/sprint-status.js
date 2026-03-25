@@ -79,6 +79,46 @@ function jiraGet(apiPath, auth) {
   });
 }
 
+// Fetch PR links for a batch of issue keys from Jira dev-status API
+async function fetchPrLinks(issueKeys, auth) {
+  const prMap = {};
+  for (const key of issueKeys) {
+    try {
+      await sleep(100);
+      const data = await jiraGet(
+        `/rest/dev-status/1.0/issue/detail?issueId=${key}&applicationType=GitHub&dataType=pullrequest`,
+        auth
+      );
+      const prs = (data.detail || [])
+        .flatMap(d => d.pullRequests || [])
+        .map(pr => ({ url: pr.url, status: pr.status, name: pr.name }))
+        .filter(pr => pr.url);
+      if (prs.length > 0) prMap[key] = prs;
+    } catch (_) {
+      // dev-status API may need issue ID (numeric), try via search
+      try {
+        const searchResult = await jiraGet(
+          `/rest/api/3/issue/${key}?fields=id`,
+          auth
+        );
+        const issueId = searchResult.id;
+        if (issueId) {
+          const data = await jiraGet(
+            `/rest/dev-status/1.0/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=pullrequest`,
+            auth
+          );
+          const prs = (data.detail || [])
+            .flatMap(d => d.pullRequests || [])
+            .map(pr => ({ url: pr.url, status: pr.status, name: pr.name }))
+            .filter(pr => pr.url);
+          if (prs.length > 0) prMap[key] = prs;
+        }
+      } catch (_) { /* skip */ }
+    }
+  }
+  return prMap;
+}
+
 // HTTP helper for Meilisearch
 function httpRequest(method, url, headers, body) {
   return new Promise((resolve, reject) => {
@@ -1325,6 +1365,15 @@ async function main() {
       console.log(`${colors.dim}Computing metrics...${colors.reset}`);
       const data = computeMetrics(issues, historicalSprints, futureSprint, epicProgress, currentTeamName, sprintInfo);
 
+      // Enrich blocked and code review items with PR links
+      const prIssueKeys = [...data.blocked.map(b => b.key), ...data.codeReview.map(c => c.key)];
+      if (prIssueKeys.length > 0) {
+        console.log(`${colors.dim}Fetching PR links for ${prIssueKeys.length} issues...${colors.reset}`);
+        const prMap = await fetchPrLinks(prIssueKeys, config.auth);
+        data.blocked.forEach(b => { if (prMap[b.key]) b.prs = prMap[b.key]; });
+        data.codeReview.forEach(c => { if (prMap[c.key]) c.prs = prMap[c.key]; });
+      }
+
       // Collect components
       Object.keys(data.components || {}).forEach(c => allComponents.add(c));
 
@@ -1491,6 +1540,15 @@ async function main() {
     // 8. Compute metrics
     console.log(`${colors.cyan}Computing metrics...${colors.reset}`);
     const data = computeMetrics(issues, historicalSprints, futureSprint, epicProgress, extractedTeamName, sprintInfo);
+
+    // 8.5 Enrich blocked and code review items with PR links
+    const prIssueKeys = [...data.blocked.map(b => b.key), ...data.codeReview.map(c => c.key)];
+    if (prIssueKeys.length > 0) {
+      console.log(`${colors.cyan}Fetching PR links for ${prIssueKeys.length} issues...${colors.reset}`);
+      const prMap = await fetchPrLinks(prIssueKeys, config.auth);
+      data.blocked.forEach(b => { if (prMap[b.key]) b.prs = prMap[b.key]; });
+      data.codeReview.forEach(c => { if (prMap[c.key]) c.prs = prMap[c.key]; });
+    }
 
     // 9. Index to Meilisearch (before rendering so we can fetch history)
     console.log(`${colors.cyan}Indexing to Meilisearch...${colors.reset}`);

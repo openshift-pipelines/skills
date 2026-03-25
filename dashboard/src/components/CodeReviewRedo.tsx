@@ -51,6 +51,9 @@ export function CodeReviewRedo({ items, jiraBaseUrl, filter }: CodeReviewRedoPro
               <th className="text-left py-2 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
                 Assignee
               </th>
+              <th className="text-left py-2 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                PRs
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -74,6 +77,25 @@ export function CodeReviewRedo({ items, jiraBaseUrl, filter }: CodeReviewRedoPro
                 </td>
                 <td className="py-2 px-3 text-amber-400 font-semibold">{item.suggestedSP}</td>
                 <td className="py-2 px-3 text-slate-300">{item.assignee}</td>
+                <td className="py-2 px-3">
+                  {item.prs && item.prs.length > 0 ? (
+                    <div className="flex flex-col gap-1">
+                      {item.prs.map((pr, idx) => (
+                        <a
+                          key={idx}
+                          href={pr.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-purple-400 hover:text-purple-300 hover:underline text-xs"
+                        >
+                          {pr.status === 'MERGED' ? '✓' : pr.status === 'OPEN' ? '○' : '•'} {pr.name || 'PR'}
+                        </a>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-slate-600 text-xs">—</span>
+                  )}
+                </td>
               </tr>
             ))}
             <tr className="border-t-2 border-slate-700 font-bold">
@@ -83,7 +105,7 @@ export function CodeReviewRedo({ items, jiraBaseUrl, filter }: CodeReviewRedoPro
               <td className="py-2 px-3 text-slate-200">{totalCurrentSP}</td>
               <td className="py-2 px-3"></td>
               <td className="py-2 px-3 text-amber-400">{totalSuggestedSP}</td>
-              <td className="py-2 px-3"></td>
+              <td className="py-2 px-3" colSpan={2}></td>
             </tr>
           </tbody>
         </table>

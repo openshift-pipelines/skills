@@ -83,6 +83,9 @@ export function BlockedIssues({ items, jiraBaseUrl, filter }: BlockedIssuesProps
               <th className="text-left py-2 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
                 Assignee
               </th>
+              <th className="text-left py-2 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                PRs
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -102,6 +105,25 @@ export function BlockedIssues({ items, jiraBaseUrl, filter }: BlockedIssuesProps
                 <td className="py-2 px-3">{getPriorityBadge(item.priority)}</td>
                 <td className="py-2 px-3 text-slate-400">{item.reason}</td>
                 <td className="py-2 px-3 text-slate-300">{item.assignee}</td>
+                <td className="py-2 px-3">
+                  {item.prs && item.prs.length > 0 ? (
+                    <div className="flex flex-col gap-1">
+                      {item.prs.map((pr, idx) => (
+                        <a
+                          key={idx}
+                          href={pr.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-purple-400 hover:text-purple-300 hover:underline text-xs"
+                        >
+                          {pr.status === 'MERGED' ? '✓' : pr.status === 'OPEN' ? '○' : '•'} {pr.name || 'PR'}
+                        </a>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-slate-600 text-xs">—</span>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>

@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
   if (mode === 'ghpages') {
     return {
       plugins: [react()],
-      base: '/skills/sprint/',
+      base: '/',
       build: {
         outDir: '../docs/sprint',
         emptyOutDir: false, // Don't delete JSON data files

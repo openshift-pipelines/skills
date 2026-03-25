@@ -299,7 +299,8 @@ function filterByAssignee(data: DashboardData, assignee: string): DashboardData 
 
 function getTeamFromPath(): string | null {
   const path = window.location.pathname
-  const match = path.match(/\/sprint\/(\w+)/i)
+  // Match /sprint/<team> (GitHub Pages) or /<team> (Cloudflare Pages)
+  const match = path.match(/\/sprint\/(\w+)/i) || path.match(/^\/(\w+)$/i)
   return match ? match[1] : null
 }
 

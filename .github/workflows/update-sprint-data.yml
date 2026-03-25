@@ -1,0 +1,60 @@
+name: Update Sprint Data
+
+on:
+  schedule:
+    - cron: '0 */2 * * 1-5' # Every 2 hours on weekdays
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Install dashboard dependencies
+        working-directory: dashboard
+        run: npm ci
+
+      - name: Fetch sprint data and build dashboard
+        env:
+          JIRA_CLOUD_EMAIL: ${{ secrets.JIRA_CLOUD_EMAIL }}
+          JIRA_CLOUD_TOKEN: ${{ secrets.JIRA_CLOUD_TOKEN }}
+        run: |
+          mkdir -p ~/.config/osp
+          node -e "
+            const fs = require('fs');
+            fs.writeFileSync(
+              process.env.HOME + '/.config/osp/config.json',
+              JSON.stringify({
+                jira_cloud: {
+                  email: process.env.JIRA_CLOUD_EMAIL,
+                  token: process.env.JIRA_CLOUD_TOKEN
+                }
+              })
+            );
+          "
+
+          node bin/sprint-status.js --all --publish
+
+      - name: Commit and push updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add docs/sprint/
+          if git diff --cached --quiet; then
+            echo "No data changes"
+          else
+            git commit -m "data: update sprint data $(date -u +%Y-%m-%d)"
+            git push
+          fi

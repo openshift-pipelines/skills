@@ -7,10 +7,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  update-data:
+  update-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -25,7 +25,7 @@ jobs:
         working-directory: dashboard
         run: npm ci
 
-      - name: Fetch sprint data and build dashboard
+      - name: Fetch sprint data
         env:
           JIRA_CLOUD_EMAIL: ${{ secrets.JIRA_CLOUD_EMAIL }}
           JIRA_CLOUD_TOKEN: ${{ secrets.JIRA_CLOUD_TOKEN }}
@@ -46,15 +46,12 @@ jobs:
 
           node bin/sprint-status.js --all --publish
 
-      - name: Commit and push updated data
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Build dashboard
+        working-directory: dashboard
+        run: npm run build:ghpages
 
-          git add docs/sprint/
-          if git diff --cached --quiet; then
-            echo "No data changes"
-          else
-            git commit -m "data: update sprint data $(date -u +%Y-%m-%d)"
-            git push
-          fi
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler pages deploy docs/sprint --project-name sprint-dashboard --commit-dirty=true

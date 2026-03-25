@@ -311,19 +311,19 @@ function App() {
   const embeddedData = window.__DASHBOARD_DATA__ as AppData
   const teamFromPath = getTeamFromPath()
 
-  // Load data from JSON file if on GitHub Pages (no embedded data, team in URL path)
+  // Load data from JSON file if on GitHub Pages (no embedded data)
   useEffect(() => {
     const hasEmbedded = embeddedData && (isMultiTeam(embeddedData) || (embeddedData as DashboardData).meta)
-    if (hasEmbedded || !teamFromPath) return
+    if (hasEmbedded) return
 
     setLoading(true)
     setError(null)
 
-    // Try loading team JSON from same directory
-    const jsonUrl = `${teamFromPath.toLowerCase()}.json`
+    // Load team-specific JSON if team in URL path, otherwise load all.json
+    const jsonUrl = teamFromPath ? `${teamFromPath.toLowerCase()}.json` : 'all.json'
     fetch(jsonUrl)
       .then(res => {
-        if (!res.ok) throw new Error(`No data for team "${teamFromPath}" (HTTP ${res.status})`)
+        if (!res.ok) throw new Error(`Failed to load dashboard data (HTTP ${res.status})`)
         return res.json()
       })
       .then(data => { setDynamicData(data); setLoading(false) })

@@ -49,6 +49,10 @@ from datetime import datetime, timezone
 
 d = json.load(sys.stdin)
 issues = d.get('issues', [])
+JIRA = 'https://redhat.atlassian.net/browse'
+
+def link(key):
+    return f'[{key}]({JIRA}/{key})'
 
 def extract_text(node):
     if isinstance(node, dict):
@@ -77,11 +81,11 @@ for i in issues:
 
     # Check fix version
     if not fv:
-        no_fix_version.append(f'{key} | {priority:10s} | {status:15s} | {summary}')
+        no_fix_version.append(f'{link(key)} | {priority:10s} | {status:15s} | {summary}')
 
     # Check priority
     if priority == 'Undefined':
-        undefined_priority.append(f'{key} | {status:15s} | {summary}')
+        undefined_priority.append(f'{link(key)} | {status:15s} | {summary}')
 
     # Check unanswered comments
     comments = f.get('comment', {}).get('comments', [])
@@ -94,7 +98,7 @@ for i in issues:
         a = f.get('assignee') or {}
         assignee_name = a.get('displayName', 'NOMATCH')
         if assignee_name not in author:
-            needs_reply.append(f'{key} | {last_date} | {author[:20]:20s} | {last_body}')
+            needs_reply.append(f'{link(key)} | {last_date} | {author[:20]:20s} | {last_body}')
 
     # Check staleness (not updated in 30+ days)
     if updated:
@@ -102,7 +106,7 @@ for i in issues:
             up = datetime.fromisoformat(updated.replace('Z', '+00:00'))
             days = (now - up).days
             if days > 30:
-                old_tickets.append(f'{key} | {days:3d} days | {status:15s} | {summary}')
+                old_tickets.append(f'{link(key)} | {days:3d} days | {status:15s} | {summary}')
         except: pass
 
 print(f'TOTAL OPEN TICKETS: {len(issues)}')

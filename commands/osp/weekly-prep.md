@@ -46,18 +46,22 @@ base = '$JIRA_BASE'
 filt = '$FILTER'
 auth = base64.b64encode(f'{email}:{token}'.encode()).decode()
 headers = {'Authorization': f'Basic {auth}', 'Content-Type': 'application/json'}
+JIRA_BROWSE = f'{base}/browse'
 
 def api(jql, max_results=30):
     data = json.dumps({'jql': jql, 'maxResults': max_results, 'fields': ['key','summary','status','priority','assignee','fixVersions','issuetype']}).encode()
     req = urllib.request.Request(f'{base}/rest/api/3/search/jql', data=data, headers=headers)
     return json.loads(urllib.request.urlopen(req).read())
 
+def link(key):
+    return f'[{key}]({JIRA_BROWSE}/{key})'
+
 def fmt(issue):
     f = issue['fields']
     a = f.get('assignee')
     assignee = a['displayName'].split()[0] if a else 'Unassigned'
     fv = ','.join(v['name'] for v in f.get('fixVersions', [])) or '-'
-    return f'{issue[\"key\"]:15s} | {f[\"status\"][\"name\"]:15s} | {assignee:12s} | {fv:20s} | {f[\"summary\"][:55]}'
+    return f'{link(issue[\"key\"]):15s} | {f[\"status\"][\"name\"]:15s} | {assignee:12s} | {fv:20s} | {f[\"summary\"][:55]}'
 
 # Core filter: exclude console, hub-ui, PAC-specific, dashboard
 core_exclude = 'AND summary !~ \"console\" AND summary !~ \"hub-ui\" AND summary !~ \"ANSI\" AND summary !~ \"log viewer\" AND summary !~ \"Overview page\"' if filt == 'core' else ''

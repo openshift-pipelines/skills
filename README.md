@@ -1,20 +1,23 @@
-# Claude Skills for OpenShift Pipelines
+# OpenShift Pipelines Skills
 
-A collection of [Claude Code](https://claude.ai/claude-code) skills for OpenShift Pipelines and Tekton development workflows. Includes a **sprint health dashboard** with React UI, Meilisearch-powered historical analytics, and standalone scripts that run without LLM tokens.
+AI-powered skills for [Claude Code](https://claude.ai/claude-code) and [Cursor](https://cursor.com) for OpenShift Pipelines and Tekton development workflows. Includes a **sprint health dashboard** with React UI, Meilisearch-powered historical analytics, and standalone scripts that run without LLM tokens.
 
 ## Installation
 
 ### Install from GitHub (Recommended)
 
 ```bash
-# Interactive installation (prompts for global/local)
+# Interactive installation (prompts for Claude Code / Cursor)
 npx github:openshift-pipelines/skills
 
-# Install globally
+# Install globally for Claude Code
 npx github:openshift-pipelines/skills -- -g
 
-# Install locally in current project
+# Install locally for Claude Code
 npx github:openshift-pipelines/skills -- -l
+
+# Install for Cursor IDE
+npx github:openshift-pipelines/skills -- --cursor
 ```
 
 ### Manual Installation
@@ -22,7 +25,12 @@ npx github:openshift-pipelines/skills -- -l
 ```bash
 git clone https://github.com/openshift-pipelines/skills.git
 cd skills
+
+# Claude Code
 node bin/install.js -g
+
+# Cursor IDE
+node bin/install.js --cursor
 ```
 
 ### Build the React Dashboard
@@ -57,6 +65,14 @@ node bin/sprint-history.js pioneers compare crookshank
 /osp:sprint-status pioneers
 /osp:sprint-history pioneers trends
 ```
+
+### Via Cursor IDE
+
+After installing with `--cursor`, skills are available as context rules in `.cursor/rules/`. Ask Cursor about OpenShift Pipelines tasks and the relevant rules activate automatically. For example:
+
+- "Debug this failed PipelineRun" activates `osp-debug.mdc`
+- "Create a Tekton Pipeline" activates `osp-pipeline.mdc`
+- "Check sprint status for pioneers" activates `osp-sprint-status.mdc`
 
 ### What It Does
 
@@ -129,10 +145,12 @@ DoD compliance is tracked per issue using Jira labels:
 
 Full DoD checklists at Story/Feature/Epic levels are in `docs/definition-of-done.md`.
 
-## All Available Commands
+## All Available Skills
 
-| Command | Description |
-|---------|-------------|
+Skills work as slash commands in Claude Code (`/osp:debug`) and as context rules in Cursor.
+
+| Skill | Description |
+|-------|-------------|
 | `/osp:help` | Show available commands and usage guide |
 | `/osp:configure` | Set up Jira, Jira Cloud, GitHub, Konflux, and Meilisearch settings |
 | `/osp:sprint-status` | Sprint health dashboard with React UI |
@@ -140,8 +158,14 @@ Full DoD checklists at Story/Feature/Epic levels are in `docs/definition-of-done
 | `/osp:pipeline` | Create or modify Tekton Pipeline resources |
 | `/osp:task` | Create or modify Tekton Task resources |
 | `/osp:debug` | Debug failed PipelineRuns or TaskRuns |
+| `/osp:pr` | Create PRs on tektoncd repos with proper template |
+| `/osp:issue` | Create GitHub issues on tektoncd repos |
 | `/osp:map-jira-to-upstream` | Find upstream Tekton GitHub issues for a Jira issue |
 | `/osp:backlog-triage` | Deep LLM-powered backlog triage against upstream tektoncd repos |
+| `/osp:jira-hygiene` | Audit Jira ticket hygiene — stale status, missing fix versions |
+| `/osp:jira-notifications` | Show tickets with unanswered comments needing reply |
+| `/osp:weekly-prep` | Generate weekly meeting template from Jira |
+| `/osp:cve-triage` | List open CVEs, check for upstream fixes |
 | `/osp:release-status` | Track release status from Jira version |
 | `/osp:release-checklist` | Generate component release checklist |
 | `/osp:component-status` | Check release readiness of a component |
@@ -155,6 +179,7 @@ Full DoD checklists at Story/Feature/Epic levels are in `docs/definition-of-done
 | `/osp:stage-release` | Execute stage release |
 | `/osp:prod-release` | Execute production release |
 | `/osp:pr-pipeline-status` | Check PR pipeline status |
+| `/osp:registry-info` | Quick reference for registry usage across release stages |
 
 ### Standalone Scripts
 
@@ -206,7 +231,7 @@ gh auth login    # Recommended
 │   ├── sprint-status.js        # Standalone sprint dashboard (1,200 lines)
 │   ├── sprint-history.js       # Standalone history queries
 │   └── konflux-auth.js         # Konflux SSO cookie extraction
-├── commands/osp/               # Claude Code skills (22 files)
+├── commands/osp/               # Skills source (Claude Code .md / Cursor .mdc)
 │   ├── sprint-status.md        # Sprint health dashboard skill
 │   ├── sprint-history.md       # Historical analytics skill
 │   ├── configure.md            # Auth setup (Jira, Jira Cloud, Konflux, Meilisearch)
@@ -237,7 +262,7 @@ gh auth login    # Recommended
 
 | Component | Technology |
 |-----------|-----------|
-| Skills | Markdown with YAML frontmatter (Claude Code skill format) |
+| Skills | Markdown with YAML frontmatter (Claude Code `.md` / Cursor `.mdc`) |
 | Dashboard | React 19 + TypeScript + Tailwind CSS + Recharts |
 | Build | Vite 5 + vite-plugin-singlefile (outputs single HTML) |
 | Data | Jira Cloud REST API (Agile + Platform v3) |

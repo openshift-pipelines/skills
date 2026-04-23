@@ -65,13 +65,22 @@ repos_dir = "~/src/tektoncd"
 
 ## Working Directory
 
-All data files (backlog JSON, analysis JSON, HTML report) are stored in a temporary working directory:
+All data files are stored in a temporary working directory:
 
 ```
 /tmp/backlog-triage-{project}/
 ├── backlog.json              # Fetched Jira issues
 ├── analysis.json             # Per-issue analysis results
-└── report.html               # Interactive HTML report
+├── report.html               # Interactive HTML report
+└── upstream-cache/           # Cached GitHub data (avoids API rate limits)
+    ├── metadata.json         # Fetch timestamp and stats
+    ├── pipeline/
+    │   ├── merged-prs.json
+    │   ├── closed-issues.json
+    │   └── open-issues.json
+    ├── triggers/
+    │   └── ...
+    └── ...
 ```
 
 ## Workflow
@@ -121,6 +130,23 @@ for repo in pipeline triggers chains results cli operator pipelines-as-code cata
 done
 ```
 
+### Phase 2b: Fetch and Cache GitHub Data
+
+Pre-fetch all merged PRs, closed issues, and open issues from GitHub to avoid
+hitting the API during per-issue analysis (which would cause rate limiting):
+
+```bash
+python3 "${SKILLS_REPO}/bin/fetch-upstream.py" --config backlog-triage.toml
+```
+
+Options:
+- `--since 2024-01-01` — only fetch recent PRs/issues (faster, smaller cache)
+- `--fresh` — ignore existing cache and re-fetch everything
+- `--repos pipeline triggers` — only fetch specific repos
+
+The cache is stored in `/tmp/backlog-triage-{project}/upstream-cache/` and
+reused across runs. Re-run with `--fresh` to refresh.
+
 ### Phase 3: Analyze Issues (Agent-Based)
 
 Load issues from the backlog JSON, then investigate each one. Process in batches of ~20, grouped by component for efficient upstream searches.
@@ -134,19 +160,32 @@ For each issue:
    - Blocker/Critical with recent activity → HIGH_PRIORITY
 3. **Investigate upstream** for non-obvious cases:
 
+**First, search the local cache** (no API calls):
 ```bash
-# Search commits in the relevant repo
+# Search cached merged PRs (use jq or python to grep cached JSON)
+cat /tmp/backlog-triage-{project}/upstream-cache/{repo}/merged-prs.json | \
+  python3 -c "import json,sys; [print(f'#{i[\"number\"]} {i[\"mergedAt\"][:10]} {i[\"title\"]}') for i in json.load(sys.stdin) if '{keyword}'.lower() in i['title'].lower()]"
+
+# Search cached closed issues
+cat /tmp/backlog-triage-{project}/upstream-cache/{repo}/closed-issues.json | \
+  python3 -c "import json,sys; [print(f'#{i[\"number\"]} {i[\"closedAt\"][:10]} {i[\"title\"]}') for i in json.load(sys.stdin) if '{keyword}'.lower() in i['title'].lower()]"
+
+# Search commits in the local git clone (no API)
 git -C "$REPOS_DIR/{repo}" log --oneline --all --grep="{keyword}" | head -20
-
-# Search merged PRs on GitHub
-gh pr list -R tektoncd/{repo} --state merged --search "{keyword}" --limit 10 --json number,title,mergedAt,url
-
-# Search closed issues on GitHub
-gh issue list -R tektoncd/{repo} --state closed --search "{keyword}" --limit 10 --json number,title,closedAt,url
-
-# Read a specific PR for details
-gh pr view {number} -R tektoncd/{repo} --json title,body,mergedAt,files
 ```
+
+**Only use `gh` API for deep dives** on specific items found in the cache:
+```bash
+# Read a specific PR for full details (body, files changed)
+gh pr view {number} -R tektoncd/{repo} --json title,body,mergedAt,files
+
+# Read a specific issue for full details
+gh issue view {number} -R tektoncd/{repo} --json title,body,comments,labels
+```
+
+> **Important**: Do NOT use `gh pr list --search` or `gh issue list --search` during
+> per-issue analysis — this will hit GitHub API rate limits. Always search the
+> pre-fetched cache first. Only use live `gh` calls to read specific items by number.
 
 4. **Classify** with recommendation, score, confidence, reason, evidence, and suggested comment
 
@@ -212,7 +251,7 @@ fi
 For large backlogs (1000+ issues), dispatch batches to parallel subagents:
 
 1. Split unanalyzed issues into batches of ~100, grouped by component
-2. Each subagent receives issues + access to git/gh tools
+2. Each subagent receives issues + access to git/cached data/gh tools
 3. Each writes results to a separate temp file
 4. Orchestrator merges results, deduplicates, saves checkpoint
 
@@ -220,11 +259,18 @@ Subagent task template:
 ```
 You are analyzing Jira backlog issues for {project_name} ({jira_project}).
 Upstream repos are in {repos_dir}/{repo}.
+Cached GitHub data is in /tmp/backlog-triage-{project}/upstream-cache/{repo}/.
 
 Current supported versions: {current_versions}. EOL: {eol_versions}.
 
-For each issue, investigate using `git log --grep` and `gh pr/issue list` commands,
-then classify. Write results as a JSON array to {output_file}.
+For each issue:
+1. Search cached JSON files (merged-prs.json, closed-issues.json, open-issues.json)
+   for keyword matches in titles
+2. Search local git repos with `git log --grep`
+3. Only use `gh pr view` or `gh issue view` for specific items found in cache
+4. Do NOT use `gh pr list --search` or `gh issue list --search` (rate limits)
+
+Write results as a JSON array to {output_file}.
 
 Issues to analyze:
 {issues_json}

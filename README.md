@@ -163,6 +163,7 @@ Full DoD checklists at Story/Feature/Epic levels are in `docs/definition-of-done
 | `node bin/sprint-status.js <team>` | Full sprint dashboard (no LLM tokens) |
 | `node bin/sprint-history.js <team> <subcommand>` | Historical analytics (no LLM tokens) |
 | `python3 bin/fetch-backlog.py --config <toml>` | Fetch Jira backlog issues for triage |
+| `python3 bin/fetch-upstream.py --config <toml>` | Cache upstream GitHub PRs/issues (avoids rate limits) |
 | `python3 bin/gen-backlog-report.py --config <toml>` | Generate HTML report from triage analysis |
 | `node bin/install.js` | Install skills to Claude Code |
 

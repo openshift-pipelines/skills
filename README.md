@@ -141,6 +141,7 @@ Full DoD checklists at Story/Feature/Epic levels are in `docs/definition-of-done
 | `/osp:task` | Create or modify Tekton Task resources |
 | `/osp:debug` | Debug failed PipelineRuns or TaskRuns |
 | `/osp:map-jira-to-upstream` | Find upstream Tekton GitHub issues for a Jira issue |
+| `/osp:backlog-triage` | Deep LLM-powered backlog triage against upstream tektoncd repos |
 | `/osp:release-status` | Track release status from Jira version |
 | `/osp:release-checklist` | Generate component release checklist |
 | `/osp:component-status` | Check release readiness of a component |
@@ -161,6 +162,8 @@ Full DoD checklists at Story/Feature/Epic levels are in `docs/definition-of-done
 |--------|-------------|
 | `node bin/sprint-status.js <team>` | Full sprint dashboard (no LLM tokens) |
 | `node bin/sprint-history.js <team> <subcommand>` | Historical analytics (no LLM tokens) |
+| `python3 bin/fetch-backlog.py --config <toml>` | Fetch Jira backlog issues for triage |
+| `python3 bin/gen-backlog-report.py --config <toml>` | Generate HTML report from triage analysis |
 | `node bin/install.js` | Install skills to Claude Code |
 
 ## Configuration

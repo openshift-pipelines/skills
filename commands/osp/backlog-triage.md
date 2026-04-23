@@ -99,20 +99,24 @@ The script:
 - Saves to `/tmp/backlog-triage-{project}/backlog.json` with checkpoint/resume support
 - Concurrency: 8 workers (configurable via `--workers`)
 
-### Phase 2: Update Upstream Repos
+### Phase 2: Clone/Update Upstream Repos
 
-Ensure local clones of upstream repos are up-to-date:
+Ensure local clones of upstream repos exist and are up-to-date:
 
 ```bash
 REPOS_DIR=$(python3 -c "import tomllib; print(tomllib.load(open('backlog-triage.toml','rb'))['upstream']['repos_dir'])" | sed "s|~|$HOME|")
 ORG=$(python3 -c "import tomllib; print(tomllib.load(open('backlog-triage.toml','rb'))['upstream']['org'])")
+
+mkdir -p "$REPOS_DIR"
 
 for repo in pipeline triggers chains results cli operator pipelines-as-code catalog dashboard hub; do
     if [ -d "$REPOS_DIR/$repo" ]; then
         git -C "$REPOS_DIR/$repo" fetch --all --quiet 2>/dev/null
         echo "Updated $repo"
     else
-        echo "SKIP: $REPOS_DIR/$repo not found (clone it first)"
+        echo "Cloning $ORG/$repo..."
+        git clone --quiet "https://github.com/$ORG/$repo.git" "$REPOS_DIR/$repo"
+        echo "Cloned $repo"
     fi
 done
 ```
@@ -190,7 +194,18 @@ This produces a self-contained dark-themed HTML report with:
 - Per-issue cards with key (linked to Jira), badges, LLM reason, upstream evidence, suggested comment, tags
 - Auto-opens sections with CLOSE or HIGH_PRIORITY items
 
-Open: `xdg-open /tmp/backlog-triage-{project}/report.html`
+Open the report in the default browser:
+
+```bash
+# Cross-platform: works on Linux (xdg-open), macOS (open), and WSL
+if command -v xdg-open &>/dev/null; then
+    xdg-open /tmp/backlog-triage-{project}/report.html
+elif command -v open &>/dev/null; then
+    open /tmp/backlog-triage-{project}/report.html
+else
+    echo "Report ready: /tmp/backlog-triage-{project}/report.html"
+fi
+```
 
 ### Parallelization with Subagents
 

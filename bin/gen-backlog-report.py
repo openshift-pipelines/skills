@@ -338,8 +338,13 @@ document.querySelectorAll('.component-section').forEach(section => {
         print(f"  {REC_ICONS.get(rec, '')} {rec}: {rec_summary.get(rec, 0)}", file=sys.stderr)
 
     if args.open:
-        import subprocess
-        subprocess.run(["xdg-open", str(output_file)], check=False)
+        import shutil, subprocess
+        if shutil.which("xdg-open"):
+            subprocess.run(["xdg-open", str(output_file)], check=False)
+        elif shutil.which("open"):
+            subprocess.run(["open", str(output_file)], check=False)
+        else:
+            print(f"Open manually: {output_file}", file=sys.stderr)
 
 
 if __name__ == "__main__":

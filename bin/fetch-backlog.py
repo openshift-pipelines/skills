@@ -16,6 +16,7 @@ Usage:
 import argparse
 import json
 import os
+import platform
 import subprocess
 import sys
 import tomllib

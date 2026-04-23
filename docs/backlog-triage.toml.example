@@ -1,0 +1,31 @@
+# Backlog Triage Configuration
+# Copy to your working directory as backlog-triage.toml and adjust as needed.
+
+[project]
+name = "OpenShift Pipelines"
+jira_project = "SRVKP"
+jira_base = "https://issues.redhat.com/browse"
+
+[versions]
+current = ["1.19", "1.20", "1.21"]
+development = ["1.22"]
+eol = ["1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.8", "1.9", "1.10", "1.11", "1.12", "1.13", "1.14", "1.15", "1.16", "1.17", "1.18"]
+eol_ocp = ["4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", "4.8", "4.9", "4.10", "4.11", "4.12", "4.13"]
+
+[upstream]
+org = "tektoncd"
+# Path to local clones of upstream repos (will be git-fetched before analysis)
+repos_dir = "~/src/tektoncd"
+
+# Map Jira components to upstream GitHub repo names
+[upstream.component_map]
+"Tekton Pipelines" = "pipeline"
+"Pipelines as Code" = "pipelines-as-code"
+"Tekton Triggers" = "triggers"
+"Tekton Chains" = "chains"
+"Tekton Results" = "results"
+"Tekton CLI" = "cli"
+"Operator" = "operator"
+"Tekton Ecosystem" = "catalog"
+"UI" = "dashboard"
+"Tekton Hub" = "hub"

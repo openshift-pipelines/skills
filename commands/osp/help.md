@@ -40,6 +40,7 @@ Present the following command reference to the user in a clear, formatted manner
 | Command | Description |
 |---------|-------------|
 | `/osp:map-jira-to-upstream` | Find upstream Tekton GitHub issues related to a Red Hat Jira issue |
+| `/osp:backlog-triage` | Deep LLM-powered backlog triage against upstream tektoncd repos |
 
 ### Sprint Management
 | Command | Description |

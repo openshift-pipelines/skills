@@ -17,6 +17,7 @@ describe('parseArgs', () => {
     expect(options).toEqual({
       global: false,
       local: false,
+      cursor: false,
       configDir: null,
       help: false,
     })
@@ -70,6 +71,11 @@ describe('parseArgs', () => {
   it('parses -c= with inline value', () => {
     process.argv = ['node', 'install.js', '-c=/custom/path']
     expect(parseArgs().configDir).toBe('/custom/path')
+  })
+
+  it('parses --cursor flag', () => {
+    process.argv = ['node', 'install.js', '--cursor']
+    expect(parseArgs().cursor).toBe(true)
   })
 
   it('parses multiple flags together', () => {

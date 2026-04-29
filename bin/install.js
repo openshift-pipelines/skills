@@ -27,12 +27,14 @@ const NAMESPACE = 'osp'; // OpenShift Pipelines
 // Display banner
 function showBanner() {
   console.log(`
-${colors.cyan}${colors.bright}╔══════════════════════════════════════════════════════════════╗
-║           OpenShift Pipelines Skills for Claude Code          ║
-║                         v${VERSION}                               ║
-╚══════════════════════════════════════════════════════════════╝${colors.reset}
+${colors.cyan}${colors.bright}    ___  ____  ____
+   / _ \\/ ___||  _ \\
+  | | | \\___ \\| |_) |
+  | |_| |___) |  __/
+   \\___/|____/|_|    ${colors.reset}${colors.dim}v${VERSION}${colors.reset}
 
-${colors.dim}Claude Code skills for OpenShift Pipelines development workflows${colors.reset}
+${colors.cyan}${colors.bright}  OpenShift Pipelines Skills${colors.reset}
+${colors.dim}  AI-powered skills for Claude Code & Cursor${colors.reset}
 `);
 }
 
@@ -50,6 +52,7 @@ function parseArgs() {
   const options = {
     global: false,
     local: false,
+    cursor: false,
     configDir: null,
     help: false,
   };
@@ -63,6 +66,8 @@ function parseArgs() {
       options.global = true;
     } else if (arg === '--local' || arg === '-l') {
       options.local = true;
+    } else if (arg === '--cursor') {
+      options.cursor = true;
     } else if (arg === '--config-dir' || arg === '-c') {
       options.configDir = args[++i];
     } else if (arg.startsWith('--config-dir=')) {
@@ -81,19 +86,22 @@ function showHelp() {
 ${colors.bright}Usage:${colors.reset} npx openshift-pipelines-skills [options]
 
 ${colors.bright}Options:${colors.reset}
-  -g, --global              Install to ~/.claude/commands/${NAMESPACE}/
-  -l, --local               Install to ./.claude/commands/${NAMESPACE}/
+  -g, --global              Install to ~/.claude/commands/${NAMESPACE}/ (Claude Code)
+  -l, --local               Install to ./.claude/commands/${NAMESPACE}/ (Claude Code)
+  --cursor                  Install to ./.cursor/rules/ (Cursor IDE)
   -c, --config-dir <path>   Install to custom directory
   -h, --help                Show this help message
 
 ${colors.bright}Examples:${colors.reset}
   npx openshift-pipelines-skills              # Interactive prompt
-  npx openshift-pipelines-skills -g           # Install globally
-  npx openshift-pipelines-skills -l           # Install in current project
+  npx openshift-pipelines-skills -g           # Install globally (Claude Code)
+  npx openshift-pipelines-skills -l           # Install in current project (Claude Code)
+  npx openshift-pipelines-skills --cursor     # Install for Cursor IDE
   npx openshift-pipelines-skills -c ~/custom  # Custom directory
 
 ${colors.bright}After Installation:${colors.reset}
-  Use /${NAMESPACE}:help in Claude Code to see available commands
+  Claude Code: Use /${NAMESPACE}:help to see available commands
+  Cursor:      Rules auto-activate based on context
 `);
 }
 
@@ -126,15 +134,80 @@ async function promptLocation() {
 
   return new Promise((resolve) => {
     console.log(`${colors.bright}Where would you like to install the skills?${colors.reset}\n`);
-    console.log(`  ${colors.cyan}1)${colors.reset} Global (${colors.dim}~/.claude/commands/${NAMESPACE}/${colors.reset}) ${colors.green}[recommended]${colors.reset}`);
-    console.log(`  ${colors.cyan}2)${colors.reset} Local  (${colors.dim}./.claude/commands/${NAMESPACE}/${colors.reset})\n`);
+    console.log(`  ${colors.cyan}1)${colors.reset} Claude Code — Global (${colors.dim}~/.claude/commands/${NAMESPACE}/${colors.reset}) ${colors.green}[recommended]${colors.reset}`);
+    console.log(`  ${colors.cyan}2)${colors.reset} Claude Code — Local  (${colors.dim}./.claude/commands/${NAMESPACE}/${colors.reset})`);
+    console.log(`  ${colors.cyan}3)${colors.reset} Cursor IDE   (${colors.dim}./.cursor/rules/${colors.reset})\n`);
 
     rl.question(`${colors.bright}Choice [1]:${colors.reset} `, (answer) => {
       rl.close();
       const choice = answer.trim() || '1';
-      resolve(choice === '2' ? 'local' : 'global');
+      if (choice === '3') resolve('cursor');
+      else if (choice === '2') resolve('local');
+      else resolve('global');
     });
   });
+}
+
+// Convert Claude Code skill (.md) to Cursor rule (.mdc)
+function convertToCursorRule(content, filename) {
+  // Extract YAML frontmatter
+  const fmMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  if (!fmMatch) return content;
+
+  const frontmatter = fmMatch[1];
+  const body = fmMatch[2];
+
+  // Parse description from frontmatter
+  const descMatch = frontmatter.match(/description:\s*(.+)/);
+  const description = descMatch ? descMatch[1].trim() : `OpenShift Pipelines: ${filename}`;
+
+  // Build Cursor .mdc frontmatter
+  return `---
+description: ${description}
+globs:
+alwaysApply: false
+---
+
+${body}`;
+}
+
+// Install skills as Cursor rules
+async function installCursor(cursorDir) {
+  const commandsSource = path.join(__dirname, '..', 'commands', NAMESPACE);
+  const rulesDir = path.join(cursorDir, 'rules');
+
+  console.log(`\n${colors.bright}Installing Cursor rules to:${colors.reset} ${rulesDir}\n`);
+
+  if (!fs.existsSync(commandsSource)) {
+    console.error(`${colors.red}Error: Commands directory not found at ${commandsSource}${colors.reset}`);
+    process.exit(1);
+  }
+
+  if (!fs.existsSync(rulesDir)) {
+    fs.mkdirSync(rulesDir, { recursive: true });
+  }
+
+  const files = fs.readdirSync(commandsSource).filter(f => f.endsWith('.md'));
+  let count = 0;
+
+  for (const file of files) {
+    const content = fs.readFileSync(path.join(commandsSource, file), 'utf8');
+    const ruleName = `${NAMESPACE}-${file.replace('.md', '')}.mdc`;
+    const converted = convertToCursorRule(content, file.replace('.md', ''));
+    fs.writeFileSync(path.join(rulesDir, ruleName), converted);
+    count++;
+  }
+
+  console.log(`${colors.green}${colors.bright}Installation complete!${colors.reset}\n`);
+  console.log(`${colors.bright}Installed ${count} Cursor rule(s):${colors.reset}`);
+
+  for (const file of files) {
+    const name = file.replace('.md', '');
+    console.log(`  ${colors.cyan}${NAMESPACE}-${name}.mdc${colors.reset}`);
+  }
+
+  console.log(`\n${colors.dim}Rules are available as context in Cursor when editing files in this project.${colors.reset}`);
+  console.log(`${colors.dim}Invoke them by asking Cursor about OpenShift Pipelines tasks.${colors.reset}\n`);
 }
 
 // Main installation function
@@ -239,14 +312,20 @@ async function main() {
   }
 
   // Validate conflicting options
-  if (options.global && options.local) {
-    console.error(`${colors.red}Error: Cannot specify both --global and --local${colors.reset}`);
+  const modeCount = [options.global, options.local, options.cursor].filter(Boolean).length;
+  if (modeCount > 1) {
+    console.error(`${colors.red}Error: Cannot specify multiple install targets (--global, --local, --cursor)${colors.reset}`);
     process.exit(1);
   }
 
-  if (options.configDir && options.local) {
-    console.error(`${colors.red}Error: Cannot specify both --config-dir and --local${colors.reset}`);
+  if (options.configDir && (options.local || options.cursor)) {
+    console.error(`${colors.red}Error: Cannot specify --config-dir with --local or --cursor${colors.reset}`);
     process.exit(1);
+  }
+
+  if (options.cursor) {
+    await installCursor(path.join(process.cwd(), '.cursor'));
+    return;
   }
 
   let targetDir;
@@ -260,6 +339,10 @@ async function main() {
   } else {
     // Interactive mode
     const location = await promptLocation();
+    if (location === 'cursor') {
+      await installCursor(path.join(process.cwd(), '.cursor'));
+      return;
+    }
     targetDir = location === 'local'
       ? path.join(process.cwd(), '.claude')
       : path.join(os.homedir(), '.claude');
